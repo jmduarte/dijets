@@ -13,7 +13,7 @@ parser.add_option("--DDTcut", dest="DDTcut", default = 0.45,help="mass of LSP", 
 
 (options, args) = parser.parse_args()
 
-class ralphabet:
+class rhalphabet:
 
 	def __init__( self , filename, lumi, name, scaleFactor = 1, extractTFs = True):
 

@@ -56,7 +56,7 @@ if __name__ == '__main__':
 
 	####################################################################################
 	# do background estimation
-	theRhalphabet = ralphabet(idir+"/"+"JetHT.root",1,"rhalphabet",100);
+	theRhalphabet = rhalphabet(idir+"/"+"JetHT.root",1,"rhalphabet",100);
 	# there is a flag to do a closure test as well
 
 	####################################################################################
