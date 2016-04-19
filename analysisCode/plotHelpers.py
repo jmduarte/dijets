@@ -144,18 +144,21 @@ def makeCanvasDataMC_wpred(hd,gpred,hmcs,legname,name,pdir="plots",blind=True):
 	tag2.SetNDC();
 	tag2.SetTextSize(0.035);
 
+	gpred.SetMarkerStyle(24);
+	gpred.SetMarkerColor(2);
+
 	c = ROOT.TCanvas("c"+name,"c"+name,1000,800);
 	mcall = hstack2.GetStack().Last()
 	if not blind: 
 		hd.SetMaximum(maxval);
 		hd.Draw("pe");
-		gpred.Draw("2");
+		gpred.Draw("pesames");
 		mcall.Draw("histsames");
 		hd.Draw("pesames");
 	if blind: 
 		mcall.SetMaximum(maxval);
 		mcall.Draw("hist");
-		gpred.Draw("2");
+		gpred.Draw("pesames");
 		mcall.Draw("histsames");
 	# ROOT.gPad.Update();
 	# hstack2.GetXaxis.SetTitle( hmcs[0].GetXaxis().GetTitle() );

@@ -69,8 +69,8 @@ class rhalphabet:
 
 		DDTCUT = float(options.DDTcut);
 
-		self.TF_fail = ROOT.TH2F("TF_fail",";rho;pT",20,float(options.rholo),float(options.rhohi),self._ptbins,self._ptlo,self._pthi)
-		self.TF_pafa = ROOT.TH2F("TF_pafa",";rho;pT",20,float(options.rholo),float(options.rhohi),self._ptbins,self._ptlo,self._pthi)	
+		self.TF_fail = ROOT.TH2F("TF_fail",";rho;pT",30,float(options.rholo),float(options.rhohi),self._ptbins,self._ptlo,self._pthi)
+		self.TF_pafa = ROOT.TH2F("TF_pafa",";rho;pT",30,float(options.rholo),float(options.rhohi),self._ptbins,self._ptlo,self._pthi)	
 		self.TF_fail.Sumw2();
 		self.TF_pafa.Sumw2();
 
@@ -117,15 +117,39 @@ class rhalphabet:
 			xlo = math.log(70.*70./curpt);
 			xhi = math.log(90.*90./curpt);
 			grs.append( self.convertHistToGraph( self.hys[i], xlo, xhi ) );
+			# grs.append( self.convertHistToGraph( self.hys[i] ) );
 
 		# do the fits
 		self.theRhoFits = [];
 		ctr = 0
 		for g in grs:
-			self.theRhoFits.append( QuadraticFit([0.01,6e-5,0.01],float(options.rholo),float(options.rhohi),"linFit1", "EMRNS") );
-			g.Fit(self.theRhoFits[ctr].fit,"RQ")
-			fitter = ROOT.TVirtualFitter.GetFitter()
-			self.theRhoFits[ctr].Converter(fitter)
+			# self.theRhoFits.append( QuadraticFit([0.01,6e-5,0.01],float(options.rholo),float(options.rhohi),"linFit1", "EMRNS") );
+			# g.Fit(self.theRhoFits[ctr].fit,"RQ")
+			# fitter = ROOT.TVirtualFitter.GetFitter()
+			# self.theRhoFits[ctr].Converter(fitter)
+
+			self.theRhoFits.append( ROOT.TF1("rhofit"+str(ctr),'([0]+[1]*x+[2]*x*x)*TMath::Erfc((x-[3])/[4])',float(options.rholo),float(options.rhohi)) ); 	
+			# self.theRhoFits.append( ROOT.TF1("rhofit"+str(ctr),'([0]+[1]*x)*TMath::Erfc((x-[2])/[3])',float(options.rholo),float(options.rhohi)) ); 	
+			self.theRhoFits[ctr].SetParameter(0,0.05);
+			self.theRhoFits[ctr].SetParameter(1,0.005);					
+			self.theRhoFits[ctr].SetParameter(2,0.);					
+			self.theRhoFits[ctr].SetParameter(3,4);					
+			self.theRhoFits[ctr].SetParameter(4,0.1);		
+
+			self.theRhoFits[ctr].SetParLimits(0,0.,0.5);
+			self.theRhoFits[ctr].SetParLimits(1,-0.01,0.01);					
+			self.theRhoFits[ctr].SetParLimits(2,-0.001,0.001);					
+			self.theRhoFits[ctr].SetParLimits(3,4,6);					
+			self.theRhoFits[ctr].SetParLimits(4,0,0.5);		
+
+			g.Fit(self.theRhoFits[ctr],"R");
+			par0 = self.theRhoFits[ctr].GetParameter(0);
+			par1 = self.theRhoFits[ctr].GetParameter(1);
+			par2 = self.theRhoFits[ctr].GetParameter(2);
+			par3 = self.theRhoFits[ctr].GetParameter(3);
+			par4 = self.theRhoFits[ctr].GetParameter(4);
+			print par0,par1,par2,par3,par4
+
 			ctr+=1;		
 
 		for i in range(len(grs)):
@@ -135,33 +159,43 @@ class rhalphabet:
 			curhr2.GetXaxis().SetTitle("#rho^{DDT}");	
 			curcan.SetGrid();
 			grs[i].Draw("pe");
-			self.theRhoFits[i].fit.SetLineColor(2);	
-			self.theRhoFits[i].ErrUp.SetLineColor(2);	
-			self.theRhoFits[i].ErrDn.SetLineColor(2);	
-			self.theRhoFits[i].ErrUp.SetLineStyle(2);	
-			self.theRhoFits[i].ErrDn.SetLineStyle(2);	
-			self.theRhoFits[i].fit.Draw("sames");	
-			self.theRhoFits[i].ErrUp.Draw("sames");	
-			self.theRhoFits[i].ErrDn.Draw("sames");	
+			
+			# self.theRhoFits[i].fit.SetLineColor(2);	
+			# self.theRhoFits[i].ErrUp.SetLineColor(2);	
+			# self.theRhoFits[i].ErrDn.SetLineColor(2);	
+			# self.theRhoFits[i].ErrUp.SetLineStyle(2);	
+			# self.theRhoFits[i].ErrDn.SetLineStyle(2);	
+			# self.theRhoFits[i].fit.Draw("sames");	
+			# self.theRhoFits[i].ErrUp.Draw("sames");	
+			# self.theRhoFits[i].ErrDn.Draw("sames");	
+
+			self.theRhoFits[i].Draw("sames");
+
 			curcan.SaveAs("plots/rhalphabet/map_rhodependence_bin"+str(i)+".pdf")
 
 		##############################
 		hpt_par0 = ROOT.TH1F("hpt_par0",";pT;par0",self._ptbins,self._ptlo,self._pthi);
 		hpt_par1 = ROOT.TH1F("hpt_par1",";pT;par1",self._ptbins,self._ptlo,self._pthi);
 		hpt_par2 = ROOT.TH1F("hpt_par2",";pT;par2",self._ptbins,self._ptlo,self._pthi);
+		hpt_par3 = ROOT.TH1F("hpt_par3",";pT;par3",self._ptbins,self._ptlo,self._pthi);
+		hpt_par4 = ROOT.TH1F("hpt_par4",";pT;par4",self._ptbins,self._ptlo,self._pthi);
 		
 		binno = 1;
 		for f in self.theRhoFits:
 			# print f.fit.GetParameter(0), f.fit.GetParameter(1), f.fit.GetParameter(2);
-			hpt_par0.SetBinContent( binno, f.fit.GetParameter(0) );
-			hpt_par0.SetBinError( binno, f.fit.GetParError(0) );
-			hpt_par1.SetBinContent( binno, f.fit.GetParameter(1) );
-			hpt_par1.SetBinError( binno, f.fit.GetParError(1) );
-			hpt_par2.SetBinContent( binno, f.fit.GetParameter(2) );
-			hpt_par2.SetBinError( binno, f.fit.GetParError(2) );
+			hpt_par0.SetBinContent( binno, f.GetParameter(0) );
+			hpt_par0.SetBinError( binno, f.GetParError(0) );
+			hpt_par1.SetBinContent( binno, f.GetParameter(1) );
+			hpt_par1.SetBinError( binno, f.GetParError(1) );
+			hpt_par2.SetBinContent( binno, f.GetParameter(2) );
+			hpt_par2.SetBinError( binno, f.GetParError(2) );
+			hpt_par3.SetBinContent( binno, f.GetParameter(3) );
+			hpt_par3.SetBinError( binno, f.GetParError(3) );
+			hpt_par4.SetBinContent( binno, f.GetParameter(4) );
+			hpt_par4.SetBinError( binno, f.GetParError(4) );
 			binno += 1;
 
-		hpt_pars = [hpt_par0,hpt_par1,hpt_par2];
+		hpt_pars = [hpt_par0,hpt_par1,hpt_par2,hpt_par3,hpt_par4];
 		
 		self.thePtFits = [];
 		ctr = 0;
@@ -190,7 +224,9 @@ class rhalphabet:
 			self.thePtFits[i].ErrDn.Draw("sames");	
 			curcan.SaveAs("plots/rhalphabet/map_ptdependence_par"+str(i)+".pdf")	
 
-		self.effPlane = ROOT.TF2("TransferPlane", "([0]+ [1]*y + [2]*y*y) + ([3]+ [4]*y + [5]*y*y)*x + ([6]+ [7]*y + [8]*y*y)*x*x ",float(options.rholo),float(options.rhohi),self._ptlo,self._pthi);
+		# self.effPlane = ROOT.TF2("TransferPlane", "([0]+ [1]*y + [2]*y*y) + ([3]+ [4]*y + [5]*y*y)*x + ([6]+ [7]*y + [8]*y*y)*x*x ",float(options.rholo),float(options.rhohi),self._ptlo,self._pthi);
+		self.effPlane = ROOT.TF2("TransferPlane", "(([0]+ [1]*y + [2]*y*y) + ([3]+ [4]*y + [5]*y*y)*x + ([6]+ [7]*y + [8]*y*y)*x*x)*TMath::Erfc((x-([9]+ [10]*y + [11]*y*y))/([12]+ [13]*y + [14]*y*y)) ",float(options.rholo),float(options.rhohi),self._ptlo,self._pthi);
+
 		self.effPlane.SetParameter(0,self.thePtFits[0].fit.GetParameter(0));
 		self.effPlane.SetParError(0,self.thePtFits[0].fit.GetParError(0));
 		self.effPlane.SetParameter(1,self.thePtFits[0].fit.GetParameter(1));
@@ -211,6 +247,20 @@ class rhalphabet:
 		self.effPlane.SetParError(7,self.thePtFits[2].fit.GetParError(1));
 		self.effPlane.SetParameter(8,self.thePtFits[2].fit.GetParameter(2));
 		self.effPlane.SetParError(8,self.thePtFits[2].fit.GetParError(2));
+
+		self.effPlane.SetParameter(9,self.thePtFits[3].fit.GetParameter(0));
+		self.effPlane.SetParError(9,self.thePtFits[3].fit.GetParError(0));
+		self.effPlane.SetParameter(10,self.thePtFits[3].fit.GetParameter(1));
+		self.effPlane.SetParError(10,self.thePtFits[3].fit.GetParError(1));
+		self.effPlane.SetParameter(11,self.thePtFits[3].fit.GetParameter(2));
+		self.effPlane.SetParError(11,self.thePtFits[3].fit.GetParError(2));		
+
+		self.effPlane.SetParameter(12,self.thePtFits[4].fit.GetParameter(0));
+		self.effPlane.SetParError(12,self.thePtFits[4].fit.GetParError(0));
+		self.effPlane.SetParameter(13,self.thePtFits[4].fit.GetParameter(1));
+		self.effPlane.SetParError(13,self.thePtFits[4].fit.GetParError(1));
+		self.effPlane.SetParameter(14,self.thePtFits[4].fit.GetParameter(2));
+		self.effPlane.SetParError(14,self.thePtFits[4].fit.GetParError(2));		
 
 		self.effPlane_prefit = self.effPlane.Clone();
 
@@ -234,13 +284,14 @@ class rhalphabet:
 		self.effPlane.Draw("surf1");
 		cplane2.SaveAs("plots/rhalphabet/map_parameterized_postfit.pdf")	
 
-		# make a diff of the parameterized plane and the original
+		#make a diff of the parameterized plane and the original
 		self.TF_diff = ROOT.TH2F("TF_diff",";rho;pT",20,float(options.rholo),float(options.rhohi),self._ptbins,self._ptlo,self._pthi)	
 		for i in range(self.TF_pafa.GetNbinsX()):
 			for j in range(self.TF_pafa.GetNbinsY()):
 				paramval = self.effPlane.Eval( self.TF_pafa.GetXaxis().GetBinCenter(i+1) , self.TF_pafa.GetYaxis().GetBinCenter(j+1) )
 				tableval = self.TF_pafa.GetBinContent(i+1,j+1);
-				self.TF_diff.SetBinContent( i+1,j+1, (paramval-tableval)/tableval );
+				if tableval != 0: self.TF_diff.SetBinContent( i+1,j+1, (paramval-tableval)/tableval );
+				else: self.TF_diff.SetBinContent( i+1,j+1, 0 );
 		
 		cplane3 = ROOT.TCanvas("cplane3","cplane3",1000,800);
 		# ROOT.gPad.GetRightMargin(0.18);
@@ -325,8 +376,9 @@ class rhalphabet:
 		self.theFitResult.GetConfidenceIntervals(1,1,1,curpoint,curerr, 0.683, False);	
 		
 		curval = self.effPlane.Eval( xval, yval );
-		# curval2 = self.effPlane_prefit.Eval( xval, yval );
-		# print curval,curval2
+		curval2 = self.effPlane_prefit.Eval( xval, yval );
+		# print curval,curval2,curerr[0]
+
 		# storageFile2 = ROOT.TFile("plots/rhalphabet/storedHistos.root","READ");
 		# tfpafa = storageFile2.Get("TF_pafa");
 		# # print self.TF_pafa
