@@ -13,6 +13,9 @@ parser.add_option('--doMCLooping', action='store_true', dest='doMCLooping', defa
 parser.add_option('--doRhalphabet', action='store_true', dest='doRhalphabet', default=False, help='go!')
 parser.add_option('--doData', action='store_true', dest='doData', default=False, help='go!')
 parser.add_option('--doPlots', action='store_true', dest='doPlots', default=False, help='go!')
+parser.add_option('--doCards', action='store_true', dest='doCards', default=False, help='go!')
+
+parser.add_option("--lumi", dest="lumi", default = 0.44,help="mass of LSP", metavar="MLSP")
 parser.add_option("--rholo", dest="rholo", default = 0.,help="mass of LSP", metavar="MLSP")
 parser.add_option("--rhohi", dest="rhohi", default = 4.,help="mass of LSP", metavar="MLSP")
 parser.add_option("--DDTcut", dest="DDTcut", default = 0.45,help="mass of LSP", metavar="MLSP")
@@ -29,9 +32,9 @@ class rhalphabet:
 		# self._ptbins = 5;
 		# self._ptlo = 500;
 		# self._pthi = 1000;
-		self._ptbins = 10;
-		self._ptlo = 500;
-		self._pthi = 1500;
+		self._ptbins = 6;
+		self._ptlo = 300;
+		self._pthi = 900;
 
 		self._filename = filename;
 		self._tf = ROOT.TFile( self._filename );
@@ -53,7 +56,7 @@ class rhalphabet:
 			self.TF_pafa.Write();
 		else:
 			self.hys = [];
-			for i in range(10): self.hys.append( self._storageFile.Get("hys"+str(i)) );
+			for i in range(self._ptbins): self.hys.append( self._storageFile.Get("hys"+str(i)) );
 			self.TF_pafa = self._storageFile.Get("TF_pafa");			
 
 		self.do2DFit();
@@ -182,7 +185,9 @@ class rhalphabet:
 		
 		binno = 1;
 		for f in self.theRhoFits:
-			# print f.fit.GetParameter(0), f.fit.GetParameter(1), f.fit.GetParameter(2);
+			print f.GetParameter(0), f.GetParameter(1), f.GetParameter(2), f.GetParameter(3), f.GetParameter(4);
+			print f.GetParError(0), f.GetParError(1), f.GetParError(2), f.GetParError(3), f.GetParError(4);
+
 			hpt_par0.SetBinContent( binno, f.GetParameter(0) );
 			hpt_par0.SetBinError( binno, f.GetParError(0) );
 			hpt_par1.SetBinContent( binno, f.GetParameter(1) );
@@ -208,11 +213,11 @@ class rhalphabet:
 			ctr+=1
 
 		for i in range(len(hpt_pars)):
-			curcan = ROOT.TCanvas("curcan2"+str(i),"curcan2"+str(i),1200,800);
+			curcan2 = ROOT.TCanvas("curcan2"+str(i),"curcan2"+str(i),1200,800);
 			# curhr2 = curcan.DrawFrame(ptlo[0],0,pthi[nptbins-1],0.2);
 			# curhr2.GetYaxis().SetTitle("npass/nfail in a #rho^{DDT} bin");
 			# curhr2.GetXaxis().SetTitle("pT");	
-			curcan.SetGrid();
+			curcan2.SetGrid();
 			hpt_pars[i].Draw("pe");
 			self.thePtFits[i].fit.SetLineColor(2);	
 			self.thePtFits[i].ErrUp.SetLineColor(2);	
@@ -222,9 +227,8 @@ class rhalphabet:
 			self.thePtFits[i].fit.Draw("sames");	
 			self.thePtFits[i].ErrUp.Draw("sames");	
 			self.thePtFits[i].ErrDn.Draw("sames");	
-			curcan.SaveAs("plots/rhalphabet/map_ptdependence_par"+str(i)+".pdf")	
+			curcan2.SaveAs("plots/rhalphabet/map_ptdependence_par"+str(i)+".pdf")	
 
-		# self.effPlane = ROOT.TF2("TransferPlane", "([0]+ [1]*y + [2]*y*y) + ([3]+ [4]*y + [5]*y*y)*x + ([6]+ [7]*y + [8]*y*y)*x*x ",float(options.rholo),float(options.rhohi),self._ptlo,self._pthi);
 		self.effPlane = ROOT.TF2("TransferPlane", "(([0]+ [1]*y + [2]*y*y) + ([3]+ [4]*y + [5]*y*y)*x + ([6]+ [7]*y + [8]*y*y)*x*x)*TMath::Erfc((x-([9]+ [10]*y + [11]*y*y))/([12]+ [13]*y + [14]*y*y)) ",float(options.rholo),float(options.rhohi),self._ptlo,self._pthi);
 
 		self.effPlane.SetParameter(0,self.thePtFits[0].fit.GetParameter(0));
@@ -312,9 +316,9 @@ class rhalphabet:
 		self.pred_scaleFactor = scaleFactor;
 
 		# Define histogram
-		self.hpred_jetmsd         = ROOT.TH1F("hpred_jetmsd"+self._name,"; soft drop mass (GeV);", 30, 0, 300);
-		self.hpred_jetmsd_errup   = ROOT.TH1F("hpred_jetmsd_errup"+self._name,"; soft drop mass (GeV);", 30, 0, 300);
-		self.hpred_jetmsd_failcut = ROOT.TH1F("hpred_jetmsd_failcut"+self._name,"; soft drop mass (GeV);", 30, 0, 300);
+		self.hpred_jetmsd         = ROOT.TH1F("hpred_jetmsd"+self._name,"; soft drop mass (GeV);", 60, 30, 330);
+		self.hpred_jetmsd_errup   = ROOT.TH1F("hpred_jetmsd_errup"+self._name,"; soft drop mass (GeV);", 60, 30, 330);
+		self.hpred_jetmsd_failcut = ROOT.TH1F("hpred_jetmsd_failcut"+self._name,"; soft drop mass (GeV);", 60, 30, 330);
 		self.hpred_rhoDDT         = ROOT.TH1F("hpred_rhoDDT"+self._name,"; soft drop mass (GeV);", 20, float(options.rholo),float(options.rhohi));
 		self.hpred_rhoDDT_errup    = ROOT.TH1F("hpred_rhoDDT_errup"+self._name,"; soft drop mass (GeV);", 20, float(options.rholo),float(options.rhohi));
 		self.hpred_rhoDDT_failcut = ROOT.TH1F("hpred_rhoDDT_failcut"+self._name,"; soft drop mass (GeV);", 20, float(options.rholo),float(options.rhohi));

@@ -185,6 +185,7 @@ def makeCanvasShapeComparison(hs,legname,name,pdir="plots"):
 	maxval = -99;
 	for h in range(len(hs)): 
 		hs[h].SetLineColor(color[h]);
+		hs[h].SetLineStyle(style[h]);
 		hs[h].SetLineWidth(2);
 		hs[h].SetFillStyle(0);
 		hs[h].Scale(1./hs[h].Integral());
@@ -198,7 +199,38 @@ def makeCanvasShapeComparison(hs,legname,name,pdir="plots"):
 	leg.Draw();
 	c.SaveAs(pdir+"/"+name+".pdf");	
 	ROOT.gPad.SetLogy();
+	hs[0].SetMinimum(1e-3);
 	c.SaveAs(pdir+"/"+name+"_log.pdf")	
+
+def makeCanvasComparison(hs,legname,name,pdir="plots"):
+
+	color = [2,4,6,7,8,3,5,2,4,6,7,8,3,5]
+	style = [1,1,1,1,1,1,1,2,2,2,2,2,2,2]
+	
+	leg = ROOT.TLegend(0.6,0.7,0.9,0.9);
+	leg.SetFillStyle(0);
+	leg.SetBorderSize(0);
+	leg.SetTextSize(0.035);
+
+	maxval = -99;
+	for h in range(len(hs)): 
+		hs[h].SetLineColor(color[h]);
+		hs[h].SetLineStyle(style[h]);
+		hs[h].SetLineWidth(2);
+		hs[h].SetFillStyle(0);
+		# hs[h].Scale(1./hs[h].Integral());
+		if hs[h].GetMaximum() > maxval: maxval = hs[h].GetMaximum();
+		leg.AddEntry(hs[h],legname[h],"l");
+
+	c = ROOT.TCanvas("c"+name,"c"+name,1000,800);
+	hs[0].SetMaximum(1.5*maxval);
+	hs[0].Draw("hist");
+	for h in range(1,len(hs)): hs[h].Draw("histsames"); 
+	leg.Draw();
+	c.SaveAs(pdir+"/"+name+".pdf");	
+	ROOT.gPad.SetLogy();
+	hs[0].SetMinimum(1e-3);	
+	c.SaveAs(pdir+"/"+name+"_log.pdf")		
 
 def	makeCanvas2D( TFMap, name, pdir='plots' ):
 

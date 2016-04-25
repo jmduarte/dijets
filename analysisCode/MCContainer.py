@@ -12,6 +12,9 @@ parser.add_option('--doMCLooping', action='store_true', dest='doMCLooping', defa
 parser.add_option('--doRhalphabet', action='store_true', dest='doRhalphabet', default=False, help='go!')
 parser.add_option('--doData', action='store_true', dest='doData', default=False, help='go!')
 parser.add_option('--doPlots', action='store_true', dest='doPlots', default=False, help='go!')
+parser.add_option('--doCards', action='store_true', dest='doCards', default=False, help='go!')
+
+parser.add_option("--lumi", dest="lumi", default = 0.44,help="mass of LSP", metavar="MLSP")
 parser.add_option("--rholo", dest="rholo", default = 0.,help="mass of LSP", metavar="MLSP")
 parser.add_option("--rhohi", dest="rhohi", default = 4.,help="mass of LSP", metavar="MLSP")
 parser.add_option("--DDTcut", dest="DDTcut", default = 0.45,help="mass of LSP", metavar="MLSP")
@@ -22,7 +25,7 @@ parser.add_option("--DDTcut", dest="DDTcut", default = 0.45,help="mass of LSP", 
 
 class MCContainer:
 
-	def __init__( self , filename, lumi, name, scaleFactor = 1,isData=False):
+	def __init__( self , filename, lumi, name, tag, scaleFactor = 1,isData=False):
 
 		self._fn = filename;
 		self._tf = ROOT.TFile( self._fn );
@@ -30,14 +33,17 @@ class MCContainer:
 		self._scaleFactor = scaleFactor;
 		self._lumi = lumi;
 		self._isData = isData;
+		self._name = name;
+		self._tag = tag;
+
 
 		# Define histogram
 		self.h_jetpt = ROOT.TH1F("h_jetpt"+name,"; jet pT (GeV);", 50, 200, 2000);
 		self.h_jeteta = ROOT.TH1F("h_jeteta"+name,"; jet #eta;", 20, -3, 3);
-		self.h_jetmsd = ROOT.TH1F("h_jetmsd"+name,"; soft drop mass (GeV);", 30, 0, 300);
+		self.h_jetmsd = ROOT.TH1F("h_jetmsd"+name,"; soft drop mass (GeV);", 60, 0, 300);
 		self.h_rhoDDT = ROOT.TH1F("h_rhoDDT"+name,"; #rho^{DDT};", 20,float(options.rholo),float(options.rhohi));
 
-		self.h_jetmsd_passcut = ROOT.TH1F("h_jetmsd_passcut"+name,"; soft drop mass (GeV);", 30, 0, 300);
+		self.h_jetmsd_passcut = ROOT.TH1F("h_jetmsd_passcut"+name,"; soft drop mass (GeV);", 60, 30, 330);
 		self.h_rhoDDT_passcut = ROOT.TH1F("h_rhoDDT_passcut"+name,"; #rho^{DDT};", 20,float(options.rholo),float(options.rhohi));
 
 		# Loop
