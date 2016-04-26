@@ -52,6 +52,7 @@ def makeCanvasDataMC(hd,hmcs,legname,name,pdir="plots",nodata=False):
 
 	# normalize MC to data
 	scalefactor = hd.Integral()/fullmc.Integral();
+	print "data/mc scale factor = ", scalefactor
 	for i in range(len(hmcs)): hmcs[i].Scale( scalefactor );
 
 	xtitle = hmcs[0].GetXaxis().GetTitle();
@@ -124,7 +125,6 @@ def makeCanvasDataMC_wpred(hd,gpred,hmcs,legname,name,pdir="plots",blind=True):
 	hstack2 = ROOT.THStack("hstack2",";"+xtitle+";"+ytitle+";");
 	for h in hmcs: hstack2.Add(h);
 
-	maxval = 1.5*max(hstack2.GetStack().Last().GetMaximum(),hd.GetMaximum());
 	# print maxval;
 	leg = ROOT.TLegend(0.6,0.7,0.9,0.9);
 	leg.SetFillStyle(0);
@@ -149,16 +149,19 @@ def makeCanvasDataMC_wpred(hd,gpred,hmcs,legname,name,pdir="plots",blind=True):
 
 	c = ROOT.TCanvas("c"+name,"c"+name,1000,800);
 	mcall = hstack2.GetStack().Last()
+	maxval = 1.5*max(mcall.GetMaximum(),hd.GetMaximum());
+	hd.SetLineColor(1);
+	mcall.SetLineColor(4);
 	if not blind: 
 		hd.SetMaximum(maxval);
 		hd.Draw("pe");
-		gpred.Draw("pesames");
+		gpred.Draw("2");
 		mcall.Draw("histsames");
 		hd.Draw("pesames");
 	if blind: 
 		mcall.SetMaximum(maxval);
 		mcall.Draw("hist");
-		gpred.Draw("pesames");
+		gpred.Draw("2");
 		mcall.Draw("histsames");
 	# ROOT.gPad.Update();
 	# hstack2.GetXaxis.SetTitle( hmcs[0].GetXaxis().GetTitle() );

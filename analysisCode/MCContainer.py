@@ -41,6 +41,8 @@ class MCContainer:
 		self.h_jetpt = ROOT.TH1F("h_jetpt"+name,"; jet pT (GeV);", 50, 200, 2000);
 		self.h_jeteta = ROOT.TH1F("h_jeteta"+name,"; jet #eta;", 20, -3, 3);
 		self.h_jetmsd = ROOT.TH1F("h_jetmsd"+name,"; soft drop mass (GeV);", 60, 0, 300);
+		self.h_jett21 = ROOT.TH1F("h_jett21"+name,"; #tau_{21};", 20, 0, 1);
+		self.h_jett21DDT = ROOT.TH1F("h_jett21DDT"+name,"; #tau_{21}^{DDT};", 20, 0, 1.2);
 		self.h_rhoDDT = ROOT.TH1F("h_rhoDDT"+name,"; #rho^{DDT};", 20,float(options.rholo),float(options.rhohi));
 
 		self.h_jetmsd_passcut = ROOT.TH1F("h_jetmsd_passcut"+name,"; soft drop mass (GeV);", 60, 30, 330);
@@ -80,6 +82,8 @@ class MCContainer:
 
 			self.h_jetpt.Fill( jpt, weight );
 			self.h_jeteta.Fill( jeta, weight );
+			self.h_jett21.Fill( jt21, weight );
+			self.h_jett21DDT.Fill( jt21P, weight );
 			self.h_jetmsd.Fill( jmsd, weight );
 
 			if rhP > 0 and jt21P < DDTCUT: 

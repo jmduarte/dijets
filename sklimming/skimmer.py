@@ -133,7 +133,7 @@ def sklimAdd(fn,odir):
 	ofile.cd();
 	otree = tree.CloneTree(0);
 	otree.SetName("otree");
-	otree.SetBranchStatus("*CHS*",0);
+	otree.SetBranchStatus("*res_*",0);
 	# otree.SetBranchStatus("bst8_PUPPIjet0_pt",1);
 
 	# lheWeight = array( 'f', [ 0. ] );  
@@ -192,11 +192,11 @@ def getFilesRecursively(dir,searchstring,additionalstring = None):
 
 if __name__ == '__main__':
 
-	DataDir = 'data/'
+	DataDir = 'zprimebits_notrigger/'
 	# DataDir = "/Users/ntran/Documents/Research/Ext/DissectingJetsPlusMET/sampleProcessing/DissectingJetsPlusMET/localData/Backgrounds/Backgrounds_13TEV/TTBAR/";
 	# DataDir = "/Users/ntran/Documents/Research/Ext/DissectingJetsPlusMET/sampleProcessing/DissectingJetsPlusMET/andrewBkg/";
 	# DataDir = "/Users/ntran/Documents/Research/Ext/DissectingJetsPlusMET/sampleProcessing/DissectingJetsPlusMET/rawData-v3/";
-	OutDir = 'sklim-v3'
+	OutDir = 'sklim-v0'
 
 	tags = [];
 	# tags.append( ['QCD'] );

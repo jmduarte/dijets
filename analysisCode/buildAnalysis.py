@@ -41,7 +41,7 @@ ROOT.gStyle.SetOptFit(0000);
 ###############################################################################################################
 def main(): 
 
-	idir = "/Users/ntran/Documents/Research/CMS/WZpToQQ/bkgEst/sklim-v2";
+	idir = "/Users/ntran/Documents/Research/CMS/WZpToQQ/dijets/sklimming/sklim-v0";
 
 	####################################################################################
 	# do mc looping - a class that holds histograms
@@ -54,7 +54,7 @@ def main():
 		bkgLabels = ["QCD","W(qq)"];
 		bkgTags = ["QCD","Winc"];
 		for i in range(len(bkgNames)):
-			bkgContainers.append( MCContainer( idir+"/"+bkgNames[i], float(options.lumi)/3., bkgLabels[i], bkgTags[i], 1 ) );
+			bkgContainers.append( MCContainer( idir+"/"+bkgNames[i], float(options.lumi), bkgLabels[i], bkgTags[i], 5 ) );
 			# random factor of 3 w.r.t. data
 
 		sigContainers = [];
@@ -79,13 +79,13 @@ def main():
 	theRhalphabet = None;
 	if options.doRhalphabet: 
 		isData = True;
-		theRhalphabet = rhalphabet(idir+"/"+"JetHT.root",1,"rhalphabet",1, False);
+		theRhalphabet = rhalphabet(idir+"/"+"JetHT.root",1,"rhalphabet",1, True);
 		theRhalphabet.GetPredictedDistributions( idir+"/"+"JetHT.root", 1, 5, isData);
 		
 		# there is a flag to do a closure test as well
 		# isData = False;
-		# theRhalphabet = rhalphabet(idir+"/"+"QCD.root",1,"rhalphabetClosure",1, False);
-		# theRhalphabet.GetPredictedDistributions( idir+"/"+"QCD.root", 0.44, 10, isData );
+		# theRhalphabet = rhalphabet(idir+"/"+"QCD.root",1,"rhalphabetClosure",2, False);
+		# theRhalphabet.GetPredictedDistributions( idir+"/"+"QCD.root", options.lumi, 2, isData );
 
 	####################################################################################
 	# do the loop on data
@@ -109,6 +109,65 @@ def BuildPlots(bkgContainers,sigContainers,theRhalphabet,theData):
 
 	print "making plots...";
 
+	if options.doMCLooping and options.doRhalphabet and options.doData: 
+
+		makeCanvasDataMC_wpred( theData.h_jetmsd_passcut,
+								theRhalphabet.grpred_jetmsd, 
+								[bkgContainers[0].h_jetmsd_passcut],
+								['qcd'],
+								'jetmsd_pred',
+								'plots/results/',
+								False);
+
+		makeCanvasDataMC_wpred( theData.h_rhoDDT_passcut,
+								theRhalphabet.grpred_rhoDDT, 
+								[bkgContainers[0].h_rhoDDT_passcut],
+								['qcd'],
+								'rhoDDT_pred',
+								'plots/results/',
+								False);
+
+	if options.doMCLooping and options.doRhalphabet and not options.doData:
+
+		makeCanvasDataMC_wpred( bkgContainers[0].h_jetmsd_passcut,
+								theRhalphabet.grpred_jetmsd, 
+								[bkgContainers[0].h_jetmsd_passcut],
+								['qcd'],
+								'jetmsd_pred',
+								'plots/results/',
+								False);
+
+		makeCanvasDataMC_wpred( bkgContainers[0].h_rhoDDT_passcut,
+								theRhalphabet.grpred_rhoDDT, 
+								[bkgContainers[0].h_rhoDDT_passcut],
+								['qcd'],
+								'rhoDDT_pred',
+								'plots/results/',
+								False);
+
+	if options.doMCLooping and options.doData:
+
+		names = [];
+		names.append( "h_jetpt" );
+		names.append( "h_jeteta" );
+		names.append( "h_jett21" );
+		names.append( "h_jett21DDT" );
+		names.append( "h_jetmsd" );
+
+		for n in names: 
+	
+			harray = [];
+			hlabels = [];
+			for b in bkgContainers: 
+				harray.append( getattr( b, n ) );
+				hlabels.append( b._name );
+			# for s in sigContainers: 
+			# 	harray.append( getattr( s, n ) );
+			# 	hlabels.append( s._name );
+			hd = getattr( theData, n );
+			makeCanvasDataMC(hd,harray,hlabels,"mc_"+n,"plots/yields/");
+			makeCanvasDataMC(hd,harray,hlabels,"mc_"+n,"plots/shapes/");
+
 	if options.doMCLooping:
 
 		names = [];
@@ -128,45 +187,6 @@ def BuildPlots(bkgContainers,sigContainers,theRhalphabet,theData):
 
 			makeCanvasComparison(harray,hlabels,"mc_"+n,"plots/yields/");
 			makeCanvasShapeComparison(harray,hlabels,"mc_"+n,"plots/shapes/");
-
-
-	if options.doMCLooping and options.doRhalphabet and options.doData: 
-
-		makeCanvasDataMC_wpred( theData.h_jetmsd_passcut,
-								theRhalphabet.grpred_jetmsd, 
-								[bkgContainers[0].h_jetmsd_passcut],
-								['qcd'],
-								'jetmsd_pred',
-								'plots/results/',
-								False);
-
-		makeCanvasDataMC_wpred( theData.h_rhoDDT_passcut,
-								theRhalphabet.grpred_rhoDDT, 
-								[bkgContainers[0].h_rhoDDT_passcut],
-								['qcd'],
-								'rhoDDT_pred',
-								'plots/results/',
-								False);
-
-
-	# makeCanvasDataMC_wpred( bkgContainers[0].h_jetmsd_passcut,
-	# 						theRhalphabet.grpred_jetmsd, 
-	# 						[bkgContainers[0].h_jetmsd_passcut],
-	# 						['qcd'],
-	# 						'jetmsd_pred',
-	# 						'plots/results/',
-	# 						False);
-
-	# makeCanvasDataMC_wpred( bkgContainers[0].h_rhoDDT_passcut,
-	# 						theRhalphabet.grpred_rhoDDT, 
-	# 						[bkgContainers[0].h_rhoDDT_passcut],
-	# 						['qcd'],
-	# 						'rhoDDT_pred',
-	# 						'plots/results/',
-	# 						False);
-
-
-
 
 
 
