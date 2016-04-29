@@ -1,0 +1,22 @@
+# no emacs temp files
+*~
+# no tables files
+*.tex
+*.aux
+*.log
+*.pdf
+*.png
+LSFJOB*
+# no python compiled files:
+*pyc
+# no python init file
+python/__init__.py
+*.root
+analysisCode/plots/
+*.d
+*.so
+*.o
+*.pyc
+*.pcm
+./#*
+./__afs*
