@@ -8,10 +8,10 @@ import array
 
 parser = OptionParser()
 parser.add_option('-b', action='store_true', dest='noX', default=False, help='no X11 windows')
-parser.add_option('--doMCLooping', action='store_true', dest='doMCLooping', default=False, help='go!')
+parser.add_option('--doMCLooping', action='store_true', dest='doMCLooping', default=True, help='go!')
 parser.add_option('--doRhalphabet', action='store_true', dest='doRhalphabet', default=False, help='go!')
-parser.add_option('--doData', action='store_true', dest='doData', default=False, help='go!')
-parser.add_option('--doPlots', action='store_true', dest='doPlots', default=False, help='go!')
+parser.add_option('--doData', action='store_true', dest='doData', default=True, help='go!')
+parser.add_option('--doPlots', action='store_true', dest='doPlots', default=True, help='go!')
 parser.add_option('--doCards', action='store_true', dest='doCards', default=False, help='go!')
 
 parser.add_option("--lumi", dest="lumi", default = 0.44,help="mass of LSP", metavar="MLSP")
@@ -41,7 +41,8 @@ ROOT.gStyle.SetOptFit(0000);
 ###############################################################################################################
 def main(): 
 
-	idir = "/Users/ntran/Documents/Research/CMS/WZpToQQ/dijets/sklimming/sklim-v0";
+	# idir = "/Users/ntran/Documents/Research/CMS/WZpToQQ/dijets/sklimming/sklim-v0";
+	idir = "/tmp/cmantill/"
 
 	####################################################################################
 	# do mc looping - a class that holds histograms
@@ -50,9 +51,9 @@ def main():
 	if options.doMCLooping: 
 		
 		bkgContainers = [];
-		bkgNames = ["QCD.root","W.root"];
-		bkgLabels = ["QCD","W(qq)"];
-		bkgTags = ["QCD","Winc"];
+		bkgNames = ["QCD.root","W.root","DY.root"];
+		bkgLabels = ["QCD","W(qq)","Z+jets"];
+		bkgTags = ["QCD","Winc","Zjets"];
 		for i in range(len(bkgNames)):
 			bkgContainers.append( MCContainer( idir+"/"+bkgNames[i], float(options.lumi), bkgLabels[i], bkgTags[i], 5 ) );
 			# random factor of 3 w.r.t. data
@@ -167,7 +168,7 @@ def BuildPlots(bkgContainers,sigContainers,theRhalphabet,theData):
 			hd = getattr( theData, n );
 			makeCanvasDataMC(hd,harray,hlabels,"mc_"+n,"plots/yields/");
 			makeCanvasDataMC(hd,harray,hlabels,"mc_"+n,"plots/shapes/");
-
+			'''
 	if options.doMCLooping:
 
 		names = [];
@@ -187,7 +188,7 @@ def BuildPlots(bkgContainers,sigContainers,theRhalphabet,theData):
 
 			makeCanvasComparison(harray,hlabels,"mc_"+n,"plots/yields/");
 			makeCanvasShapeComparison(harray,hlabels,"mc_"+n,"plots/shapes/");
-
+			'''
 
 
 #----------------------------------------------------------------------------------------------------------------
