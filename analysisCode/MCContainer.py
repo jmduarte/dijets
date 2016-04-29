@@ -71,7 +71,7 @@ class MCContainer:
 			jeta = getattr(self._tt,"bst8_PUPPIjet0_eta");
 			jmsd = getattr(self._tt,"bst8_PUPPIjet0_msd");		
 			if jmsd == 0.: jmsd = 0.01;
-			weight = self._scaleFactor*self._lumi*getattr(self._tt,"scale1fb");
+			weight = self._scaleFactor*self._lumi*getattr(self._tt,"scale1fb")*getattr(self._tt,"kfactor");
 			if self._isData: weight = 1;
 
 			if jpt < 500: continue;
