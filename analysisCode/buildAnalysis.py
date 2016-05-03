@@ -5,6 +5,7 @@ import math
 import sys
 import time
 import array
+import os
 
 parser = OptionParser()
 parser.add_option('-b', action='store_true', dest='noX', default=False, help='no X11 windows')
@@ -16,8 +17,9 @@ parser.add_option('--doCards', action='store_true', dest='doCards', default=Fals
 
 parser.add_option("--lumi", dest="lumi", default = 0.44,help="mass of LSP", metavar="MLSP")
 parser.add_option("--rholo", dest="rholo", default = 0.,help="mass of LSP", metavar="MLSP")
-parser.add_option("--rhohi", dest="rhohi", default = 4.,help="mass of LSP", metavar="MLSP")
-parser.add_option("--DDTcut", dest="DDTcut", default = 0.45,help="mass of LSP", metavar="MLSP")
+parser.add_option("--rhohi", dest="rhohi", default = 6.,help="mass of LSP", metavar="MLSP")
+parser.add_option("--DDTcut", dest="DDTcut", default = 0.38,help="mass of LSP", metavar="MLSP")
+parser.add_option('--qcdClosure', action='store_true', dest='qcdClosure', default=False, help='go!')
 
 # parser.add_option("--rholo", dest="rholo", default = 0.,help="mass of LSP", metavar="MLSP")
 (options, args) = parser.parse_args()
@@ -41,8 +43,15 @@ ROOT.gStyle.SetOptFit(0000);
 ###############################################################################################################
 def main(): 
 
-	# idir = "/Users/ntran/Documents/Research/CMS/WZpToQQ/dijets/sklimming/sklim-v0";
-	idir = "/tmp/cmantill/"
+	# output directories
+	if not os.path.exists('plots/results'): os.makedirs('plots/results')
+	if not os.path.exists('plots/yields'): os.makedirs('plots/yields')
+	if not os.path.exists('plots/shapes'): os.makedirs('plots/shapes')
+	if not os.path.exists('plots/rhalphabet'): os.makedirs('plots/rhalphabet')
+	if not os.path.exists('plots/datacards'): os.makedirs('plots/datacards')
+
+	idir = "/Users/ntran/Documents/Research/CMS/WZpToQQ/dijetsGH/dijets/sklimming/sklim-v0";
+	# idir = "/tmp/cmantill/"
 
 	####################################################################################
 	# do mc looping - a class that holds histograms
@@ -53,7 +62,7 @@ def main():
 		bkgContainers = [];
 		bkgNames = ["QCD.root","W.root","DY.root"];
 		bkgLabels = ["QCD","W(qq)","Z+jets"];
-		bkgTags = ["QCD","Winc","Zjets"];
+		bkgTags = ["QCD","Winc","Zinc"];
 		for i in range(len(bkgNames)):
 			bkgContainers.append( MCContainer( idir+"/"+bkgNames[i], float(options.lumi), bkgLabels[i], bkgTags[i], 5 ) );
 			# random factor of 3 w.r.t. data
@@ -79,14 +88,17 @@ def main():
 	# do background estimation
 	theRhalphabet = None;
 	if options.doRhalphabet: 
-		isData = True;
-		theRhalphabet = rhalphabet(idir+"/"+"JetHT.root",1,"rhalphabet",1, True);
-		theRhalphabet.GetPredictedDistributions( idir+"/"+"JetHT.root", 1, 5, isData);
+	
+		if not options.qcdClosure:		
+			isData = True;
+			theRhalphabet = rhalphabet(idir+"/"+"JetHT.root",1,"rhalphabet",1, False);
+			theRhalphabet.GetPredictedDistributions( idir+"/"+"JetHT.root", 1, 5, isData);
 		
 		# there is a flag to do a closure test as well
-		# isData = False;
-		# theRhalphabet = rhalphabet(idir+"/"+"QCD.root",1,"rhalphabetClosure",2, False);
-		# theRhalphabet.GetPredictedDistributions( idir+"/"+"QCD.root", options.lumi, 2, isData );
+		if options.qcdClosure:
+			isData = False;
+			theRhalphabet = rhalphabet(idir+"/"+"QCD.root",1,"rhalphabetClosure",2, False);
+			theRhalphabet.GetPredictedDistributions( idir+"/"+"QCD.root", options.lumi, 5, isData );
 
 	####################################################################################
 	# do the loop on data

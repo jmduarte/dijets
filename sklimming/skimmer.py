@@ -151,7 +151,7 @@ def sklimAdd(fn,odir):
 		tree.GetEntry(i);
 		# print tree.HT, tree.mT2, tree.alphaT, tree.dRazor, tree.mRazor, tree.sumJetMass
 
-		if tree.bst8_PUPPIjet0_pt > 200:
+		if tree.bst8_PUPPIjet0_pt > 450:
 			# throw out NaN values...
 			# print tree.HT, tree.mT2, tree.alphaT, tree.dRazor, tree.mRazor, tree.sumJetMass
 
@@ -201,13 +201,14 @@ if __name__ == '__main__':
 	tags = [];
 	# tags.append( ['QCD'] );
 	# tags.append( ['W.ro'] );
+	tags.append( ['DY.ro'] );
 	# tags.append( ['ZPrimeToQQ_50GeV_v4_mc'] );
 	# tags.append( ['ZPrimeToQQ_100GeV_v4_mc'] );
 	# tags.append( ['ZPrimeToQQ_150GeV_v4_mc'] );
 	# tags.append( ['ZPrimeToQQ_200GeV_v4_mc'] );
 	# tags.append( ['ZPrimeToQQ_250GeV_v4_mc'] );
 	# tags.append( ['ZPrimeToQQ_300GeV_v4_mc'] );
-	tags.append( ['JetHT'] );
+	# tags.append( ['JetHT'] );
 
 
 	# make a tmp dir

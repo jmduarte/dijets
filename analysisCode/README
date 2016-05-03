@@ -1,0 +1,31 @@
+######
+#README
+######
+
+# steering
+--doMCLooping = loops over signal and background samples
+--doRhalphabet = do background estimation, with --qcdClosure does the background estimation either with data or QCD MC closure test
+--doPlots = plotting based on which of the above options are chosen
+--doCards = makes datacards for setting limits
+--doData = loop over the data sample (right now set to factor of 5 blinding)
+
+# other parameters
+--rholo [va] = plotting scale lower value for rho, def = 0.
+--rhohi [va] = plotting scale hihger value for rho, def = 6.
+--DDTcut [val] = cut on t21DDT set to default as 0.38
+--lumi [val] = lumi for the MC to be scaled to
+--qcdClosture = use QCD to measure closure...
+
+# examples
+python buildAnalysis.py -b --doMCLooping --doCards --doRhalphabet --doCards --doPlots --doData --lumi 0.46 --DDTcut 0.38 --rholo 0. --rhohi 6.
+
+# then you get some datacards in plots/datacards
+# make sure you checkout the Higgs combine package
+# https://twiki.cern.ch/twiki/bin/viewauth/CMS/SWGuideHiggsAnalysisCombinedLimit
+
+# to compute limit
+combine -M Asymptotic combine_Wsigna.dat
+# to compute p-value
+combine -M ProfileLikelihood --signif combine_WZsignal.dat
+# to compute the best fit mu
+combine -M MaxLikelihoodFit combine_WZsignal.dat

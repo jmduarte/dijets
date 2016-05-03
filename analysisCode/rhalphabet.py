@@ -18,8 +18,9 @@ parser.add_option('--doCards', action='store_true', dest='doCards', default=Fals
 
 parser.add_option("--lumi", dest="lumi", default = 0.44,help="mass of LSP", metavar="MLSP")
 parser.add_option("--rholo", dest="rholo", default = 0.,help="mass of LSP", metavar="MLSP")
-parser.add_option("--rhohi", dest="rhohi", default = 4.,help="mass of LSP", metavar="MLSP")
-parser.add_option("--DDTcut", dest="DDTcut", default = 0.45,help="mass of LSP", metavar="MLSP")
+parser.add_option("--rhohi", dest="rhohi", default = 6.,help="mass of LSP", metavar="MLSP")
+parser.add_option("--DDTcut", dest="DDTcut", default = 0.38,help="mass of LSP", metavar="MLSP")
+parser.add_option('--qcdClosure', action='store_true', dest='qcdClosure', default=False, help='go!')
 
 (options, args) = parser.parse_args()
 
@@ -520,7 +521,7 @@ class rhalphabet:
 			jeta = getattr(self.pred_tt,"bst8_PUPPIjet0_eta");
 			jmsd = getattr(self.pred_tt,"bst8_PUPPIjet0_msd");		
 			if jmsd == 0.: jmsd = 0.01;
-			weight = self.pred_scaleFactor*lumi*getattr(self.pred_tt,"scale1fb");
+			weight = float(self.pred_scaleFactor)*float(lumi)*getattr(self.pred_tt,"scale1fb");
 			if isData: weight = 1;
 
 			if jpt < 500: continue;
