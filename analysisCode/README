@@ -20,11 +20,11 @@
 python buildAnalysis.py -b --doMCLooping --doCards --doRhalphabet --doCards --doPlots --doData --lumi 0.46 --DDTcut 0.38 --rholo 0. --rhohi 6.
 
 # then you get some datacards in plots/datacards
-# make sure you checkout the Higgs combine package
+# make sure you checkout and compile the Higgs combine package
 # https://twiki.cern.ch/twiki/bin/viewauth/CMS/SWGuideHiggsAnalysisCombinedLimit
 
 # to compute limit
-combine -M Asymptotic combine_Wsigna.dat
+combine -M Asymptotic combine_WZsignal.dat
 # to compute p-value
 combine -M ProfileLikelihood --signif combine_WZsignal.dat
 # to compute the best fit mu
