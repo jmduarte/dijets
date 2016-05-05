@@ -17,8 +17,9 @@ parser.add_option('--doCards', action='store_true', dest='doCards', default=Fals
 
 parser.add_option("--lumi", dest="lumi", default = 0.44,help="mass of LSP", metavar="MLSP")
 parser.add_option("--rholo", dest="rholo", default = 0.,help="mass of LSP", metavar="MLSP")
-parser.add_option("--rhohi", dest="rhohi", default = 4.,help="mass of LSP", metavar="MLSP")
-parser.add_option("--DDTcut", dest="DDTcut", default = 0.45,help="mass of LSP", metavar="MLSP")
+parser.add_option("--rhohi", dest="rhohi", default = 6.,help="mass of LSP", metavar="MLSP")
+parser.add_option("--DDTcut", dest="DDTcut", default = 0.38,help="mass of LSP", metavar="MLSP")
+parser.add_option('--qcdClosure', action='store_true', dest='qcdClosure', default=False, help='go!')
 
 # parser.add_option("--rholo", dest="rholo", default = 0.,help="mass of LSP", metavar="MLSP")
 (options, args) = parser.parse_args()
@@ -39,23 +40,34 @@ def buildDatacards(bkgContainers,sigContainers,theRhalphabet,theData):
 		theSignalName = "sig";
 		theQCDName = "qcd";
 		theWincName = "Winc";
+		theZincName = "Zinc";
 
 		theSignalShape       = sigContainers[i].h_jetmsd_passcut;
-		theQCDShape          = bkgContainers[0].h_jetmsd_passcut; # this would eventually become the rhalphabet piece
 		theWincShape         = bkgContainers[1].h_jetmsd_passcut;
-		theDataObs           = theQCDShape.Clone("data_obs"); # and this would eventually become the data :)
-		theDataObs.Add(theWincShape);
+		theZincShape         = bkgContainers[2].h_jetmsd_passcut;
+
+		##theQCDShape          = bkgContainers[0].h_jetmsd_passcut; # this would eventually become the rhalphabet piece		
+		theQCDShape = theRhalphabet.hpred_jetmsd
+
+		# theDataObs           = theQCDShape.Clone("data_obs"); # and this would eventually become the data :)
+		# theDataObs.Add(theWincShape);
+		# theDataObs.Add(theZincShape);
+		theDataObs = theData.h_jetmsd_passcut;
 
 		fout.cd();
 		theSignalShape.SetName(theSignalName);
 		theQCDShape.SetName(theQCDName);
 		theWincShape.SetName(theWincName);
+		theZincShape.SetName(theZincName);
 		theDataObs.SetName("data_obs")
 		theSignalShape.Write();
 		theQCDShape.Write();
 		theWincShape.Write();
+		theZincShape.Write();
 		theDataObs.Write();
 
+		###############################################################
+		# write the card
 		ofile = open("plots/datacards/combine_"+tag+".dat",'w');
 
 		#write the damn thing
@@ -66,7 +78,7 @@ def buildDatacards(bkgContainers,sigContainers,theRhalphabet,theData):
 
 		line = "imax 1 #number of channels \n";
 		allLines.append(line);
-		line = "jmax 2 #number of backgrounds \n";
+		line = "jmax * #number of backgrounds \n";
 		allLines.append(line);
 		allLines.append("kmax * nuissance \n");
 		allLines.append("------------ \n");
@@ -81,26 +93,79 @@ def buildDatacards(bkgContainers,sigContainers,theRhalphabet,theData):
 		allLines.append(line);
 		allLines.append("------------ \n");
 
-		line = "bin ch0 ch0 ch0 \n"
+		line = "bin ch0 ch0 ch0 ch0 \n"
 		allLines.append(line);
-		line = "process 0 1 2 \n";
+		line = "process 0 1 2 3 \n";
 		allLines.append(line);
-		line = "process %s %s %s \n" % ( theSignalName, theQCDName, theWincName );
+		line = "process %s %s %s %s \n" % ( theSignalName, theQCDName, theWincName, theZincName );
 		allLines.append(line);
-		line = "rate %s %s %s \n" % ( str(round(theSignalShape.Integral(),4)), str(round(theQCDShape.Integral(),4)), str(round(theWincShape.Integral(),4)) )
+		line = "rate %s %s %s %s \n" % ( str(round(theSignalShape.Integral(),4)), str(round(theQCDShape.Integral(),4)), str(round(theWincShape.Integral(),4)), str(round(theZincShape.Integral(),4)) )
 		allLines.append(line);		
 		allLines.append("------------ \n");
 
-		line = "lumi_13TEV lnN 1.027 - - \n"
+		line = "lumi_13TEV lnN 1.027 - - - \n"
 		allLines.append(line);		
-		line = "bkgd_QCDNorm lnN - 1.3 - \n"
+		line = "bkgd_QCDNorm lnN - 1.3 - - \n"
 		allLines.append(line);		
-		line = "bkgd_WincNorm lnN - - 1.2 \n"
+		line = "bkgd_WincNorm lnN - - 1.2 - \n"
+		line = "bkgd_ZincNorm lnN - - - 1.2 \n"
 		allLines.append(line);		
 
 		for l in allLines:
 			ofile.write(l);
 		ofile.close();
+
+		###############################################################
+		########### make a card with W as signal
+		if i == 0:
+			
+			ofileW = open("plots/datacards/combine_WZsignal.dat",'w');
+
+			#write the damn thing
+			allLines = [];
+
+			line = "#card for signal = %s \n" % (tag);
+			allLines.append(line);
+
+			line = "imax 1 #number of channels \n";
+			allLines.append(line);
+			line = "jmax * #number of backgrounds \n";
+			allLines.append(line);
+			allLines.append("kmax * nuissance \n");
+			allLines.append("------------ \n");
+
+			line = "shapes * * %s $PROCESS $PROCESS_$SYSTEMATIC \n" % (basename);
+			allLines.append(line);
+			allLines.append("------------ \n");
+
+
+			allLines.append("bin ch0 \n");
+			line = "observation %s \n" % (str(round(theDataObs.Integral(),4)));
+			allLines.append(line);
+			allLines.append("------------ \n");
+
+			line = "bin ch0 ch0 ch0 \n"
+			allLines.append(line);
+			line = "process -1 0 1 \n";
+			allLines.append(line);
+			line = "process %s %s %s \n" % ( theWincName, theZincName, theQCDName );
+			allLines.append(line);
+			line = "rate %s %s %s \n" % ( str(round(theWincShape.Integral(),4)), str(round(theZincShape.Integral(),4)), str(round(theQCDShape.Integral(),4)) )
+			allLines.append(line);		
+			allLines.append("------------ \n");
+
+			line = "lumi_13TEV lnN 1.027 1.027 - \n"
+			allLines.append(line);		
+			line = "bkgd_QCDNorm lnN - - 1.3 \n"
+			allLines.append(line);		
+			line = "bkgd_WincNorm lnN 1.2 - - \n"
+			allLines.append(line);		
+			line = "bkgd_ZincNorm lnN - 1.2 - \n"
+			allLines.append(line);		
+
+			for l in allLines:
+				ofileW.write(l);
+			ofileW.close();	
 
 		fout.Close();
 

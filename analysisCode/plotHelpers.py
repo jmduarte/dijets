@@ -6,24 +6,24 @@ import time
 import array
 
 def getRatio(hist, reference):
-    ratio = hist.Clone("%s_ratio"%hist.GetName())
-    ratio.SetDirectory(0)
-    ratio.SetLineColor(hist.GetLineColor())
-    for xbin in xrange(1,reference.GetNbinsX()+1):
-        ref = reference.GetBinContent(xbin)
-        val = hist.GetBinContent(xbin)
+	ratio = hist.Clone("%s_ratio"%hist.GetName())
+	ratio.SetDirectory(0)
+	ratio.SetLineColor(hist.GetLineColor())
+	for xbin in xrange(1,reference.GetNbinsX()+1):
+		ref = reference.GetBinContent(xbin)
+		val = hist.GetBinContent(xbin)
 
-        refE = reference.GetBinError(xbin)
-        valE = hist.GetBinError(xbin)
+		refE = reference.GetBinError(xbin)
+		valE = hist.GetBinError(xbin)
 
-        try:
-            ratio.SetBinContent(xbin, val/ref)
-            ratio.SetBinError(xbin, math.sqrt( (val*refE/(ref**2))**2 + (valE/ref)**2 ))
-        except ZeroDivisionError:
-            ratio.SetBinContent(xbin, 1.0)
-            ratio.SetBinError(xbin, 0.0)
+		try:
+			ratio.SetBinContent(xbin, val/ref)
+			ratio.SetBinError(xbin, math.sqrt( (val*refE/(ref**2))**2 + (valE/ref)**2 ))
+		except ZeroDivisionError:
+			ratio.SetBinContent(xbin, 1.0)
+			ratio.SetBinError(xbin, 0.0)
 
-    return ratio
+	return ratio
 
 
 def makeCanvas(hists,normalize=False):
@@ -101,19 +101,19 @@ def makeCanvasDataMC(hd,hmcs,legname,name,pdir="plots",nodata=False):
 	tag2.SetTextSize(0.035);
 
 	c = ROOT.TCanvas("c"+name,"c"+name,1000,800);
-        p2 = ROOT.TPad("pad2","pad2",0,0,1,0.31);
-        p2.SetTopMargin(0);
-        p2.SetBottomMargin(0.3);
-        p2.SetLeftMargin(0.15)
-        p2.SetRightMargin(0.03)
-        p2.SetFillStyle(0);
-        p2.Draw();
-        p1 = ROOT.TPad("pad1","pad1",0,0.31,1,1);
-        p1.SetBottomMargin(0);
-        p1.SetLeftMargin(p2.GetLeftMargin())
-        p1.SetRightMargin(p2.GetRightMargin())
-        p1.Draw();
-        p1.cd();
+	p2 = ROOT.TPad("pad2","pad2",0,0,1,0.31);
+	p2.SetTopMargin(0);
+	p2.SetBottomMargin(0.3);
+	p2.SetLeftMargin(0.15)
+	p2.SetRightMargin(0.03)
+	p2.SetFillStyle(0);
+	p2.Draw();
+	p1 = ROOT.TPad("pad1","pad1",0,0.31,1,1);
+	p1.SetBottomMargin(0);
+	p1.SetLeftMargin(p2.GetLeftMargin())
+	p1.SetRightMargin(p2.GetRightMargin())
+	p1.Draw();
+	p1.cd();
 
 	mainframe = hmcs[0].Clone('mainframe')
 	mainframe.Reset('ICE')
@@ -147,44 +147,46 @@ def makeCanvasDataMC(hd,hmcs,legname,name,pdir="plots",nodata=False):
 	tag2.Draw();
 
 	p2.cd()
-        ratioframe = mainframe.Clone('ratioframe')
-        ratioframe.Reset('ICE')
-        ratioframe.GetYaxis().SetRangeUser(0.50,1.50)
+	ratioframe = mainframe.Clone('ratioframe')
+	ratioframe.Reset('ICE')
+	ratioframe.GetYaxis().SetRangeUser(0.50,1.50)
 	ratioframe.GetYaxis().SetTitle('Data/MC')
 	ratioframe.GetXaxis().SetTitle(hmcs[0].GetXaxis().GetTitle())
 	ratioframe.GetXaxis().SetLabelSize(22)
-        ratioframe.GetXaxis().SetTitleSize(26)
-        ratioframe.GetYaxis().SetNdivisions(5)
-        ratioframe.GetYaxis().SetNoExponent()
-        ratioframe.GetYaxis().SetTitleOffset(mainframe.GetYaxis().GetTitleOffset())
-        ratioframe.GetXaxis().SetTitleOffset(3.0)
-        ratioframe.Draw()
+	ratioframe.GetXaxis().SetTitleSize(26)
+	ratioframe.GetYaxis().SetNdivisions(5)
+	ratioframe.GetYaxis().SetNoExponent()
+	ratioframe.GetYaxis().SetTitleOffset(mainframe.GetYaxis().GetTitleOffset())
+	ratioframe.GetXaxis().SetTitleOffset(3.0)
+	ratioframe.Draw()
 
-        ## Calculate Ratios
-        ratios = []
+	## Calculate Ratios
+	ratios = []
 	ratios.append(getRatio(hd, fullmc))
 	ratios[0].SetMinimum(0)
 	ratios[0].SetMaximum(2)
 	ratioframe.GetYaxis().SetRangeUser(0,2)
 
-        line = ROOT.TLine(ratios[0].GetXaxis().GetXmin(), 1.0,
-                          ratios[0].GetXaxis().GetXmax(), 1.0)
-        line.SetLineColor(ROOT.kGray)
-        line.SetLineStyle(2)
-        line.Draw()
+	line = ROOT.TLine(ratios[0].GetXaxis().GetXmin(), 1.0,
+					  ratios[0].GetXaxis().GetXmax(), 1.0)
+	line.SetLineColor(ROOT.kGray)
+	line.SetLineStyle(2)
+	line.Draw()
 
-        ratios[0].Draw("P same")
-        
-        c.cd()
-        c.Modified()
-        c.Update()        
+	ratios[0].Draw("P same")
+	
+	c.cd()
+	c.Modified()
+	c.Update()        
 	c.SaveAs(pdir+"/"+name+".pdf");
+	c.SaveAs(pdir+"/"+name+".png");
 
 	ROOT.gPad.SetLogy();
 	hstack.SetMinimum(0.1);
 	c.SaveAs(pdir+"/"+name+"_log.pdf")
+	c.SaveAs(pdir+"/"+name+"_log.png")
 
-        c.Close()
+	c.Close()
 
 def makeCanvasDataMC_wpred(hd,gpred,hmcs,legname,name,pdir="plots",blind=True):
 	
