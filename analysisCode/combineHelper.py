@@ -111,6 +111,8 @@ def buildDatacards(bkgContainers,sigContainers,theRhalphabet,theData):
 		line = "bkgd_ZincNorm lnN - - - 1.2 \n"
 		allLines.append(line);		
 
+		WriteBinByBinUncertainties(theQCDShape," - 1 - - ",allLines,True);
+
 		for l in allLines:
 			ofile.write(l);
 		ofile.close();
@@ -118,7 +120,7 @@ def buildDatacards(bkgContainers,sigContainers,theRhalphabet,theData):
 		###############################################################
 		########### make a card with W as signal
 		if i == 0:
-			
+
 			ofileW = open("plots/datacards/combine_WZsignal.dat",'w');
 
 			#write the damn thing
@@ -156,12 +158,14 @@ def buildDatacards(bkgContainers,sigContainers,theRhalphabet,theData):
 
 			line = "lumi_13TEV lnN 1.027 1.027 - \n"
 			allLines.append(line);		
-			line = "bkgd_QCDNorm lnN - - 1.3 \n"
-			allLines.append(line);		
+			# line = "bkgd_QCDNorm lnN - - 1.3 \n"
+			# allLines.append(line);		
 			line = "bkgd_WincNorm lnN 1.2 - - \n"
 			allLines.append(line);		
 			line = "bkgd_ZincNorm lnN - 1.2 - \n"
-			allLines.append(line);		
+			allLines.append(line);
+
+			WriteBinByBinUncertainties(theQCDShape," - - 1 ",allLines,False);					
 
 			for l in allLines:
 				ofileW.write(l);
@@ -170,12 +174,39 @@ def buildDatacards(bkgContainers,sigContainers,theRhalphabet,theData):
 		fout.Close();
 
 
+def WriteBinByBinUncertainties(theH, tag, allLines, write=False):
 
+	h_unc_up = [];
+	h_unc_dn = [];
+	text_unc = [];
+	# text_unc_dn = [];
+	for i in range(theH.GetNbinsX()):
 
+		samplename = theH.GetName();
+		uncname = "BinByBin"+str(i);
+		sysnameUp = samplename + "_" + uncname + "Up";
+		sysnameDn = samplename + "_" + uncname + "Down";
 
+		text_unc.append( uncname + " shapeN2 " + tag + " \n" );
 
+		h_unc_up.append(theH.Clone());
+		h_unc_dn.append(theH.Clone());
+		curbincontent = theH.GetBinContent(i+1);
+		curbinerror = theH.GetBinError(i+1);
+		
+		h_unc_up[i].SetBinContent(i+1, curbincontent+curbinerror);
+		h_unc_dn[i].SetBinContent(i+1, curbincontent-curbinerror);
+		h_unc_up[i].SetName(sysnameUp);
+		h_unc_dn[i].SetName(sysnameDn);
 
+	if write:
+		for i in range(len(text_unc)):
+			# print text_unc_up[i], text_unc_dn[i], h_unc_up[i].GetName(), h_unc_dn[i].GetName();
+			h_unc_up[i].Write();
+			h_unc_dn[i].Write();
 
+	for i in range(len(text_unc)):		
+		allLines.append( text_unc[i] );
 
 
 

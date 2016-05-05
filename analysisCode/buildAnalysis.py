@@ -64,7 +64,9 @@ def main():
 		bkgLabels = ["QCD","W(qq)","Z+jets"];
 		bkgTags = ["QCD","Winc","Zinc"];
 		for i in range(len(bkgNames)):
-			bkgContainers.append( MCContainer( idir+"/"+bkgNames[i], float(options.lumi), bkgLabels[i], bkgTags[i], 5 ) );
+			tmpsf = 100;
+			if i > 0: tmpsf = 1;
+			bkgContainers.append( MCContainer( idir+"/"+bkgNames[i], float(options.lumi), bkgLabels[i], bkgTags[i], tmpsf ) );
 			# random factor of 3 w.r.t. data
 
 		sigContainers = [];
