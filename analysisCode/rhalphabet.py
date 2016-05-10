@@ -41,8 +41,9 @@ class rhalphabet:
 		self._filename = filename;
 		self._tf = ROOT.TFile( self._filename );
 		self._tt = self._tf.Get("otree");
-		self._sf = scaleFactor;
+		self._scaleFactor = scaleFactor;
 		self._name = name;
+		self._lumi = float(lumi);
 
 		tfopt = "READ";
 		if extractTFs: tfopt = "RECREATE"
@@ -91,12 +92,12 @@ class rhalphabet:
 			if(i % (1 * nent/100) == 0):
 				sys.stdout.write("\r[" + "="*int(20*i/nent) + " " + str(round(100.*i/nent,0)) + "% done");
 				sys.stdout.flush();
-			if i % int(self._sf) != 0: continue;
+			if i % int(self._scaleFactor) != 0: continue;
 
 			# cutting
 			jpt = getattr(t,"bst8_PUPPIjet0_pt");
 			jmsd = getattr(t,"bst8_PUPPIjet0_msd");		
-			weight = getattr(t,"scale1fb");
+			weight = self._scaleFactor*self._lumi*getattr(self._tt,"scale1fb")*getattr(self._tt,"kfactor");
 
 			if jmsd > 0:
 
@@ -326,7 +327,8 @@ class rhalphabet:
 			jeta = getattr(self.pred_tt,"bst8_PUPPIjet0_eta");
 			jmsd = getattr(self.pred_tt,"bst8_PUPPIjet0_msd");		
 			if jmsd == 0.: jmsd = 0.01;
-			weight = float(self.pred_scaleFactor)*float(lumi)*getattr(self.pred_tt,"scale1fb");
+			# weight = float(self.pred_scaleFactor)*float(lumi)*getattr(self.pred_tt,"scale1fb");
+			weight = self.pred_scaleFactor*self._lumi*getattr(self.pred_tt,"scale1fb")*getattr(self.pred_tt,"kfactor");
 			if isData: weight = 1;
 
 			if jpt < 500: continue;
@@ -345,6 +347,8 @@ class rhalphabet:
 				self.hpred_rhoDDT_errup.Fill( rhP, weight*(curval+curerr) );
 
 		print "\n"
+
+		print "predicted integral = ", self.hpred_jetmsd.Integral();
 
 		# adjust histogram errors
 		self.grpred_jetmsd = self.AdjustHistogramErrors(self.hpred_jetmsd,self.hpred_jetmsd_errup);

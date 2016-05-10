@@ -57,6 +57,8 @@ def main():
 	# do mc looping - a class that holds histograms
 	bkgContainers = None;
 	sigContainers = None;
+
+	qcdSF = 5;
 	if options.doMCLooping: 
 		
 		bkgContainers = [];
@@ -64,7 +66,7 @@ def main():
 		bkgLabels = ["QCD","W(qq)","Z+jets"];
 		bkgTags = ["QCD","Winc","Zinc"];
 		for i in range(len(bkgNames)):
-			tmpsf = 100;
+			tmpsf = qcdSF;
 			if i > 0: tmpsf = 1;
 			bkgContainers.append( MCContainer( idir+"/"+bkgNames[i], float(options.lumi), bkgLabels[i], bkgTags[i], tmpsf ) );
 			# random factor of 3 w.r.t. data
@@ -99,8 +101,8 @@ def main():
 		# there is a flag to do a closure test as well
 		if options.qcdClosure:
 			isData = False;
-			theRhalphabet = rhalphabet(idir+"/"+"QCD.root",1,"rhalphabetClosure",2, False);
-			theRhalphabet.GetPredictedDistributions( idir+"/"+"QCD.root", options.lumi, 5, isData );
+			theRhalphabet = rhalphabet(idir+"/"+"QCD.root",options.lumi,"rhalphabetClosure",2, True);
+			theRhalphabet.GetPredictedDistributions( idir+"/"+"QCD.root", options.lumi, qcdSF, isData );
 
 	####################################################################################
 	# do the loop on data
@@ -182,7 +184,7 @@ def BuildPlots(bkgContainers,sigContainers,theRhalphabet,theData):
 			hd = getattr( theData, n );
 			makeCanvasDataMC(hd,harray,hlabels,"mc_"+n,"plots/yields/");
 			makeCanvasDataMC(hd,harray,hlabels,"mc_"+n,"plots/shapes/");
-			'''
+			
 	if options.doMCLooping:
 
 		names = [];
@@ -202,7 +204,7 @@ def BuildPlots(bkgContainers,sigContainers,theRhalphabet,theData):
 
 			makeCanvasComparison(harray,hlabels,"mc_"+n,"plots/yields/");
 			makeCanvasShapeComparison(harray,hlabels,"mc_"+n,"plots/shapes/");
-			'''
+			
 
 
 #----------------------------------------------------------------------------------------------------------------

@@ -190,6 +190,9 @@ def makeCanvasDataMC(hd,hmcs,legname,name,pdir="plots",nodata=False):
 
 def makeCanvasDataMC_wpred(hd,gpred,hmcs,legname,name,pdir="plots",blind=True):
 	
+	print "makeCanvasDataMC_wpred---"
+	print "hd integral = ",hd.Integral();
+
 	gpred.SetLineColor(2);
 	gpred.SetFillColor(2);
 	gpred.SetFillStyle(3001);

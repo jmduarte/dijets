@@ -93,6 +93,7 @@ class MCContainer:
 
 		print "\n";
 
+		print "MC yields = ", self.h_jetmsd.Integral(), self.h_jetmsd_passcut.Integral();
 
 
 

@@ -49,10 +49,13 @@ def buildDatacards(bkgContainers,sigContainers,theRhalphabet,theData):
 		##theQCDShape          = bkgContainers[0].h_jetmsd_passcut; # this would eventually become the rhalphabet piece		
 		theQCDShape = theRhalphabet.hpred_jetmsd
 
-		# theDataObs           = theQCDShape.Clone("data_obs"); # and this would eventually become the data :)
-		# theDataObs.Add(theWincShape);
-		# theDataObs.Add(theZincShape);
-		theDataObs = theData.h_jetmsd_passcut;
+		theDataObs = None;
+		if options.qcdClosure:
+			theDataObs = theQCDShape.Clone("data_obs"); # and this would eventually become the data :)
+			theDataObs.Add(theWincShape);
+			theDataObs.Add(theZincShape);
+		else:
+			theDataObs = theData.h_jetmsd_passcut;
 
 		fout.cd();
 		theSignalShape.SetName(theSignalName);
