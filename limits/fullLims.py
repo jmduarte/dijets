@@ -68,6 +68,8 @@ def main():
 	gr_UA2 = csvToGraph( "externDat/UA2.csv",4 );
 	gr_CDFRun1 = csvToGraph( "externDat/CDF_Run1.csv",2 );
 	gr_CDFRun2 = csvToGraph( "externDat/CDF_Run2.csv",6 );
+        gr_ATLAS = csvToGraph( "externDat/gBMZB_ATLAS_all_fbinv.csv",7 );
+        gr_CMS = csvToGraph( "externDat/CMS_Scouting.csv",8 );
 	#--------------------------------
 
 	#--------------------------------
@@ -127,6 +129,8 @@ def main():
 	leg2.AddEntry(gr_UA2,"UA2","l")	
 	leg2.AddEntry(gr_CDFRun1,"CDF Run 1","l")	
 	leg2.AddEntry(gr_CDFRun2,"CDF Run 2","l")	
+        leg2.AddEntry(gr_ATLAS,"ATLAS 13 #oplus 20.3  fb^{-1}","l")
+        leg2.AddEntry(gr_CMS,"CMS 18.8 fb^{-1} (Data Scouting)","l")
 
 	can_gB = ROOT.TCanvas("can_gB","can_gB",1200,800);
 	hrl = can_gB.DrawFrame(40,0,800,4);
@@ -141,6 +145,8 @@ def main():
 	gr_UA2.Draw("lsames")
 	gr_CDFRun1.Draw("lsames")
 	gr_CDFRun2.Draw("lsames")
+        gr_ATLAS.Draw("lsames")
+        gr_CMS.Draw("lsames")
 
 	txta.Draw();
 	txtb.Draw();
