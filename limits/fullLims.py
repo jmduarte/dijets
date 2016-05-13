@@ -65,11 +65,12 @@ def main():
 	gr_gB_2sigma = makeAFillGraph( masses, l_m2sig_gB, l_p2sig_gB, 0, 5, 1001 );
 
 	#--------------------------------
-	gr_UA2 = csvToGraph( "externDat/UA2.csv",4 );
-	gr_CDFRun1 = csvToGraph( "externDat/CDF_Run1.csv",2 );
-	gr_CDFRun2 = csvToGraph( "externDat/CDF_Run2.csv",6 );
-        gr_ATLAS = csvToGraph( "externDat/gBMZB_ATLAS_all_fbinv.csv",7 );
-        gr_CMS = csvToGraph( "externDat/CMS_Scouting.csv",8 );
+	addFactor=True;
+	gr_UA2 = csvToGraph( "externDat/UA2.csv",4,addFactor);
+	gr_CDFRun1 = csvToGraph( "externDat/CDF_Run1.csv",2,addFactor );
+	gr_CDFRun2 = csvToGraph( "externDat/CDF_Run2.csv",6,addFactor );
+	gr_ATLAS = csvToGraph( "externDat/gBMZB_ATLAS_all_fbinv.csv",7,False );
+	gr_CMS = csvToGraph( "externDat/CMS_Scouting.csv",8,False );
 	#--------------------------------
 
 	#--------------------------------
@@ -129,11 +130,11 @@ def main():
 	leg2.AddEntry(gr_UA2,"UA2","l")	
 	leg2.AddEntry(gr_CDFRun1,"CDF Run 1","l")	
 	leg2.AddEntry(gr_CDFRun2,"CDF Run 2","l")	
-        leg2.AddEntry(gr_ATLAS,"ATLAS 13 #oplus 20.3  fb^{-1}","l")
-        leg2.AddEntry(gr_CMS,"CMS 18.8 fb^{-1} (Data Scouting)","l")
+	leg2.AddEntry(gr_ATLAS,"ATLAS 13 #oplus 20.3  fb^{-1}","l")
+	leg2.AddEntry(gr_CMS,"CMS 18.8 fb^{-1} (Data Scouting)","l")
 
 	can_gB = ROOT.TCanvas("can_gB","can_gB",1200,800);
-	hrl = can_gB.DrawFrame(40,0,800,4);
+	hrl = can_gB.DrawFrame(40,0,650,4);
 	hrl.GetYaxis().SetTitle("g_{B}");
 	hrl.GetXaxis().SetTitle("Z\' mass (GeV)");
 	
@@ -145,8 +146,38 @@ def main():
 	gr_UA2.Draw("lsames")
 	gr_CDFRun1.Draw("lsames")
 	gr_CDFRun2.Draw("lsames")
-        gr_ATLAS.Draw("lsames")
-        gr_CMS.Draw("lsames")
+	gr_ATLAS.Draw("lsames")
+	gr_CMS.Draw("lsames")
+
+	txta.Draw();
+	txtb.Draw();
+	txtc.Draw();
+	# txtd.Draw();
+	leg2.Draw();
+
+	gr_gB_2sigma.GetXaxis().SetMoreLogLabels(True);	
+	gr_gB_2sigma.GetXaxis().SetNdivisions(10);	
+
+	# ROOT.gPad.SetLogx();
+	can_gB.SaveAs('limplots/gB.pdf');
+
+	#####
+
+	can_gB2 = ROOT.TCanvas("can_gB2","can_gB2",1200,800);
+	hrl2 = can_gB.DrawFrame(40,0,1000,4);
+	hrl2.GetYaxis().SetTitle("g_{B}");
+	hrl2.GetXaxis().SetTitle("Z\' mass (GeV)");
+	
+	gr_gB_2sigma.Draw('f');
+	gr_gB_1sigma.Draw('fsames');
+	gr_gB_obs.Draw('lsames');
+	gr_gB_exp.Draw('lsames');
+
+	gr_UA2.Draw("lsames")
+	gr_CDFRun1.Draw("lsames")
+	gr_CDFRun2.Draw("lsames")
+	gr_ATLAS.Draw("lsames")
+	gr_CMS.Draw("lsames")
 
 	txta.Draw();
 	txtb.Draw();
@@ -158,7 +189,8 @@ def main():
 	gr_gB_2sigma.GetXaxis().SetNdivisions(10);	
 
 	ROOT.gPad.SetLogx();
-	can_gB.SaveAs('limplots/gB.pdf');
+	can_gB2.SaveAs('limplots/gB_logx.pdf');
+
 
 ########################################################################################
 ########################################################################################
@@ -201,7 +233,10 @@ def makeAFillGraph(listx,listy1,listy2,linecolor = 1, fillcolor = 0, fillstyle =
 
 	return gr
 
-def csvToGraph(fn, linecolor=1):
+def csvToGraph(fn, linecolor=1, addFactor=False):
+
+	factor = 1.;
+	if addFactor: factor = 6.;
 
 	a_m = array('d', []);
 	a_g = array('d', []);
@@ -211,7 +246,7 @@ def csvToGraph(fn, linecolor=1):
 	for line in ifile: 
 		lline = line.strip().split(',');
 		a_m.append(float(lline[0]))
-		a_g.append(float(lline[1])*6.)
+		a_g.append(float(lline[1])*factor)
 		npoints += 1;
 
 	gr = ROOT.TGraph(npoints,a_m,a_g);

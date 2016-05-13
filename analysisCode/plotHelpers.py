@@ -188,6 +188,7 @@ def makeCanvasDataMC(hd,hmcs,legname,name,pdir="plots",nodata=False):
 
 	c.Close()
 
+##################################################################################################
 def makeCanvasDataMC_wpred(hd,gpred,hmcs,legname,name,pdir="plots",blind=True):
 	
 	print "makeCanvasDataMC_wpred---"
@@ -238,34 +239,128 @@ def makeCanvasDataMC_wpred(hd,gpred,hmcs,legname,name,pdir="plots",blind=True):
 	gpred.SetMarkerStyle(24);
 	gpred.SetMarkerColor(2);
 
+	#---------------------------------------------------------------
 	c = ROOT.TCanvas("c"+name,"c"+name,1000,800);
+	
+	p1 = ROOT.TPad("p1","p1",0.0,0.3,1.0,1.0);
+	p2 = ROOT.TPad("p2","p2",0.0,0.0,1.0,0.3);
+	p1.SetBottomMargin(0.05);
+	p2.SetTopMargin(0.05);
+	p2.SetBottomMargin(0.3);
+
+	c.cd();
+	p1.Draw(); p1.cd();
+
 	mcall = hstack2.GetStack().Last()
 	maxval = 1.5*max(mcall.GetMaximum(),hd.GetMaximum());
 	hd.SetLineColor(1);
 	mcall.SetLineColor(4);
 	if not blind: 
-		hd.SetMaximum(maxval);
-		hd.Draw("pe");
+		mcall.SetMaximum(maxval);
+		mcall.Draw("hist");
+		hd.Draw("pesames");
 		gpred.Draw("2");
 		mcall.Draw("histsames");
 		hd.Draw("pesames");
+		hd.SetMinimum(0);
 	if blind: 
 		mcall.SetMaximum(maxval);
 		mcall.Draw("hist");
 		gpred.Draw("2");
 		mcall.Draw("histsames");
+		mcall.SetMinimum(0);
+
+	mcall.GetXaxis().SetTitle("");
 	# ROOT.gPad.Update();
 	# hstack2.GetXaxis.SetTitle( hmcs[0].GetXaxis().GetTitle() );
 	# hstack2.GetYaxis.SetTitle( hmcs[0].GetYaxis().GetTitle() );	
 	leg.Draw();
 	tag1.Draw();
 	tag2.Draw();
-	c.SaveAs(pdir+"/"+name+".pdf");
 
-	ROOT.gPad.SetLogy();
-	hstack.SetMinimum(0.1);
+	c.cd();
+	p2.Draw(); p2.cd();
+
+	hdOvPred = hd.Clone();
+	hpred = gpred.GetHistogram();
+	hdOvPred.SetMaximum(2);
+	hdOvPred.SetMinimum(0);
+	for i in range(hd.GetNbinsX()):
+
+		print "bin ", i, ", ", hd.GetBinContent(i+1),hpred.GetBinContent(i+1),gpred.GetY()[i]
+		if gpred.GetY()[i] > 0:
+			hdOvPred.SetBinContent( i+1, hd.GetBinContent(i+1)/gpred.GetY()[i] );
+		else:
+			hdOvPred.SetBinContent( i+1, 0. );		
+	
+	hdOvPred.GetXaxis().SetTitle("jet mass (GeV)"); 
+	hdOvPred.GetXaxis().SetTitleSize(0.14);
+	hdOvPred.GetYaxis().SetTitle("Data/MC"); 
+	hdOvPred.GetYaxis().SetTitleSize(0.14); 
+	hdOvPred.GetYaxis().SetTitleOffset(0.42);	
+	hdOvPred.Draw('hist');
+
+	c.SaveAs(pdir+"/"+name+".pdf");
+	#---------------------------------------------------------------
+	mcall.SetMinimum(0.1);
+	p1.cd();
+	p1.SetLogy();
 	c.SaveAs(pdir+"/"+name+"_log.pdf")	
 
+##################################################################################################
+def makeCanvasDataMC_MONEY(hd,gpred,hmcs,legname,name,pdir="plots",blind=True):
+	
+	print "makeCanvasDataMC_wpred---"
+	print "hd integral = ",hd.Integral();
+
+	gpred.SetLineColor(2);
+	gpred.SetFillColor(2);
+	gpred.SetFillStyle(3001);
+
+	color = [2,4,6,7,8,3,5]
+	for h in range(len(hmcs)): 
+		hmcs[h].SetLineWidth(2);
+		hmcs[h].SetLineColor(color[h])
+
+	# print maxval;
+	leg = ROOT.TLegend(0.6,0.7,0.9,0.9);
+	leg.SetFillStyle(0);
+	leg.SetBorderSize(0);
+	leg.SetTextSize(0.035);
+	leg.AddEntry(hd,"data","pe");
+	leg.AddEntry(gpred,"bkg pred.","f");
+	for i in range(len(hmcs)):
+		leg.AddEntry(hmcs[i],legname[i],"l")
+
+	tag1 = ROOT.TLatex(0.7,0.95,"0.44 fb^{-1} (13 TeV)")
+	tag1.SetNDC();
+	tag1.SetTextSize(0.035);
+	tag2 = ROOT.TLatex(0.17,0.95,"CMS preliminary")
+	tag2.SetNDC();
+	tag2.SetTextSize(0.035);
+
+	gpred.SetMarkerStyle(24);
+	gpred.SetMarkerColor(2);
+
+	#---------------------------------------------------------------
+	c = ROOT.TCanvas("c"+name,"c"+name,1000,800);
+
+	hd.Draw();
+	gpred.Draw('2');
+	for i in range(len(hmcs)):
+		hmcs[i].Draw("histsames");
+
+	leg.Draw();
+	tag1.Draw();
+	tag2.Draw();
+
+	c.SaveAs(pdir+"/"+name+".pdf");
+	#---------------------------------------------------------------
+	hd.SetMinimum(0.1);
+	ROOT.gPad.SetLogy();
+	c.SaveAs(pdir+"/"+name+"_log.pdf")		
+
+##################################################################################################
 def makeCanvasShapeComparison(hs,legname,name,pdir="plots"):
 
 	color = [2,4,6,7,8,3,5,2,4,6,7,8,3,5]

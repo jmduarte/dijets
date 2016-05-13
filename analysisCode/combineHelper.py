@@ -108,9 +108,10 @@ def buildDatacards(bkgContainers,sigContainers,theRhalphabet,theData):
 
 		line = "lumi_13TEV lnN 1.027 - - - \n"
 		allLines.append(line);		
-		line = "bkgd_QCDNorm lnN - 1.3 - - \n"
+		line = "bkgd_QCDMClosure lnN - 1.15 - - \n"
 		allLines.append(line);		
 		line = "bkgd_WincNorm lnN - - 1.2 - \n"
+		allLines.append(line);				
 		line = "bkgd_ZincNorm lnN - - - 1.2 \n"
 		allLines.append(line);		
 
@@ -161,8 +162,8 @@ def buildDatacards(bkgContainers,sigContainers,theRhalphabet,theData):
 
 			line = "lumi_13TEV lnN 1.027 1.027 - \n"
 			allLines.append(line);		
-			# line = "bkgd_QCDNorm lnN - - 1.3 \n"
-			# allLines.append(line);		
+			line = "bkgd_QCDNorm lnN - - 1.15 \n"
+			allLines.append(line);		
 			line = "bkgd_WincNorm lnN 1.2 - - \n"
 			allLines.append(line);		
 			line = "bkgd_ZincNorm lnN - 1.2 - \n"

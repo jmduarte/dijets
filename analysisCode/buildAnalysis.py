@@ -26,7 +26,7 @@ parser.add_option('--qcdClosure', action='store_true', dest='qcdClosure', defaul
 
 from MCContainer import *
 from rhalphabet import *
-from plotHelpers import makeCanvas, makeCanvasDataMC, makeCanvasShapeComparison,makeCanvas2D,makeCanvasDataMC_wpred,makeCanvasComparison
+from plotHelpers import makeCanvas, makeCanvasDataMC, makeCanvasShapeComparison,makeCanvas2D,makeCanvasDataMC_wpred,makeCanvasDataMC_MONEY,makeCanvasComparison
 from combineHelper import buildDatacards
 #
 import tdrstyle
@@ -58,7 +58,7 @@ def main():
 	bkgContainers = None;
 	sigContainers = None;
 
-	qcdSF = 5;
+	qcdSF = 100;
 	if options.doMCLooping: 
 		
 		bkgContainers = [];
@@ -95,13 +95,13 @@ def main():
 	
 		if not options.qcdClosure:		
 			isData = True;
-			theRhalphabet = rhalphabet(idir+"/"+"JetHT.root",1,"rhalphabet",1, False);
+			theRhalphabet = rhalphabet(idir+"/"+"JetHT.root",1,"rhalphabet",1, True);
 			theRhalphabet.GetPredictedDistributions( idir+"/"+"JetHT.root", 1, 5, isData);
 		
 		# there is a flag to do a closure test as well
 		if options.qcdClosure:
 			isData = False;
-			theRhalphabet = rhalphabet(idir+"/"+"QCD.root",options.lumi,"rhalphabetClosure",2, True);
+			theRhalphabet = rhalphabet(idir+"/"+"QCD.root",options.lumi,"rhalphabetClosure",2, False);
 			theRhalphabet.GetPredictedDistributions( idir+"/"+"QCD.root", options.lumi, qcdSF, isData );
 
 	####################################################################################
@@ -144,6 +144,14 @@ def BuildPlots(bkgContainers,sigContainers,theRhalphabet,theData):
 								'plots/results/',
 								False);
 
+		makeCanvasDataMC_MONEY( theData.h_jetmsd_passcut,
+								theRhalphabet.grpred_jetmsd, 
+								[bkgContainers[1].h_jetmsd_passcut,bkgContainers[2].h_jetmsd_passcut,sigContainers[0].h_jetmsd_passcut,sigContainers[2].h_jetmsd_passcut],
+								['W(qq)','Z(qq)','Z\' (50 GeV)','Z\' (150 GeV)'],
+								'jetmsd_final',
+								'plots/results/',
+								False);		
+
 	if options.doMCLooping and options.doRhalphabet and not options.doData:
 
 		makeCanvasDataMC_wpred( bkgContainers[0].h_jetmsd_passcut,
@@ -162,48 +170,56 @@ def BuildPlots(bkgContainers,sigContainers,theRhalphabet,theData):
 								'plots/results/',
 								False);
 
-	if options.doMCLooping and options.doData:
+		makeCanvasDataMC_MONEY( bkgContainers[0].h_jetmsd_passcut,
+								theRhalphabet.grpred_jetmsd, 
+								[bkgContainers[1].h_jetmsd_passcut,bkgContainers[2].h_jetmsd_passcut,sigContainers[0].h_jetmsd_passcut,sigContainers[2].h_jetmsd_passcut],
+								['W(qq)','Z(qq)','Z\' (50 GeV)','Z\' (150 GeV)'],
+								'jetmsd_final',
+								'plots/results/',
+								False);
 
-		names = [];
-		names.append( "h_jetpt" );
-		names.append( "h_jeteta" );
-		names.append( "h_jett21" );
-		names.append( "h_jett21DDT" );
-		names.append( "h_jetmsd" );
+	# if options.doMCLooping and options.doData:
 
-		for n in names: 
+	# 	names = [];
+	# 	names.append( "h_jetpt" );
+	# 	names.append( "h_jeteta" );
+	# 	names.append( "h_jett21" );
+	# 	names.append( "h_jett21DDT" );
+	# 	names.append( "h_jetmsd" );
+
+	# 	for n in names: 
 	
-			harray = [];
-			hlabels = [];
-			for b in bkgContainers: 
-				harray.append( getattr( b, n ) );
-				hlabels.append( b._name );
-			# for s in sigContainers: 
-			# 	harray.append( getattr( s, n ) );
-			# 	hlabels.append( s._name );
-			hd = getattr( theData, n );
-			makeCanvasDataMC(hd,harray,hlabels,"mc_"+n,"plots/yields/");
-			makeCanvasDataMC(hd,harray,hlabels,"mc_"+n,"plots/shapes/");
+	# 		harray = [];
+	# 		hlabels = [];
+	# 		for b in bkgContainers: 
+	# 			harray.append( getattr( b, n ) );
+	# 			hlabels.append( b._name );
+	# 		# for s in sigContainers: 
+	# 		# 	harray.append( getattr( s, n ) );
+	# 		# 	hlabels.append( s._name );
+	# 		hd = getattr( theData, n );
+	# 		makeCanvasDataMC(hd,harray,hlabels,"mc_"+n,"plots/yields/");
+	# 		makeCanvasDataMC(hd,harray,hlabels,"mc_"+n,"plots/shapes/");
 			
-	if options.doMCLooping:
+	# if options.doMCLooping:
 
-		names = [];
-		names.append( "h_jetmsd" );
-		names.append( "h_jetmsd_passcut" );
+	# 	names = [];
+	# 	names.append( "h_jetmsd" );
+	# 	names.append( "h_jetmsd_passcut" );
 
-		for n in names: 
+	# 	for n in names: 
 	
-			harray = [];
-			hlabels = [];
-			for b in bkgContainers: 
-				harray.append( getattr( b, n ) );
-				hlabels.append( b._name );
-			for s in sigContainers: 
-				harray.append( getattr( s, n ) );
-				hlabels.append( s._name );
+	# 		harray = [];
+	# 		hlabels = [];
+	# 		for b in bkgContainers: 
+	# 			harray.append( getattr( b, n ) );
+	# 			hlabels.append( b._name );
+	# 		for s in sigContainers: 
+	# 			harray.append( getattr( s, n ) );
+	# 			hlabels.append( s._name );
 
-			makeCanvasComparison(harray,hlabels,"mc_"+n,"plots/yields/");
-			makeCanvasShapeComparison(harray,hlabels,"mc_"+n,"plots/shapes/");
+	# 		makeCanvasComparison(harray,hlabels,"mc_"+n,"plots/yields/");
+	# 		makeCanvasShapeComparison(harray,hlabels,"mc_"+n,"plots/shapes/");
 			
 
 

@@ -1,0 +1,78 @@
+#card for signal = Zprime250 
+imax 1 #number of channels 
+jmax * #number of backgrounds 
+kmax * nuissance 
+------------ 
+shapes * * combine_Zprime250.root $PROCESS $PROCESS_$SYSTEMATIC 
+------------ 
+bin ch0 
+observation 4258.0 
+------------ 
+bin ch0 ch0 ch0 ch0 
+process 0 1 2 3 
+process sig qcd Winc Zinc 
+rate 8.3047 4142.2606 116.735 46.891 
+------------ 
+lumi_13TEV lnN 1.027 - - - 
+bkgd_QCDNorm lnN - 1.3 - - 
+bkgd_ZincNorm lnN - - - 1.2 
+BinByBin0 shapeN2  - 1 - -  
+BinByBin1 shapeN2  - 1 - -  
+BinByBin2 shapeN2  - 1 - -  
+BinByBin3 shapeN2  - 1 - -  
+BinByBin4 shapeN2  - 1 - -  
+BinByBin5 shapeN2  - 1 - -  
+BinByBin6 shapeN2  - 1 - -  
+BinByBin7 shapeN2  - 1 - -  
+BinByBin8 shapeN2  - 1 - -  
+BinByBin9 shapeN2  - 1 - -  
+BinByBin10 shapeN2  - 1 - -  
+BinByBin11 shapeN2  - 1 - -  
+BinByBin12 shapeN2  - 1 - -  
+BinByBin13 shapeN2  - 1 - -  
+BinByBin14 shapeN2  - 1 - -  
+BinByBin15 shapeN2  - 1 - -  
+BinByBin16 shapeN2  - 1 - -  
+BinByBin17 shapeN2  - 1 - -  
+BinByBin18 shapeN2  - 1 - -  
+BinByBin19 shapeN2  - 1 - -  
+BinByBin20 shapeN2  - 1 - -  
+BinByBin21 shapeN2  - 1 - -  
+BinByBin22 shapeN2  - 1 - -  
+BinByBin23 shapeN2  - 1 - -  
+BinByBin24 shapeN2  - 1 - -  
+BinByBin25 shapeN2  - 1 - -  
+BinByBin26 shapeN2  - 1 - -  
+BinByBin27 shapeN2  - 1 - -  
+BinByBin28 shapeN2  - 1 - -  
+BinByBin29 shapeN2  - 1 - -  
+BinByBin30 shapeN2  - 1 - -  
+BinByBin31 shapeN2  - 1 - -  
+BinByBin32 shapeN2  - 1 - -  
+BinByBin33 shapeN2  - 1 - -  
+BinByBin34 shapeN2  - 1 - -  
+BinByBin35 shapeN2  - 1 - -  
+BinByBin36 shapeN2  - 1 - -  
+BinByBin37 shapeN2  - 1 - -  
+BinByBin38 shapeN2  - 1 - -  
+BinByBin39 shapeN2  - 1 - -  
+BinByBin40 shapeN2  - 1 - -  
+BinByBin41 shapeN2  - 1 - -  
+BinByBin42 shapeN2  - 1 - -  
+BinByBin43 shapeN2  - 1 - -  
+BinByBin44 shapeN2  - 1 - -  
+BinByBin45 shapeN2  - 1 - -  
+BinByBin46 shapeN2  - 1 - -  
+BinByBin47 shapeN2  - 1 - -  
+BinByBin48 shapeN2  - 1 - -  
+BinByBin49 shapeN2  - 1 - -  
+BinByBin50 shapeN2  - 1 - -  
+BinByBin51 shapeN2  - 1 - -  
+BinByBin52 shapeN2  - 1 - -  
+BinByBin53 shapeN2  - 1 - -  
+BinByBin54 shapeN2  - 1 - -  
+BinByBin55 shapeN2  - 1 - -  
+BinByBin56 shapeN2  - 1 - -  
+BinByBin57 shapeN2  - 1 - -  
+BinByBin58 shapeN2  - 1 - -  
+BinByBin59 shapeN2  - 1 - -  
