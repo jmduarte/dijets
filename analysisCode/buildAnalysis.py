@@ -7,6 +7,9 @@ import time
 import array
 import os
 
+sys.path.append('../fitting')
+from hist import hist
+
 parser = OptionParser()
 parser.add_option('-b', action='store_true', dest='noX', default=False, help='no X11 windows')
 parser.add_option('--doMCLooping', action='store_true', dest='doMCLooping', default=True, help='go!')
@@ -58,18 +61,30 @@ def main():
 	bkgContainers = None;
 	sigContainers = None;
 
+	### signal corrections and other directors
+	sig_mass_shift = 0.98;
+	sig_mass_shift_unc = 0.02;
+	# sig_res_shift = 0.95;
+	sig_res_shift = 0.8;
+	sig_res_shift_unc = 0.2;
 	qcdSF = 100;
+
 	if options.doMCLooping: 
 		
 		bkgContainers = [];
 		bkgNames = ["QCD.root","W.root","DY.root"];
 		bkgLabels = ["QCD","W(qq)","Z+jets"];
 		bkgTags = ["QCD","Winc","Zinc"];
+		bkgmass = [0.0,80.,91.];
 		for i in range(len(bkgNames)):
 			tmpsf = qcdSF;
 			if i > 0: tmpsf = 1;
 			bkgContainers.append( MCContainer( idir+"/"+bkgNames[i], float(options.lumi), bkgLabels[i], bkgTags[i], tmpsf ) );
 			# random factor of 3 w.r.t. data
+			if i > 0: 
+				bkgContainers[i].morphSignal("h_peakshape",bkgmass[i],
+											               sig_mass_shift,sig_mass_shift_unc,
+											               sig_res_shift,sig_res_shift_unc);
 
 		sigContainers = [];
 		sigNames = [];
@@ -82,11 +97,24 @@ def main():
 		sigLabels = ["Z\'(50 GeV)","Z\'(100 GeV)","Z\'(150 GeV)","Z\'(200 GeV)","Z\'(250 GeV)","Z\'(300 GeV)"]
 		sigTags = ["Zprime50","Zprime100","Zprime150","Zprime200","Zprime250","Zprime300"];
 		# sigXS = [139300.,19430.,5706.,2322.,1131.,619.];
-		sigXS = [11.,10.,10.,10.,10.,10.]; # in pb
+		sigXS   = [11.,10.,10.,10.,10.,10.]; # in pb
+		sigmass = [50.,100.,150.,200.,250.,300.]; # in pb
 
 		for i in range(len(sigNames)):
 			sigContainers.append( MCContainer( idir+"/"+sigNames[i], float(options.lumi)*sigXS[i]*1.2, sigLabels[i], sigTags[i], 1 ) );
 			# k-factor is 1.2
+			sigContainers[i].morphSignal("h_peakshape",sigmass[i],
+										               sig_mass_shift,sig_mass_shift_unc,
+										               sig_res_shift,sig_res_shift_unc);
+
+			# hsig = [];
+			# hsig.append( getattr( sigContainers[i], "h_signalshape_central" ) );
+			# hsig.append( getattr( sigContainers[i], "h_signalshape_shiftUp" ) );
+			# hsig.append( getattr( sigContainers[i], "h_signalshape_smearUp" ) );
+			# hsig.append( getattr( sigContainers[i], "h_signalshape_shiftDn" ) );
+			# hsig.append( getattr( sigContainers[i], "h_signalshape_smearDn" ) );
+
+			# makeCanvasShapeComparison(hsig,["cen","shiftup","smearup","shiftdn","smeardn"],"mcsignalshapes_"+sigTags[i],"plots/shapes/");
 
 	####################################################################################
 	# do background estimation
@@ -95,7 +123,7 @@ def main():
 	
 		if not options.qcdClosure:		
 			isData = True;
-			theRhalphabet = rhalphabet(idir+"/"+"JetHT.root",1,"rhalphabet",1, True);
+			theRhalphabet = rhalphabet(idir+"/"+"JetHT.root",1,"rhalphabet",1, False);
 			theRhalphabet.GetPredictedDistributions( idir+"/"+"JetHT.root", 1, 5, isData);
 		
 		# there is a flag to do a closure test as well

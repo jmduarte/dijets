@@ -42,9 +42,9 @@ def buildDatacards(bkgContainers,sigContainers,theRhalphabet,theData):
 		theWincName = "Winc";
 		theZincName = "Zinc";
 
-		theSignalShape       = sigContainers[i].h_jetmsd_passcut;
-		theWincShape         = bkgContainers[1].h_jetmsd_passcut;
-		theZincShape         = bkgContainers[2].h_jetmsd_passcut;
+		theSignalShape       = sigContainers[i].h_peakshape_central; ### note this new name!!!
+		theWincShape         = bkgContainers[1].h_peakshape_central;
+		theZincShape         = bkgContainers[2].h_peakshape_central;
 
 		##theQCDShape          = bkgContainers[0].h_jetmsd_passcut; # this would eventually become the rhalphabet piece		
 		theQCDShape = theRhalphabet.hpred_jetmsd
@@ -58,6 +58,7 @@ def buildDatacards(bkgContainers,sigContainers,theRhalphabet,theData):
 			theDataObs = theData.h_jetmsd_passcut;
 
 		fout.cd();
+
 		theSignalShape.SetName(theSignalName);
 		theQCDShape.SetName(theQCDName);
 		theWincShape.SetName(theWincName);
@@ -68,6 +69,47 @@ def buildDatacards(bkgContainers,sigContainers,theRhalphabet,theData):
 		theWincShape.Write();
 		theZincShape.Write();
 		theDataObs.Write();
+
+		# peak shifts
+		theSignalShape_shiftUp       = sigContainers[i].h_peakshape_shiftUp;
+		theWincShape_shiftUp         = bkgContainers[1].h_peakshape_shiftUp;
+		theZincShape_shiftUp         = bkgContainers[2].h_peakshape_shiftUp;		
+		theSignalShape_shiftDn       = sigContainers[i].h_peakshape_shiftDn;
+		theWincShape_shiftDn         = bkgContainers[1].h_peakshape_shiftDn;
+		theZincShape_shiftDn         = bkgContainers[2].h_peakshape_shiftDn;		
+		theSignalShape_smearUp       = sigContainers[i].h_peakshape_smearUp;
+		theWincShape_smearUp         = bkgContainers[1].h_peakshape_smearUp;
+		theZincShape_smearUp         = bkgContainers[2].h_peakshape_smearUp;		
+		theSignalShape_smearDn       = sigContainers[i].h_peakshape_smearDn;
+		theWincShape_smearDn         = bkgContainers[1].h_peakshape_smearDn;
+		theZincShape_smearDn         = bkgContainers[2].h_peakshape_smearDn;		
+
+		theSignalShape_shiftUp.SetName(theSignalName+"_shiftUp")
+		theSignalShape_shiftDn.SetName(theSignalName+"_shiftDn")
+		theSignalShape_smearUp.SetName(theSignalName+"_smearUp")
+		theSignalShape_smearDn.SetName(theSignalName+"_smearDn")
+		theSignalShape_shiftUp.Write();
+		theSignalShape_shiftDn.Write();
+		theSignalShape_smearUp.Write();
+		theSignalShape_smearDn.Write();
+
+		theWincShape_shiftUp.SetName(theWincName+"_shiftUp")
+		theWincShape_shiftDn.SetName(theWincName+"_shiftDn")
+		theWincShape_smearUp.SetName(theWincName+"_smearUp")
+		theWincShape_smearDn.SetName(theWincName+"_smearDn")
+		theWincShape_shiftUp.Write();
+		theWincShape_shiftDn.Write();
+		theWincShape_smearUp.Write();
+		theWincShape_smearDn.Write();
+
+		theZincShape_shiftUp.SetName(theZincName+"_shiftUp")
+		theZincShape_shiftDn.SetName(theZincName+"_shiftDn")
+		theZincShape_smearUp.SetName(theZincName+"_smearUp")
+		theZincShape_smearDn.SetName(theZincName+"_smearDn")		
+		theZincShape_shiftUp.Write();
+		theZincShape_shiftDn.Write();
+		theZincShape_smearUp.Write();
+		theZincShape_smearDn.Write();		
 
 		###############################################################
 		# write the card
@@ -116,6 +158,20 @@ def buildDatacards(bkgContainers,sigContainers,theRhalphabet,theData):
 		allLines.append(line);		
 
 		WriteBinByBinUncertainties(theQCDShape," - 1 - - ",allLines,True);
+
+		line = "shift shapeN2 1 - - - \n"
+		allLines.append(line);		
+		line = "shift shapeN2 - - 1 - \n"
+		allLines.append(line);		
+		line = "shift shapeN2 - - - 1 \n"
+		allLines.append(line);		
+
+		line = "smear shapeN2 1 - - - \n"
+		allLines.append(line);		
+		line = "smear shapeN2 - - 1 - \n"
+		allLines.append(line);		
+		line = "smear shapeN2 - - - 1 \n"
+		allLines.append(line);		
 
 		for l in allLines:
 			ofile.write(l);
@@ -170,6 +226,17 @@ def buildDatacards(bkgContainers,sigContainers,theRhalphabet,theData):
 			allLines.append(line);
 
 			WriteBinByBinUncertainties(theQCDShape," - - 1 ",allLines,False);					
+
+			line = "shape shapeN2 1 - - \n"
+			allLines.append(line);		
+			line = "shape shapeN2 - 1 - \n"
+			allLines.append(line);		
+
+			line = "smear shapeN2 1 - - \n"
+			allLines.append(line);		
+			line = "smear shapeN2 - 1 - \n"
+			allLines.append(line);		
+
 
 			for l in allLines:
 				ofileW.write(l);

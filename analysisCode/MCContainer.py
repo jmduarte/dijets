@@ -4,6 +4,9 @@ import math
 
 from plotHelpers import makeCanvas, makeCanvasDataMC, makeCanvasShapeComparison,makeCanvas2D
 
+sys.path.append('../fitting')
+from hist import hist
+
 
 from optparse import OptionParser
 parser = OptionParser()
@@ -94,6 +97,34 @@ class MCContainer:
 		print "\n";
 
 		print "MC yields = ", self.h_jetmsd.Integral(), self.h_jetmsd_passcut.Integral();
+
+	def morphSignal(self,newname,mass,mass_shift,mass_shift_unc,mass_res,mass_res_unc):
+
+		setattr(self,newname, getattr(self,"h_jetmsd_passcut").Clone());
+		hist_container = hist( [mass],[getattr(self,newname)] );
+
+		# get new central value
+		shift_val = mass - mass*mass_shift;
+		tmp_shifted_h = hist_container.shift( getattr(self,newname), shift_val);
+		# get new central value and new smeared value
+		smear_val = mass_res - 1;
+		tmp_smeared_h = hist_container.smear( tmp_shifted_h[0], smear_val)
+		if smear_val <= 0: setattr(self,newname+"_central",tmp_smeared_h[1])
+		else: setattr(self,newname+"_central",tmp_smeared_h[0])
+		
+		# get shift up/down
+		shift_unc = mass*mass_shift*mass_shift_unc;
+		hsys_shift = shifted_up_dn = hist_container.shift( getattr(self,newname+"_central"), shift_unc);
+		# get res up/down
+		hsys_smear = smeated_up_dn = hist_container.smear( getattr(self,newname+"_central"), mass_res_unc);	
+
+
+		print shift_val, smear_val, shift_unc, mass_res_unc
+		setattr(self,newname+"_shiftUp",hsys_shift[0])
+		setattr(self,newname+"_shiftDn",hsys_shift[1])
+		setattr(self,newname+"_smearUp",hsys_smear[0])
+		setattr(self,newname+"_smearDn",hsys_smear[1])
+
 
 
 
