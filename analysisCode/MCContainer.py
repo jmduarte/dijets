@@ -114,9 +114,9 @@ class MCContainer:
 		
 		# get shift up/down
 		shift_unc = mass*mass_shift*mass_shift_unc;
-		hsys_shift = shifted_up_dn = hist_container.shift( getattr(self,newname+"_central"), shift_unc);
+		hsys_shift = hist_container.shift( getattr(self,newname+"_central"), shift_unc);
 		# get res up/down
-		hsys_smear = smeated_up_dn = hist_container.smear( getattr(self,newname+"_central"), mass_res_unc);	
+		hsys_smear = hist_container.smear( getattr(self,newname+"_central"), mass_res_unc);	
 
 
 		print shift_val, smear_val, shift_unc, mass_res_unc

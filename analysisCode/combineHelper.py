@@ -85,27 +85,27 @@ def buildDatacards(bkgContainers,sigContainers,theRhalphabet,theData):
 		theZincShape_smearDn         = bkgContainers[2].h_peakshape_smearDn;		
 
 		theSignalShape_shiftUp.SetName(theSignalName+"_shiftUp")
-		theSignalShape_shiftDn.SetName(theSignalName+"_shiftDn")
+		theSignalShape_shiftDn.SetName(theSignalName+"_shiftDown")
 		theSignalShape_smearUp.SetName(theSignalName+"_smearUp")
-		theSignalShape_smearDn.SetName(theSignalName+"_smearDn")
+		theSignalShape_smearDn.SetName(theSignalName+"_smearDown")
 		theSignalShape_shiftUp.Write();
 		theSignalShape_shiftDn.Write();
 		theSignalShape_smearUp.Write();
 		theSignalShape_smearDn.Write();
 
 		theWincShape_shiftUp.SetName(theWincName+"_shiftUp")
-		theWincShape_shiftDn.SetName(theWincName+"_shiftDn")
+		theWincShape_shiftDn.SetName(theWincName+"_shiftDown")
 		theWincShape_smearUp.SetName(theWincName+"_smearUp")
-		theWincShape_smearDn.SetName(theWincName+"_smearDn")
+		theWincShape_smearDn.SetName(theWincName+"_smearDown")
 		theWincShape_shiftUp.Write();
 		theWincShape_shiftDn.Write();
 		theWincShape_smearUp.Write();
 		theWincShape_smearDn.Write();
 
 		theZincShape_shiftUp.SetName(theZincName+"_shiftUp")
-		theZincShape_shiftDn.SetName(theZincName+"_shiftDn")
+		theZincShape_shiftDn.SetName(theZincName+"_shiftDown")
 		theZincShape_smearUp.SetName(theZincName+"_smearUp")
-		theZincShape_smearDn.SetName(theZincName+"_smearDn")		
+		theZincShape_smearDn.SetName(theZincName+"_smearDown")		
 		theZincShape_shiftUp.Write();
 		theZincShape_shiftDn.Write();
 		theZincShape_smearUp.Write();
@@ -159,19 +159,12 @@ def buildDatacards(bkgContainers,sigContainers,theRhalphabet,theData):
 
 		WriteBinByBinUncertainties(theQCDShape," - 1 - - ",allLines,True);
 
-		line = "shift shapeN2 1 - - - \n"
-		allLines.append(line);		
-		line = "shift shapeN2 - - 1 - \n"
-		allLines.append(line);		
-		line = "shift shapeN2 - - - 1 \n"
+		line = "shift shapeN2 1 - 1 1 \n"
 		allLines.append(line);		
 
-		line = "smear shapeN2 1 - - - \n"
+		line = "smear shapeN2 1 - 1 1 \n"
 		allLines.append(line);		
-		line = "smear shapeN2 - - 1 - \n"
-		allLines.append(line);		
-		line = "smear shapeN2 - - - 1 \n"
-		allLines.append(line);		
+
 
 		for l in allLines:
 			ofile.write(l);
@@ -227,15 +220,11 @@ def buildDatacards(bkgContainers,sigContainers,theRhalphabet,theData):
 
 			WriteBinByBinUncertainties(theQCDShape," - - 1 ",allLines,False);					
 
-			line = "shape shapeN2 1 - - \n"
-			allLines.append(line);		
-			line = "shape shapeN2 - 1 - \n"
-			allLines.append(line);		
+			line = "shift shapeN2 1 1 - \n"
+			allLines.append(line);			
 
-			line = "smear shapeN2 1 - - \n"
-			allLines.append(line);		
-			line = "smear shapeN2 - 1 - \n"
-			allLines.append(line);		
+			line = "smear shapeN2 1 1 - \n"
+			allLines.append(line);			
 
 
 			for l in allLines:

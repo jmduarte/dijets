@@ -345,7 +345,7 @@ def makeCanvasDataMC_MONEY(hd,gpred,hmcs,legname,name,pdir="plots",blind=True):
 	#---------------------------------------------------------------
 	c = ROOT.TCanvas("c"+name,"c"+name,1000,800);
 
-	hd.Draw();
+	hd.Draw("pe");
 	gpred.Draw('2');
 	for i in range(len(hmcs)):
 		hmcs[i].Draw("histsames");

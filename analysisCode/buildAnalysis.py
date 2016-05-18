@@ -23,6 +23,7 @@ parser.add_option("--rholo", dest="rholo", default = 0.,help="mass of LSP", meta
 parser.add_option("--rhohi", dest="rhohi", default = 6.,help="mass of LSP", metavar="MLSP")
 parser.add_option("--DDTcut", dest="DDTcut", default = 0.38,help="mass of LSP", metavar="MLSP")
 parser.add_option('--qcdClosure', action='store_true', dest='qcdClosure', default=False, help='go!')
+parser.add_option("--jetNum", dest="jetNum", default = 0,help="mass of LSP", metavar="MLSP")
 
 # parser.add_option("--rholo", dest="rholo", default = 0.,help="mass of LSP", metavar="MLSP")
 (options, args) = parser.parse_args()
@@ -65,8 +66,8 @@ def main():
 	sig_mass_shift = 0.98;
 	sig_mass_shift_unc = 0.02;
 	# sig_res_shift = 0.95;
-	sig_res_shift = 0.8;
-	sig_res_shift_unc = 0.2;
+	sig_res_shift = 0.9;
+	sig_res_shift_unc = 0.1;
 	qcdSF = 100;
 
 	if options.doMCLooping: 
@@ -75,7 +76,7 @@ def main():
 		bkgNames = ["QCD.root","W.root","DY.root"];
 		bkgLabels = ["QCD","W(qq)","Z+jets"];
 		bkgTags = ["QCD","Winc","Zinc"];
-		bkgmass = [0.0,80.,91.];
+		bkgmass = [0.0,80.4,91.2];
 		for i in range(len(bkgNames)):
 			tmpsf = qcdSF;
 			if i > 0: tmpsf = 1;
@@ -97,7 +98,7 @@ def main():
 		sigLabels = ["Z\'(50 GeV)","Z\'(100 GeV)","Z\'(150 GeV)","Z\'(200 GeV)","Z\'(250 GeV)","Z\'(300 GeV)"]
 		sigTags = ["Zprime50","Zprime100","Zprime150","Zprime200","Zprime250","Zprime300"];
 		# sigXS = [139300.,19430.,5706.,2322.,1131.,619.];
-		sigXS   = [11.,10.,10.,10.,10.,10.]; # in pb
+		sigXS   = [16.2,12.9,12.4,11.2,11.2,11.2]; # in pb
 		sigmass = [50.,100.,150.,200.,250.,300.]; # in pb
 
 		for i in range(len(sigNames)):
@@ -108,11 +109,11 @@ def main():
 										               sig_res_shift,sig_res_shift_unc);
 
 			# hsig = [];
-			# hsig.append( getattr( sigContainers[i], "h_signalshape_central" ) );
-			# hsig.append( getattr( sigContainers[i], "h_signalshape_shiftUp" ) );
-			# hsig.append( getattr( sigContainers[i], "h_signalshape_smearUp" ) );
-			# hsig.append( getattr( sigContainers[i], "h_signalshape_shiftDn" ) );
-			# hsig.append( getattr( sigContainers[i], "h_signalshape_smearDn" ) );
+			# hsig.append( getattr( sigContainers[i], "h_peakshape_central" ) );
+			# hsig.append( getattr( sigContainers[i], "h_peakshape_shiftUp" ) );
+			# hsig.append( getattr( sigContainers[i], "h_peakshape_smearUp" ) );
+			# hsig.append( getattr( sigContainers[i], "h_peakshape_shiftDn" ) );
+			# hsig.append( getattr( sigContainers[i], "h_peakshape_smearDn" ) );
 
 			# makeCanvasShapeComparison(hsig,["cen","shiftup","smearup","shiftdn","smeardn"],"mcsignalshapes_"+sigTags[i],"plots/shapes/");
 
