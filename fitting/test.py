@@ -74,7 +74,7 @@ if __name__ == "__main__":
         draw("shift",lShiftA)
 
     if options.smear:
-        lSmears = lHist.smear(lHists[2],0.2)
+        lSmears = lHist.smear(lHists[2],0.1)
         lSmearA = [lHists[2],lSmears[0],lSmears[1]]
         lHists[2].Fit("gaus")
         lSmears[0].Fit("gaus")
