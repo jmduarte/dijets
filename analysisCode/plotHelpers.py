@@ -280,6 +280,7 @@ def makeCanvasDataMC_wpred(hd,gpred,hmcs,legname,name,pdir="plots",blind=True):
 
 	c.cd();
 	p2.Draw(); p2.cd();
+	p2.SetGrid();
 
 	hdOvPred = hd.Clone();
 	hpred = gpred.GetHistogram();
@@ -345,6 +346,15 @@ def makeCanvasDataMC_MONEY(hd,gpred,hmcs,legname,name,pdir="plots",blind=True):
 	#---------------------------------------------------------------
 	c = ROOT.TCanvas("c"+name,"c"+name,1000,800);
 
+	p1 = ROOT.TPad("p1","p1",0.0,0.3,1.0,1.0);
+	p2 = ROOT.TPad("p2","p2",0.0,0.0,1.0,0.3);
+	p1.SetBottomMargin(0.05);
+	p2.SetTopMargin(0.05);
+	p2.SetBottomMargin(0.3);
+
+	c.cd();
+	p1.Draw(); p1.cd();
+
 	hd.Draw("pe");
 	gpred.Draw('2');
 	for i in range(len(hmcs)):
@@ -353,6 +363,32 @@ def makeCanvasDataMC_MONEY(hd,gpred,hmcs,legname,name,pdir="plots",blind=True):
 	leg.Draw();
 	tag1.Draw();
 	tag2.Draw();
+
+	c.cd();
+	p2.Draw(); p2.cd();	
+	p2.SetGrid();
+
+	hdOvPred = hd.Clone();
+	hdOvPred.SetMaximum(2);
+	hdOvPred.SetMinimum(0);
+	for i in range(hd.GetNbinsX()):
+
+		if gpred.GetY()[i] > 0 and hd.GetBinContent(i+1) > 0:
+			hdOvPred.SetBinContent( i+1, hd.GetBinContent(i+1)/gpred.GetY()[i] );
+			errdat = hd.GetBinError(i+1)/hd.GetBinContent(i+1);
+			errmc  = gpred.GetEY()[i]/gpred.GetY()[i];
+			errtot = math.sqrt(errdat*errdat + errmc*errmc)
+			hdOvPred.SetBinError( i+1, errtot );
+		else:
+			hdOvPred.SetBinContent( i+1, 0. );		
+			hdOvPred.SetBinError( i+1, 0. );		
+	
+	hdOvPred.GetXaxis().SetTitle("jet mass (GeV)"); 
+	hdOvPred.GetXaxis().SetTitleSize(0.14);
+	hdOvPred.GetYaxis().SetTitle("Data/MC"); 
+	hdOvPred.GetYaxis().SetTitleSize(0.14); 
+	hdOvPred.GetYaxis().SetTitleOffset(0.42);	
+	hdOvPred.Draw('pe');	
 
 	c.SaveAs(pdir+"/"+name+".pdf");
 	#---------------------------------------------------------------
@@ -482,6 +518,71 @@ def	makeCanvas2D( TFMap, name, pdir='plots' ):
 	cy.SaveAs(pdir+"/"+name+"_hys.pdf");
 
 	return hys;
+
+def plotROCs(grs,legs,pdir,name):
+
+	canroc = ROOT.TCanvas("c","c",1000,800);
+	hrl1 = canroc.DrawFrame(0.,0.,1.0,1.0);
+	hrl1.GetXaxis().SetTitle("signal efficiency");
+	hrl1.GetYaxis().SetTitle("background efficiency");
+	
+	leg = ROOT.TLegend( 0.2, 0.6, 0.5, 0.9 );
+	leg.SetBorderSize( 0 );
+	leg.SetFillStyle( 0 );
+	leg.SetTextSize( 0.03 );  
+
+	colors = [1,2,4,6,7]
+	ctr = 0;
+	for gr in grs:
+		gr.Draw();
+		gr.SetLineColor(colors[ctr]);
+		leg.AddEntry(gr,legs[ctr],"l");
+		ctr += 1;
+	leg.Draw();
+	canroc.SaveAs(pdir+"/"+name+".pdf");
+
+
+def makeROCFromHisto(hists,LtoR=True):
+
+	hsig = hists[0];
+	hbkg = hists[1];
+
+	nbins = hsig.GetNbinsX();
+	binsize = hsig.GetBinWidth(1);
+	lowedge = hsig.GetBinLowEdge(1);
+
+	#print "lowedge: ",lowedge
+
+	hsigIntegral = hsig.Integral();
+	hbkgIntegral = hbkg.Integral();
+
+	xval = array.array('d', [])
+	yval = array.array('d', [])
+	ctr = 0;
+	effBkgPrev = -9999;
+	for i in range(1,nbins+1):
+
+			effBkg = 0;
+			effSig = 0;
+
+			if LtoR: effBkg = hbkg.Integral( i, nbins )/hbkgIntegral;
+			else: effBkg = hbkg.Integral( 1, i )/hbkgIntegral;
+
+			if LtoR: effSig = hsig.Integral( i, nbins )/hsigIntegral;
+			else: effSig = hsig.Integral( 1, i )/hsigIntegral;
+
+			#if not effBkg == 0.: print "cut: ",(lowedge+(i-1)*binsize),"effBkg: ", effBkg, ", effSig: ", effSig;
+
+			xval.append( effSig );
+			yval.append( effBkg );
+
+			#effBkgPrev = effBkg;
+			ctr = ctr + 1;
+
+	#print nbins, "and ", ctr
+	tg = ROOT.TGraph( nbins, xval, yval );
+	tg.SetName( "tg"+hsig.GetName() );
+	return tg;
 
 def dummy():
 	print "hi";

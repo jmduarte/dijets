@@ -18,31 +18,78 @@ def main():
 	idir = "datacards";
 
 	#--------------------------------
-	results = [];
-	for i in range(len(masses)): results.append( getAsymLimits(idir+'/higgsCombineZprime'+str(masses[i])+'.Asymptotic.mH120.root','Zp'+str(masses[i])) );
+	results0 = [];
+	results1 = [];
+	resultsA = [];	
+	for i in range(len(masses)): results0.append( getAsymLimits(idir+'/higgsCombineZprime'+str(masses[i])+'_0.Asymptotic.mH120.root','Zp'+str(masses[i])) );
+	for i in range(len(masses)): results1.append( getAsymLimits(idir+'/higgsCombineZprime'+str(masses[i])+'_1.Asymptotic.mH120.root','Zp'+str(masses[i])) );
+	for i in range(len(masses)): resultsA.append( getAsymLimits(idir+'/higgsCombineZprime'+str(masses[i])+'_all.Asymptotic.mH120.root','Zp'+str(masses[i])) );
+
+
 
 	names   = [];
-	l_obs   = [];
-	l_m2sig = [];
-	l_m1sig = [];
-	l_exp   = [];
-	l_p1sig = [];
-	l_p2sig = [];
+	l0_obs   = [];
+	l0_m2sig = [];
+	l0_m1sig = [];
+	l0_exp   = [];
+	l0_p1sig = [];
+	l0_p2sig = [];
+
+	l1_obs   = [];
+	l1_m2sig = [];
+	l1_m1sig = [];
+	l1_exp   = [];
+	l1_p1sig = [];
+	l1_p2sig = [];
+
+	lA_obs   = [];
+	lA_m2sig = [];
+	lA_m1sig = [];
+	lA_exp   = [];
+	lA_p1sig = [];
+	lA_p2sig = [];
+
 	ctr = 0
-	for r in results:
+	for r in results0:
 		names.append( "Zp"+str(masses[ctr]) );
-		l_m2sig.append(r[1]);
-		l_m1sig.append(r[2]);
-		l_exp.append(r[3]);
-		l_p1sig.append(r[4]);
-		l_p2sig.append(r[5]);
-		l_obs.append(r[0]);
+		l0_m2sig.append(r[1]);
+		l0_m1sig.append(r[2]);
+		l0_exp.append(r[3]);
+		l0_p1sig.append(r[4]);
+		l0_p2sig.append(r[5]);
+		l0_obs.append(r[0]);
 		ctr+=1;
 
-	gr_mu_exp    = makeAGraph( masses, l_exp, 1, 2 );
-	gr_mu_obs    = makeAGraph( masses, l_obs, 1, 1 );
-	gr_mu_1sigma = makeAFillGraph( masses, l_m1sig, l_p1sig, 0, 3, 1001 );
-	gr_mu_2sigma = makeAFillGraph( masses, l_m2sig, l_p2sig, 0, 5, 1001 );
+	for r in results1:
+		l1_m2sig.append(r[1]);
+		l1_m1sig.append(r[2]);
+		l1_exp.append(r[3]);
+		l1_p1sig.append(r[4]);
+		l1_p2sig.append(r[5]);
+		l1_obs.append(r[0]);
+
+	for r in resultsA:
+		lA_m2sig.append(r[1]);
+		lA_m1sig.append(r[2]);
+		lA_exp.append(r[3]);
+		lA_p1sig.append(r[4]);
+		lA_p2sig.append(r[5]);
+		lA_obs.append(r[0]);		
+
+	gr0_mu_exp    = makeAGraph( masses, l0_exp, 2, 2 );
+	gr0_mu_obs    = makeAGraph( masses, l0_obs, 2, 1 );
+	gr0_mu_1sigma = makeAFillGraph( masses, l0_m1sig, l0_p1sig, 0, 3, 1001 );
+	gr0_mu_2sigma = makeAFillGraph( masses, l0_m2sig, l0_p2sig, 0, 5, 1001 );
+
+	gr1_mu_exp    = makeAGraph( masses, l1_exp, 4, 2 );
+	gr1_mu_obs    = makeAGraph( masses, l1_obs, 4, 1 );
+	gr1_mu_1sigma = makeAFillGraph( masses, l1_m1sig, l1_p1sig, 0, 3, 1001 );
+	gr1_mu_2sigma = makeAFillGraph( masses, l1_m2sig, l1_p2sig, 0, 5, 1001 );
+
+	grA_mu_exp    = makeAGraph( masses, lA_exp, 1, 2 );
+	grA_mu_obs    = makeAGraph( masses, lA_obs, 1, 1 );
+	grA_mu_1sigma = makeAFillGraph( masses, lA_m1sig, lA_p1sig, 0, 3, 1001 );
+	grA_mu_2sigma = makeAFillGraph( masses, lA_m2sig, lA_p2sig, 0, 5, 1001 );
 
 	# convert to g_B limits! 
 	l_obs_gB = [];
@@ -51,13 +98,13 @@ def main():
 	l_m1sig_gB = [];
 	l_p1sig_gB = [];
 	l_p2sig_gB = [];
-	for i in range(len(l_exp)):
-		l_obs_gB.append( math.sqrt(l_obs[i]) );
-		l_exp_gB.append( math.sqrt(l_exp[i]) );
-		l_m2sig_gB.append( math.sqrt(l_m2sig[i]) );
-		l_m1sig_gB.append( math.sqrt(l_m1sig[i]) );
-		l_p1sig_gB.append( math.sqrt(l_p1sig[i]) );
-		l_p2sig_gB.append( math.sqrt(l_p2sig[i]) );
+	for i in range(len(lA_exp)):
+		l_obs_gB.append( math.sqrt(lA_obs[i]) );
+		l_exp_gB.append( math.sqrt(lA_exp[i]) );
+		l_m2sig_gB.append( math.sqrt(lA_m2sig[i]) );
+		l_m1sig_gB.append( math.sqrt(lA_m1sig[i]) );
+		l_p1sig_gB.append( math.sqrt(lA_p1sig[i]) );
+		l_p2sig_gB.append( math.sqrt(lA_p2sig[i]) );
 
 	gr_gB_exp    = makeAGraph( masses, l_exp_gB, 1, 2 );
 	gr_gB_obs    = makeAGraph( masses, l_obs_gB, 1, 1 );
@@ -95,19 +142,24 @@ def main():
 	leg.SetFillStyle(1001);
 	leg.SetFillColor(0);    
 	leg.SetBorderSize(1);  
-	leg.AddEntry(gr_mu_exp,"expected","l")
-	leg.AddEntry(gr_mu_obs,"observed","l")
-	leg.AddEntry(gr_mu_2sigma,"expected 2#sigma","f")
-	leg.AddEntry(gr_mu_1sigma,"expected 1#sigma","f")	
+	leg.AddEntry(grA_mu_exp,"expected","l")
+	leg.AddEntry(grA_mu_obs,"observed","l")
+	leg.AddEntry(grA_mu_2sigma,"expected 2#sigma","f")
+	leg.AddEntry(grA_mu_1sigma,"expected 1#sigma","f")	
+	leg.AddEntry(gr0_mu_obs,"1st jet cat. (obs)","l")	
+	leg.AddEntry(gr1_mu_obs,"2nd jet cat. (obs)","l")		
 
 	can_mu = ROOT.TCanvas("can_mu","can_mu",1200,800);
 	hrl = can_mu.DrawFrame(40,0,320,15);
 	hrl.GetYaxis().SetTitle("#mu = #sigma_{95%CL}/#sigma_{th}");
 	hrl.GetXaxis().SetTitle("Z\' mass (GeV)");
-	gr_mu_2sigma.Draw('f');
-	gr_mu_1sigma.Draw('fsames');
-	gr_mu_obs.Draw('lsames');
-	gr_mu_exp.Draw('lsames');
+	grA_mu_2sigma.Draw('f');
+	grA_mu_1sigma.Draw('fsames');
+	grA_mu_obs.Draw('lsames');
+	grA_mu_exp.Draw('lsames');
+	
+	gr0_mu_obs.Draw('lsames');
+	gr1_mu_obs.Draw('lsames');
 
 	txta.Draw();
 	txtb.Draw();
@@ -123,10 +175,10 @@ def main():
 	leg2.SetFillStyle(0);
 	leg2.SetFillColor(0);    
 	leg2.SetBorderSize(0);  
-	leg2.AddEntry(gr_mu_exp,"expected","l")
-	leg2.AddEntry(gr_mu_obs,"observed","l")
-	leg2.AddEntry(gr_mu_2sigma,"expected 2#sigma","f")
-	leg2.AddEntry(gr_mu_1sigma,"expected 1#sigma","f")	
+	leg2.AddEntry(gr_gB_exp,"expected","l")
+	leg2.AddEntry(gr_gB_obs,"observed","l")
+	leg2.AddEntry(gr_gB_2sigma,"expected 2#sigma","f")
+	leg2.AddEntry(gr_gB_1sigma,"expected 1#sigma","f")	
 	leg2.AddEntry(gr_UA2,"UA2","l")	
 	leg2.AddEntry(gr_CDFRun1,"CDF Run 1","l")	
 	leg2.AddEntry(gr_CDFRun2,"CDF Run 2","l")	

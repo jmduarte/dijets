@@ -22,6 +22,7 @@ parser.add_option("--rholo", dest="rholo", default = 0.,help="mass of LSP", meta
 parser.add_option("--rhohi", dest="rhohi", default = 6.,help="mass of LSP", metavar="MLSP")
 parser.add_option("--DDTcut", dest="DDTcut", default = 0.38,help="mass of LSP", metavar="MLSP")
 parser.add_option('--qcdClosure', action='store_true', dest='qcdClosure', default=False, help='go!')
+parser.add_option("--jetNum", dest="jetNum", default = 0,help="mass of LSP", metavar="MLSP")
 
 (options, args) = parser.parse_args()
 
@@ -29,7 +30,7 @@ parser.add_option('--qcdClosure', action='store_true', dest='qcdClosure', defaul
 
 class MCContainer:
 
-	def __init__( self , filename, lumi, name, tag, scaleFactor = 1,isData=False):
+	def __init__( self , filename, lumi, name, tag, scaleFactor = 1,isData=False,jetNum=0):
 
 		self._fn = filename;
 		self._tf = ROOT.TFile( self._fn );
@@ -39,7 +40,7 @@ class MCContainer:
 		self._isData = isData;
 		self._name = name;
 		self._tag = tag;
-
+		self._jetNum = str(jetNum);
 
 		# Define histogram
 		self.h_jetpt = ROOT.TH1F("h_jetpt"+name,"; jet pT (GeV);", 50, 200, 2000);
@@ -51,6 +52,9 @@ class MCContainer:
 
 		self.h_jetmsd_passcut = ROOT.TH1F("h_jetmsd_passcut"+name,"; soft drop mass (GeV);", 60, 30, 330);
 		self.h_rhoDDT_passcut = ROOT.TH1F("h_rhoDDT_passcut"+name,"; #rho^{DDT};", 20,float(options.rholo),float(options.rhohi));
+
+		self.h_jett21_masswindow = ROOT.TH1F("h_jett21_masswindow"+name,"; #tau_{21};", 50, 0, 1);
+		self.h_jett21DDT_masswindow = ROOT.TH1F("h_jett21DDT_masswindow"+name,"; #tau_{21}^{DDT};", 50, 0, 1.2);
 
 		# Loop
 		self.loop();
@@ -71,16 +75,16 @@ class MCContainer:
 			
 			if i % self._scaleFactor != 0: continue;		
 
-			jpt = getattr(self._tt,"bst8_PUPPIjet0_pt");
-			jeta = getattr(self._tt,"bst8_PUPPIjet0_eta");
-			jmsd = getattr(self._tt,"bst8_PUPPIjet0_msd");		
+			jpt = getattr(self._tt,"bst8_PUPPIjet"+self._jetNum+"_pt");
+			jeta = getattr(self._tt,"bst8_PUPPIjet"+self._jetNum+"_eta");
+			jmsd = getattr(self._tt,"bst8_PUPPIjet"+self._jetNum+"_msd");		
 			if jmsd == 0.: jmsd = 0.01;
 			weight = self._scaleFactor*self._lumi*getattr(self._tt,"scale1fb")*getattr(self._tt,"kfactor");
 			if self._isData: weight = 1;
 
 			if jpt < 500: continue;
 
-			jt21 = getattr(self._tt,"bst8_PUPPIjet0_tau21");
+			jt21 = getattr(self._tt,"bst8_PUPPIjet"+self._jetNum+"_tau21");
 			rhP = math.log(jmsd*jmsd/jpt);                  
 			jt21P = jt21 + 0.063*rhP;
 
@@ -89,6 +93,10 @@ class MCContainer:
 			self.h_jett21.Fill( jt21, weight );
 			self.h_jett21DDT.Fill( jt21P, weight );
 			self.h_jetmsd.Fill( jmsd, weight );
+
+			if jmsd > 60 and jmsd < 100: 
+				self.h_jett21_masswindow.Fill( jt21, weight );		
+				self.h_jett21DDT_masswindow.Fill( jt21P, weight );		
 
 			if rhP > 0 and jt21P < DDTCUT: 
 				self.h_jetmsd_passcut.Fill( jmsd, weight );
@@ -108,6 +116,7 @@ class MCContainer:
 		tmp_shifted_h = hist_container.shift( getattr(self,newname), shift_val);
 		# get new central value and new smeared value
 		smear_val = mass_res - 1;
+		
 		tmp_smeared_h = hist_container.smear( tmp_shifted_h[0], smear_val)
 		if smear_val <= 0: setattr(self,newname+"_central",tmp_smeared_h[1])
 		else: setattr(self,newname+"_central",tmp_smeared_h[0])

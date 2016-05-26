@@ -17,7 +17,10 @@
 --qcdClosture = use QCD to measure closure...
 
 # examples
-python buildAnalysis.py -b --doMCLooping --doCards --doRhalphabet --doCards --doPlots --doData --lumi 0.46 --DDTcut 0.38 --rholo 0. --rhohi 6.
+#python buildAnalysis.py -b --doMCLooping --doCards --doRhalphabet --doCards --doPlots --doData --lumi 0.46 --DDTcut 0.38 --rholo 0. --rhohi 6.
+python buildAnalysis.py -b --doMCLooping --doRhalphabet --doCards --doPlots --doData --lumi 0.46 --DDTcut 0.38 --rholo 0.0 --rhohi 6.  --jetNum 0 &
+python buildAnalysis.py -b --doMCLooping --doRhalphabet --doCards --doPlots --doData --lumi 0.46 --DDTcut 0.38 --rholo 0.0 --rhohi 6.  --jetNum 1 &
+
 
 # then you get some datacards in plots/datacards
 # make sure you checkout and compile the Higgs combine package

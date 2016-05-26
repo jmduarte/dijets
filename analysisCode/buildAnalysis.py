@@ -30,7 +30,7 @@ parser.add_option("--jetNum", dest="jetNum", default = 0,help="mass of LSP", met
 
 from MCContainer import *
 from rhalphabet import *
-from plotHelpers import makeCanvas, makeCanvasDataMC, makeCanvasShapeComparison,makeCanvas2D,makeCanvasDataMC_wpred,makeCanvasDataMC_MONEY,makeCanvasComparison
+from plotHelpers import makeCanvas, makeCanvasDataMC, makeCanvasShapeComparison,makeCanvas2D,makeCanvasDataMC_wpred,makeCanvasDataMC_MONEY,makeCanvasComparison,makeROCFromHisto,plotROCs
 from combineHelper import buildDatacards
 #
 import tdrstyle
@@ -48,13 +48,13 @@ ROOT.gStyle.SetOptFit(0000);
 def main(): 
 
 	# output directories
-	if not os.path.exists('plots/results'): os.makedirs('plots/results')
-	if not os.path.exists('plots/yields'): os.makedirs('plots/yields')
-	if not os.path.exists('plots/shapes'): os.makedirs('plots/shapes')
-	if not os.path.exists('plots/rhalphabet'): os.makedirs('plots/rhalphabet')
-	if not os.path.exists('plots/datacards'): os.makedirs('plots/datacards')
+	if not os.path.exists('plots'+str(options.jetNum)+'/results'): os.makedirs('plots'+str(options.jetNum)+'/results')
+	if not os.path.exists('plots'+str(options.jetNum)+'/yields'): os.makedirs('plots'+str(options.jetNum)+'/yields')
+	if not os.path.exists('plots'+str(options.jetNum)+'/shapes'): os.makedirs('plots'+str(options.jetNum)+'/shapes')
+	if not os.path.exists('plots'+str(options.jetNum)+'/rhalphabet'): os.makedirs('plots'+str(options.jetNum)+'/rhalphabet')
+	if not os.path.exists('plots'+str(options.jetNum)+'/datacards'): os.makedirs('plots'+str(options.jetNum)+'/datacards')
 
-	idir = "/Users/ntran/Documents/Research/CMS/WZpToQQ/dijetsGH/dijets/sklimming/sklim-v0";
+	idir = "/Users/ntran/Documents/Research/CMS/WZpToQQ/dijetsGH/dijets/sklimming/sklim-v0-May18";
 	# idir = "/tmp/cmantill/"
 
 	####################################################################################
@@ -63,12 +63,13 @@ def main():
 	sigContainers = None;
 
 	### signal corrections and other directors
+	# -1.6 GeV +/- 1.2 GeV
 	sig_mass_shift = 0.98;
-	sig_mass_shift_unc = 0.02;
+	sig_mass_shift_unc = 0.015;
 	# sig_res_shift = 0.95;
 	sig_res_shift = 0.9;
 	sig_res_shift_unc = 0.1;
-	qcdSF = 100;
+	qcdSF = 5;
 
 	if options.doMCLooping: 
 		
@@ -80,7 +81,7 @@ def main():
 		for i in range(len(bkgNames)):
 			tmpsf = qcdSF;
 			if i > 0: tmpsf = 1;
-			bkgContainers.append( MCContainer( idir+"/"+bkgNames[i], float(options.lumi), bkgLabels[i], bkgTags[i], tmpsf ) );
+			bkgContainers.append( MCContainer( idir+"/"+bkgNames[i], float(options.lumi), bkgLabels[i], bkgTags[i], tmpsf, False, options.jetNum ) );
 			# random factor of 3 w.r.t. data
 			if i > 0: 
 				bkgContainers[i].morphSignal("h_peakshape",bkgmass[i],
@@ -98,11 +99,12 @@ def main():
 		sigLabels = ["Z\'(50 GeV)","Z\'(100 GeV)","Z\'(150 GeV)","Z\'(200 GeV)","Z\'(250 GeV)","Z\'(300 GeV)"]
 		sigTags = ["Zprime50","Zprime100","Zprime150","Zprime200","Zprime250","Zprime300"];
 		# sigXS = [139300.,19430.,5706.,2322.,1131.,619.];
-		sigXS   = [16.2,12.9,12.4,11.2,11.2,11.2]; # in pb
+		# sigXS   = [16.2,12.9,12.4,11.2,11.2,11.2]; # in pb
+		sigXS   = [11,10,10,10,10,10]; # in pb
 		sigmass = [50.,100.,150.,200.,250.,300.]; # in pb
 
 		for i in range(len(sigNames)):
-			sigContainers.append( MCContainer( idir+"/"+sigNames[i], float(options.lumi)*sigXS[i]*1.2, sigLabels[i], sigTags[i], 1 ) );
+			sigContainers.append( MCContainer( idir+"/"+sigNames[i], float(options.lumi)*sigXS[i]*1.2, sigLabels[i], sigTags[i], 1, False, options.jetNum ) );
 			# k-factor is 1.2
 			sigContainers[i].morphSignal("h_peakshape",sigmass[i],
 										               sig_mass_shift,sig_mass_shift_unc,
@@ -124,13 +126,13 @@ def main():
 	
 		if not options.qcdClosure:		
 			isData = True;
-			theRhalphabet = rhalphabet(idir+"/"+"JetHT.root",1,"rhalphabet",1, False);
+			theRhalphabet = rhalphabet(idir+"/"+"JetHT.root",1,"rhalphabet",1, False, options.jetNum);
 			theRhalphabet.GetPredictedDistributions( idir+"/"+"JetHT.root", 1, 5, isData);
 		
 		# there is a flag to do a closure test as well
 		if options.qcdClosure:
 			isData = False;
-			theRhalphabet = rhalphabet(idir+"/"+"QCD.root",options.lumi,"rhalphabetClosure",2, False);
+			theRhalphabet = rhalphabet(idir+"/"+"QCD.root",options.lumi,"rhalphabetClosure",2, False, options.jetNum);
 			theRhalphabet.GetPredictedDistributions( idir+"/"+"QCD.root", options.lumi, qcdSF, isData );
 
 	####################################################################################
@@ -138,12 +140,12 @@ def main():
 	theData = None;
 	if options.doData:
 		isData = True;
-		theData = MCContainer( idir+"/"+"JetHT.root", 1, "data" ,"data" , 5, isData);
+		theData = MCContainer( idir+"/"+"JetHT.root", 1, "data" ,"data" , 5, isData, options.jetNum);
 
 	####################################################################################
 	# do some plotting
 	if options.doCards: 
-		buildDatacards(bkgContainers,sigContainers,theRhalphabet,theData);
+		buildDatacards(bkgContainers,sigContainers,theRhalphabet,theData, options.jetNum);
 
 	####################################################################################
 	# do some plotting
@@ -161,24 +163,24 @@ def BuildPlots(bkgContainers,sigContainers,theRhalphabet,theData):
 								theRhalphabet.grpred_jetmsd, 
 								[bkgContainers[0].h_jetmsd_passcut],
 								['qcd'],
-								'jetmsd_pred',
-								'plots/results/',
+								'jetmsd_pred'+str(options.jetNum),
+								'plots'+str(options.jetNum)+'/results/',
 								False);
 
 		makeCanvasDataMC_wpred( theData.h_rhoDDT_passcut,
 								theRhalphabet.grpred_rhoDDT, 
 								[bkgContainers[0].h_rhoDDT_passcut],
 								['qcd'],
-								'rhoDDT_pred',
-								'plots/results/',
+								'rhoDDT_pred'+str(options.jetNum),
+								'plots'+str(options.jetNum)+'/results/',
 								False);
 
 		makeCanvasDataMC_MONEY( theData.h_jetmsd_passcut,
 								theRhalphabet.grpred_jetmsd, 
 								[bkgContainers[1].h_jetmsd_passcut,bkgContainers[2].h_jetmsd_passcut,sigContainers[0].h_jetmsd_passcut,sigContainers[2].h_jetmsd_passcut],
 								['W(qq)','Z(qq)','Z\' (50 GeV)','Z\' (150 GeV)'],
-								'jetmsd_final',
-								'plots/results/',
+								'jetmsd_final'+str(options.jetNum),
+								'plots'+str(options.jetNum)+'/results/',
 								False);		
 
 	if options.doMCLooping and options.doRhalphabet and not options.doData:
@@ -187,24 +189,24 @@ def BuildPlots(bkgContainers,sigContainers,theRhalphabet,theData):
 								theRhalphabet.grpred_jetmsd, 
 								[bkgContainers[0].h_jetmsd_passcut],
 								['qcd'],
-								'jetmsd_pred',
-								'plots/results/',
+								'jetmsd_pred'+str(options.jetNum),
+								'plots'+str(options.jetNum)+'/results/',
 								False);
 
 		makeCanvasDataMC_wpred( bkgContainers[0].h_rhoDDT_passcut,
 								theRhalphabet.grpred_rhoDDT, 
 								[bkgContainers[0].h_rhoDDT_passcut],
 								['qcd'],
-								'rhoDDT_pred',
-								'plots/results/',
+								'rhoDDT_pred'+str(options.jetNum),
+								'plots'+str(options.jetNum)+'/results/',
 								False);
 
 		makeCanvasDataMC_MONEY( bkgContainers[0].h_jetmsd_passcut,
 								theRhalphabet.grpred_jetmsd, 
 								[bkgContainers[1].h_jetmsd_passcut,bkgContainers[2].h_jetmsd_passcut,sigContainers[0].h_jetmsd_passcut,sigContainers[2].h_jetmsd_passcut],
 								['W(qq)','Z(qq)','Z\' (50 GeV)','Z\' (150 GeV)'],
-								'jetmsd_final',
-								'plots/results/',
+								'jetmsd_final'+str(options.jetNum),
+								'plots'+str(options.jetNum)+'/results/',
 								False);
 
 	# if options.doMCLooping and options.doData:
@@ -230,26 +232,35 @@ def BuildPlots(bkgContainers,sigContainers,theRhalphabet,theData):
 	# 		makeCanvasDataMC(hd,harray,hlabels,"mc_"+n,"plots/yields/");
 	# 		makeCanvasDataMC(hd,harray,hlabels,"mc_"+n,"plots/shapes/");
 			
-	# if options.doMCLooping:
+	if options.doMCLooping:
 
-	# 	names = [];
-	# 	names.append( "h_jetmsd" );
-	# 	names.append( "h_jetmsd_passcut" );
+		names = [];
+		names.append( "h_jetmsd" );
+		names.append( "h_jetmsd_passcut" );
+		names.append( "h_jett21_masswindow" );
+		names.append( "h_jett21DDT_masswindow" );		
 
-	# 	for n in names: 
+		harrays = [];
+		for n in names: 
 	
-	# 		harray = [];
-	# 		hlabels = [];
-	# 		for b in bkgContainers: 
-	# 			harray.append( getattr( b, n ) );
-	# 			hlabels.append( b._name );
-	# 		for s in sigContainers: 
-	# 			harray.append( getattr( s, n ) );
-	# 			hlabels.append( s._name );
+			harray = [];
+			hlabels = [];
+			for b in bkgContainers: 
+				harray.append( getattr( b, n ) );
+				hlabels.append( b._name );
+			for s in sigContainers: 
+				harray.append( getattr( s, n ) );
+				hlabels.append( s._name );
 
-	# 		makeCanvasComparison(harray,hlabels,"mc_"+n,"plots/yields/");
-	# 		makeCanvasShapeComparison(harray,hlabels,"mc_"+n,"plots/shapes/");
+			makeCanvasComparison(harray,hlabels,"mc_"+n,"plots"+str(options.jetNum)+"/yields/");
+			makeCanvasShapeComparison(harray,hlabels,"mc_"+n,"plots"+str(options.jetNum)+"/shapes/");
+
+			harrays.append(harray);
 			
+		#roc comp
+		gr_t21    = makeROCFromHisto([harrays[2][1],harrays[2][0]], False);
+		gr_t21ddt = makeROCFromHisto([harrays[3][1],harrays[3][0]], False);
+		plotROCs([gr_t21,gr_t21ddt],["t21","t21DDT"],"plots"+str(options.jetNum)+'/shapes/','roccomp')
 
 
 #----------------------------------------------------------------------------------------------------------------

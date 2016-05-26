@@ -20,6 +20,7 @@ parser.add_option("--rholo", dest="rholo", default = 0.,help="mass of LSP", meta
 parser.add_option("--rhohi", dest="rhohi", default = 6.,help="mass of LSP", metavar="MLSP")
 parser.add_option("--DDTcut", dest="DDTcut", default = 0.38,help="mass of LSP", metavar="MLSP")
 parser.add_option('--qcdClosure', action='store_true', dest='qcdClosure', default=False, help='go!')
+parser.add_option("--jetNum", dest="jetNum", default = 0,help="mass of LSP", metavar="MLSP")
 
 # parser.add_option("--rholo", dest="rholo", default = 0.,help="mass of LSP", metavar="MLSP")
 (options, args) = parser.parse_args()
@@ -27,14 +28,14 @@ parser.add_option('--qcdClosure', action='store_true', dest='qcdClosure', defaul
 from MCContainer import *
 from rhalphabet import *
 
-def buildDatacards(bkgContainers,sigContainers,theRhalphabet,theData):
+def buildDatacards(bkgContainers,sigContainers,theRhalphabet,theData,jetNum):
 
 	# Create a card for each signal mass point
 	for i in range(len(sigContainers)):
 
 		tag = sigContainers[i]._tag;
-		basename = "combine_"+tag+".root";
-		fname = "plots/datacards/"+basename;
+		basename = "combine_"+tag+"_"+str(jetNum)+".root";
+		fname = "plots"+str(jetNum)+"/datacards/"+basename;
 		fout = ROOT.TFile(fname,"RECREATE");
 
 		theSignalName = "sig";
@@ -113,7 +114,7 @@ def buildDatacards(bkgContainers,sigContainers,theRhalphabet,theData):
 
 		###############################################################
 		# write the card
-		ofile = open("plots/datacards/combine_"+tag+".dat",'w');
+		ofile = open("plots"+str(jetNum)+"/datacards/combine_"+tag+"_"+str(jetNum)+".dat",'w');
 
 		#write the damn thing
 		allLines = [];
@@ -157,13 +158,15 @@ def buildDatacards(bkgContainers,sigContainers,theRhalphabet,theData):
 		line = "bkgd_ZincNorm lnN - - - 1.2 \n"
 		allLines.append(line);		
 
-		WriteBinByBinUncertainties(theQCDShape," - 1 - - ",allLines,True);
-
 		line = "shift shapeN2 1 - 1 1 \n"
 		allLines.append(line);		
-
 		line = "smear shapeN2 1 - 1 1 \n"
 		allLines.append(line);		
+		line = "WtagSF lnN 1.2 - 1.2 1.2 \n"
+		allLines.append(line);			
+
+
+		WriteBinByBinUncertainties(theQCDShape," - 1 - - ",allLines,True);
 
 
 		for l in allLines:
@@ -174,7 +177,7 @@ def buildDatacards(bkgContainers,sigContainers,theRhalphabet,theData):
 		########### make a card with W as signal
 		if i == 0:
 
-			ofileW = open("plots/datacards/combine_WZsignal.dat",'w');
+			ofileW = open("plots"+str(jetNum)+"/datacards/combine_WZsignal"+"_"+str(jetNum)+".dat",'w');
 
 			#write the damn thing
 			allLines = [];
@@ -218,14 +221,14 @@ def buildDatacards(bkgContainers,sigContainers,theRhalphabet,theData):
 			line = "bkgd_ZincNorm lnN - 1.2 - \n"
 			allLines.append(line);
 
-			WriteBinByBinUncertainties(theQCDShape," - - 1 ",allLines,False);					
-
 			line = "shift shapeN2 1 1 - \n"
 			allLines.append(line);			
-
 			line = "smear shapeN2 1 1 - \n"
 			allLines.append(line);			
+			line = "WtagSF lnN 1.2 1.2 - \n"
+			allLines.append(line);			
 
+			WriteBinByBinUncertainties(theQCDShape," - - 1 ",allLines,False);					
 
 			for l in allLines:
 				ofileW.write(l);

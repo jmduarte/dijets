@@ -21,6 +21,7 @@ parser.add_option("--rholo", dest="rholo", default = 0.,help="mass of LSP", meta
 parser.add_option("--rhohi", dest="rhohi", default = 6.,help="mass of LSP", metavar="MLSP")
 parser.add_option("--DDTcut", dest="DDTcut", default = 0.38,help="mass of LSP", metavar="MLSP")
 parser.add_option('--qcdClosure', action='store_true', dest='qcdClosure', default=False, help='go!')
+parser.add_option("--jetNum", dest="jetNum", default = 0,help="mass of LSP", metavar="MLSP")
 
 (options, args) = parser.parse_args()
 
@@ -28,7 +29,7 @@ class rhalphabet:
 
 	################################################################################################
 	# init
-	def __init__( self , filename, lumi, name, scaleFactor = 1, extractTFs = True):
+	def __init__( self , filename, lumi, name, scaleFactor = 1, extractTFs = True,jetNum=0):
 
 		## fixed parameters 
 		# self._ptbins = 5;
@@ -44,17 +45,18 @@ class rhalphabet:
 		self._scaleFactor = scaleFactor;
 		self._name = name;
 		self._lumi = float(lumi);
+		self._jetNum = str(jetNum);
 
 		tfopt = "READ";
 		if extractTFs: tfopt = "RECREATE"
-		self._storageFile = ROOT.TFile("plots/rhalphabet/storedHistos.root",tfopt);
+		self._storageFile = ROOT.TFile("plots"+str(self._jetNum)+"/rhalphabet/storedHistos.root",tfopt);
 		self.hys = None;
 		self.TF_pafa = None;
 
 		if extractTFs: 
 			self.FillTFMap();
 			self._storageFile.cd();
-			self.hys = makeCanvas2D( self.TF_pafa,"map","plots/rhalphabet" );
+			self.hys = makeCanvas2D( self.TF_pafa,"map","plots"+str(self._jetNum)+"/rhalphabet" );
 			for h in self.hys: h.Write();
 			self.TF_pafa.Write();
 		else:
@@ -95,13 +97,13 @@ class rhalphabet:
 			if i % int(self._scaleFactor) != 0: continue;
 
 			# cutting
-			jpt = getattr(t,"bst8_PUPPIjet0_pt");
-			jmsd = getattr(t,"bst8_PUPPIjet0_msd");		
+			jpt = getattr(t,"bst8_PUPPIjet"+self._jetNum+"_pt");
+			jmsd = getattr(t,"bst8_PUPPIjet"+self._jetNum+"_msd");		
 			weight = self._scaleFactor*self._lumi*getattr(self._tt,"scale1fb")*getattr(self._tt,"kfactor");
 
 			if jmsd > 0:
 
-				jt21 = getattr(t,"bst8_PUPPIjet0_tau21");
+				jt21 = getattr(t,"bst8_PUPPIjet"+self._jetNum+"_tau21");
 				rhP = math.log(jmsd*jmsd/jpt);			
 				jt21P = jt21 + 0.063*rhP;
 
@@ -128,6 +130,11 @@ class rhalphabet:
 			# grs.append( self.convertHistToGraph( self.hys[i] ) );
 
 		# do the fits
+
+		##########################################################################################
+		######## THE RHO FITS
+		print "----------- the rho fits..."
+		##########################################################################################
 		self.theRhoFits = [];
 		ctr = 0
 		for g in grs:
@@ -152,6 +159,11 @@ class rhalphabet:
 			par1 = self.theRhoFits[ctr].GetParameter(1);
 			par2 = self.theRhoFits[ctr].GetParameter(2);
 
+			print "Fit statistics = "; 
+			print "      NDOF = ", self.theRhoFits[ctr].GetNDF();
+			print "      ChiS = ", self.theRhoFits[ctr].GetChisquare();
+			print "      Prob = ", self.theRhoFits[ctr].GetProb();
+
 			ctr+=1;		
 
 		for i in range(len(grs)):
@@ -173,7 +185,7 @@ class rhalphabet:
 
 			self.theRhoFits[i].Draw("sames");
 
-			curcan.SaveAs("plots/rhalphabet/map_rhodependence_bin"+str(i)+".pdf")
+			curcan.SaveAs("plots"+str(self._jetNum)+"/rhalphabet/map_rhodependence_bin"+str(i)+".pdf")
 
 		##############################
 		hpt_par0 = ROOT.TH1F("hpt_par0",";pT;par0",self._ptbins,self._ptlo,self._pthi);
@@ -193,7 +205,11 @@ class rhalphabet:
 			binno += 1;
 
 		hpt_pars = [hpt_par0,hpt_par1,hpt_par2];
-		
+
+		##########################################################################################
+		######## THE pT FITS
+		print "--------the Pt fits..."
+		##########################################################################################		
 		self.thePtFits = [];
 		ctr = 0;
 		for h in hpt_pars:
@@ -201,6 +217,11 @@ class rhalphabet:
 			curfitresult = h.Fit(self.thePtFits[ctr].fit,"RS")
 			fitter = ROOT.TVirtualFitter.GetFitter()
 			self.thePtFits[ctr].Converter(fitter)
+
+			print "Fit statistics = "; 
+			print "      NDOF = ", self.thePtFits[ctr].fit.GetNDF();
+			print "      ChiS = ", self.thePtFits[ctr].fit.GetChisquare();
+			print "      Prob = ", self.thePtFits[ctr].fit.GetProb();
 
 			ctr+=1
 
@@ -219,7 +240,7 @@ class rhalphabet:
 			self.thePtFits[i].fit.Draw("sames");	
 			self.thePtFits[i].ErrUp.Draw("sames");	
 			self.thePtFits[i].ErrDn.Draw("sames");	
-			curcan2.SaveAs("plots/rhalphabet/map_ptdependence_par"+str(i)+".pdf")	
+			curcan2.SaveAs("plots"+str(self._jetNum)+"/rhalphabet/map_ptdependence_par"+str(i)+".pdf")	
 
 		self.effPlane = ROOT.TF2("TransferPlane", "(([0]+ [1]*y + [2]*y*y) + ([3]+ [4]*y + [5]*y*y)*x + ([6]+ [7]*y + [8]*y*y)*x*x)",float(options.rholo),THEFITRHOMAX,self._ptlo,self._pthi);
 
@@ -250,11 +271,16 @@ class rhalphabet:
 		self.effPlane.SetTitle(";#rho^{DDT};pT;N_{pass}/N_{fail}")
 		self.effPlane.Draw("surf1");
 		# ROOT.gPad.SetPhi(0.6);
-		cplane.SaveAs("plots/rhalphabet/map_parameterized.pdf")			
+		cplane.SaveAs("plots"+str(self._jetNum)+"/rhalphabet/map_parameterized.pdf")			
 
 		# need to update this to the TGraph2D with the mass windows missing?
 		self.TF_pafa_gr2D = self.convertHistToGraph2D(self.TF_pafa,70,90);
 		self.theFitResult = self.TF_pafa_gr2D.Fit(self.effPlane,"RS");
+
+		print "Fit statistics = "; 
+		print "      NDOF = ", self.effPlane.GetNDF();
+		print "      ChiS = ", self.effPlane.GetChisquare();
+		print "      Prob = ", self.effPlane.GetProb();
 		# curpoint = array.array('d', []);
 		# curpoint.append( 2 );
 		# curpoint.append( 1400 );
@@ -267,7 +293,7 @@ class rhalphabet:
 		self.effPlane.SetTitle(";#rho^{DDT};pT;N_{pass}/N_{fail}")
 		self.effPlane.Draw("surf1");
 		# ROOT.gPad.SetPhi(0.6);
-		cplane2.SaveAs("plots/rhalphabet/map_parameterized_postfit.pdf")	
+		cplane2.SaveAs("plots"+str(self._jetNum)+"/rhalphabet/map_parameterized_postfit.pdf")	
 
 		#make a diff of the parameterized plane and the original
 		self.TF_diff = ROOT.TH2F("TF_diff",";rho;pT",20,float(options.rholo),float(options.rhohi),self._ptbins,self._ptlo,self._pthi)	
@@ -282,7 +308,7 @@ class rhalphabet:
 		# ROOT.gPad.GetRightMargin(0.18);
 		self.TF_diff.SetTitle(";#rho^{DDT};pT;N_{pass}/N_{fail}")
 		self.TF_diff.Draw("colz");
-		cplane3.SaveAs("plots/rhalphabet/map_diff.pdf")
+		cplane3.SaveAs("plots"+str(self._jetNum)+"/rhalphabet/map_diff.pdf")
 		print self.TF_pafa	
 
 	################################################################################################
@@ -323,9 +349,9 @@ class rhalphabet:
 			
 			if i % self.pred_scaleFactor != 0: continue;		
 
-			jpt = getattr(self.pred_tt,"bst8_PUPPIjet0_pt");
-			jeta = getattr(self.pred_tt,"bst8_PUPPIjet0_eta");
-			jmsd = getattr(self.pred_tt,"bst8_PUPPIjet0_msd");		
+			jpt = getattr(self.pred_tt,"bst8_PUPPIjet"+self._jetNum+"_pt");
+			jeta = getattr(self.pred_tt,"bst8_PUPPIjet"+self._jetNum+"_eta");
+			jmsd = getattr(self.pred_tt,"bst8_PUPPIjet"+self._jetNum+"_msd");		
 			if jmsd == 0.: jmsd = 0.01;
 			# weight = float(self.pred_scaleFactor)*float(lumi)*getattr(self.pred_tt,"scale1fb");
 			weight = self.pred_scaleFactor*self._lumi*getattr(self.pred_tt,"scale1fb")*getattr(self.pred_tt,"kfactor");
@@ -333,7 +359,7 @@ class rhalphabet:
 
 			if jpt < 500: continue;
 
-			jt21 = getattr(self.pred_tt,"bst8_PUPPIjet0_tau21");
+			jt21 = getattr(self.pred_tt,"bst8_PUPPIjet"+self._jetNum+"_tau21");
 			rhP = math.log(jmsd*jmsd/jpt);                  
 			jt21P = jt21 + 0.063*rhP;
 
