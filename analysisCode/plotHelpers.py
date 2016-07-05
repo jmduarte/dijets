@@ -93,7 +93,7 @@ def makeCanvasDataMC(hd,hmcs,legname,name,pdir="plots",nodata=False):
 	# print hstack2.GetStack().Last().Integral(), hstack.GetStack().Last().Integral(),hd.Integral()
 	# print hstack2.GetStack().Last().GetMaximum(),hd.GetMaximum())
 
-	tag1 = ROOT.TLatex(0.7,0.95,"0.44 fb^{-1} (13 TeV)")
+	tag1 = ROOT.TLatex(0.7,0.95,"0.46 fb^{-1} (13 TeV)")
 	tag1.SetNDC();
 	tag1.SetTextSize(0.035);
 	tag2 = ROOT.TLatex(0.17,0.95,"CMS preliminary")
@@ -192,8 +192,7 @@ def makeCanvasDataMC(hd,hmcs,legname,name,pdir="plots",nodata=False):
 def makeCanvasDataMC_wpred(hd,gpred,hmcs,legname,name,pdir="plots",blind=True):
 	
 	print "makeCanvasDataMC_wpred---"
-	print "hd integral = ",hd.Integral();
-
+	# print "hd integral = ",hd.Integral();
 	gpred.SetLineColor(2);
 	gpred.SetFillColor(2);
 	gpred.SetFillStyle(3001);
@@ -229,7 +228,7 @@ def makeCanvasDataMC_wpred(hd,gpred,hmcs,legname,name,pdir="plots",blind=True):
 	# print hstack2.GetStack().Last().Integral(), hstack.GetStack().Last().Integral(),hd.Integral()
 	# print hstack2.GetStack().Last().GetMaximum(),hd.GetMaximum())
 
-	tag1 = ROOT.TLatex(0.7,0.95,"0.44 fb^{-1} (13 TeV)")
+	tag1 = ROOT.TLatex(0.7,0.95,"0.46 fb^{-1} (13 TeV)")
 	tag1.SetNDC();
 	tag1.SetTextSize(0.035);
 	tag2 = ROOT.TLatex(0.17,0.95,"CMS preliminary")
@@ -288,7 +287,7 @@ def makeCanvasDataMC_wpred(hd,gpred,hmcs,legname,name,pdir="plots",blind=True):
 	hdOvPred.SetMinimum(0);
 	for i in range(hd.GetNbinsX()):
 
-		print "bin ", i, ", ", hd.GetBinContent(i+1),hpred.GetBinContent(i+1),gpred.GetY()[i]
+		# print "bin ", i, ", ", hd.GetBinContent(i+1),hpred.GetBinContent(i+1),gpred.GetY()[i]
 		if gpred.GetY()[i] > 0:
 			hdOvPred.SetBinContent( i+1, hd.GetBinContent(i+1)/gpred.GetY()[i] );
 		else:
@@ -323,22 +322,38 @@ def makeCanvasDataMC_MONEY(hd,gpred,hmcs,legname,name,pdir="plots",blind=True):
 		hmcs[h].SetLineWidth(2);
 		hmcs[h].SetLineColor(color[h])
 
+	# build total stack
+	hTotSM = hd.Clone();
+	for i in range(hd.GetNbinsX()):
+		hTotSM.SetBinContent(i+1, gpred.GetY()[i]+hmcs[0].GetBinContent(i+1)+hmcs[1].GetBinContent(i+1) );
+		# FinalErrorsVis = 0; 
+		# FinalErrorsVis += gpred.GetY()[i]*gpred.GetY()[i];		
+		# hTotSM.SetBinContent(i+1, gpred.GetY()[i]+hmcs[0].GetBinContent(i+1)+hmcs[1].GetBinContent(i+1)  );
+	hTotSM.SetLineColor(ROOT.kGreen+2);
+	hTotSM.SetLineWidth(2);
+	hTotSM.GetYaxis().SetTitle("Events");
+	
 	# print maxval;
-	leg = ROOT.TLegend(0.6,0.7,0.9,0.9);
+	leg = ROOT.TLegend(0.6,0.65,0.9,0.9);
 	leg.SetFillStyle(0);
 	leg.SetBorderSize(0);
 	leg.SetTextSize(0.035);
 	leg.AddEntry(hd,"data","pe");
-	leg.AddEntry(gpred,"bkg pred.","f");
+	leg.AddEntry(hTotSM,"Total SM", "l");
+	leg.AddEntry(gpred,"QCD pred.","f");
 	for i in range(len(hmcs)):
 		leg.AddEntry(hmcs[i],legname[i],"l")
 
-	tag1 = ROOT.TLatex(0.7,0.95,"0.44 fb^{-1} (13 TeV)")
+	tag1 = ROOT.TLatex(0.7,0.95,"0.46 fb^{-1} (13 TeV)")
 	tag1.SetNDC();
 	tag1.SetTextSize(0.035);
-	tag2 = ROOT.TLatex(0.17,0.95,"CMS preliminary")
-	tag2.SetNDC();
-	tag2.SetTextSize(0.035);
+	tag1.SetTextFont(52);
+	txta = ROOT.TLatex(0.17,0.95,"CMS");
+	txta.SetNDC();
+	txtb = ROOT.TLatex(0.22,0.95,"Simulation Preliminary");
+	txtb.SetNDC(); txtb.SetTextFont(52);
+	txta.SetTextSize(0.035);
+	txtb.SetTextSize(0.035);
 
 	gpred.SetMarkerStyle(24);
 	gpred.SetMarkerColor(2);
@@ -355,14 +370,17 @@ def makeCanvasDataMC_MONEY(hd,gpred,hmcs,legname,name,pdir="plots",blind=True):
 	c.cd();
 	p1.Draw(); p1.cd();
 
-	hd.Draw("pe");
+	hTotSM.SetMaximum( hTotSM.GetMaximum()*1.2 );
+	hTotSM.Draw("hist");
+	if not blind: hd.Draw("pesames");
 	gpred.Draw('2');
 	for i in range(len(hmcs)):
 		hmcs[i].Draw("histsames");
 
 	leg.Draw();
 	tag1.Draw();
-	tag2.Draw();
+	txta.Draw();
+	txtb.Draw();
 
 	c.cd();
 	p2.Draw(); p2.cd();	
@@ -371,18 +389,31 @@ def makeCanvasDataMC_MONEY(hd,gpred,hmcs,legname,name,pdir="plots",blind=True):
 	hdOvPred = hd.Clone();
 	hdOvPred.SetMaximum(2);
 	hdOvPred.SetMinimum(0);
+	one_x = []
+	one_y = []
+	one_ex = []
+	one_ey = []
 	for i in range(hd.GetNbinsX()):
 
-		if gpred.GetY()[i] > 0 and hd.GetBinContent(i+1) > 0:
-			hdOvPred.SetBinContent( i+1, hd.GetBinContent(i+1)/gpred.GetY()[i] );
+		if hd.GetBinContent(i+1) > 0:
+			hdOvPred.SetBinContent( i+1, hd.GetBinContent(i+1)/hTotSM.GetBinContent(i+1) );
 			errdat = hd.GetBinError(i+1)/hd.GetBinContent(i+1);
-			errmc  = gpred.GetEY()[i]/gpred.GetY()[i];
-			errtot = math.sqrt(errdat*errdat + errmc*errmc)
+			errtot = math.sqrt(errdat*errdat)
 			hdOvPred.SetBinError( i+1, errtot );
 		else:
 			hdOvPred.SetBinContent( i+1, 0. );		
 			hdOvPred.SetBinError( i+1, 0. );		
-	
+
+		one_x.append( hd.GetXaxis().GetBinCenter(i+1) );		
+		one_ex.append(  hd.GetXaxis().GetBinWidth(i+1) );
+		if gpred.GetY()[i] > 0:
+			one_y.append( 1. );
+			errmc  = gpred.GetEY()[i]/gpred.GetY()[i];
+			one_ey.append( errmc );
+		else:
+			one_y.append( 0 );
+			one_ey.append( 0 );
+
 	hdOvPred.GetXaxis().SetTitle("jet mass (GeV)"); 
 	hdOvPred.GetXaxis().SetTitleSize(0.14);
 	hdOvPred.GetYaxis().SetTitle("Data/MC"); 
@@ -390,19 +421,95 @@ def makeCanvasDataMC_MONEY(hd,gpred,hmcs,legname,name,pdir="plots",blind=True):
 	hdOvPred.GetYaxis().SetTitleOffset(0.42);	
 	hdOvPred.Draw('pe');	
 
+	grrat = ROOT.TGraphErrors(len(one_x),array.array('d',one_x),array.array('d',one_y),array.array('d',one_ex),array.array('d',one_ey) );
+	grrat.SetLineColor(2);
+	grrat.SetFillColor(2);
+	grrat.SetFillStyle(3001);
+	grrat.Draw('2');
 	c.SaveAs(pdir+"/"+name+".pdf");
 	#---------------------------------------------------------------
-	hd.SetMinimum(0.1);
-	ROOT.gPad.SetLogy();
-	c.SaveAs(pdir+"/"+name+"_log.pdf")		
+	#---------------------------------------------------------------
+	c2 = ROOT.TCanvas("c2"+name,"c2"+name,1000,800);
+
+	p12 = ROOT.TPad("p12","p12",0.0,0.3,1.0,1.0);
+	p22 = ROOT.TPad("p22","p22",0.0,0.0,1.0,0.3);
+	p12.SetBottomMargin(0.05);
+	p22.SetTopMargin(0.05);
+	p22.SetBottomMargin(0.3);
+
+	c2.cd();
+	p12.Draw(); p12.cd();
+
+	hTotSM.SetMaximum( hTotSM.GetMaximum()*2 );
+	hTotSM.SetMinimum( 0.001 );
+	hd.SetMaximum( hTotSM.GetMaximum()*2 );
+	hd.SetMinimum( 0.001 );
+
+	hd.Draw("histpe");
+	hTotSM.Draw("histsames");
+	gpred.Draw('2');
+	for i in range(len(hmcs)):
+		hmcs[i].Draw("histsames");
+
+	leg.Draw();
+	tag1.Draw();
+	txta.Draw();
+	txtb.Draw();
+	p12.SetLogy();
+
+	c2.cd();
+	p22.Draw(); p22.cd();	
+	p22.SetGrid();
+
+	hdOvPred = hd.Clone();
+	hdOvPred.SetMaximum(2);
+	hdOvPred.SetMinimum(0);
+	one_x = []
+	one_y = []
+	one_ex = []
+	one_ey = []
+	for i in range(hd.GetNbinsX()):
+
+		if hd.GetBinContent(i+1) > 0:
+			hdOvPred.SetBinContent( i+1, hd.GetBinContent(i+1)/hTotSM.GetBinContent(i+1) );
+			errdat = hd.GetBinError(i+1)/hd.GetBinContent(i+1);
+			errtot = math.sqrt(errdat*errdat)
+			hdOvPred.SetBinError( i+1, errtot );
+		else:
+			hdOvPred.SetBinContent( i+1, 0. );		
+			hdOvPred.SetBinError( i+1, 0. );		
+
+		one_x.append( hd.GetXaxis().GetBinCenter(i+1) );		
+		one_ex.append(  hd.GetXaxis().GetBinWidth(i+1) );
+		if gpred.GetY()[i] > 0:
+			one_y.append( 1. );
+			errmc  = gpred.GetEY()[i]/gpred.GetY()[i];
+			one_ey.append( errmc );
+		else:
+			one_y.append( 0 );
+			one_ey.append( 0 );
+
+	hdOvPred.GetXaxis().SetTitle("jet mass (GeV)"); 
+	hdOvPred.GetXaxis().SetTitleSize(0.14);
+	hdOvPred.GetYaxis().SetTitle("Data/MC"); 
+	hdOvPred.GetYaxis().SetTitleSize(0.14); 
+	hdOvPred.GetYaxis().SetTitleOffset(0.42);	
+	hdOvPred.Draw('pe');	
+
+	grrat = ROOT.TGraphErrors(len(one_x),array.array('d',one_x),array.array('d',one_y),array.array('d',one_ex),array.array('d',one_ey) );
+	grrat.SetLineColor(2);
+	grrat.SetFillColor(2);
+	grrat.SetFillStyle(3001);
+	grrat.Draw('2');
+	c2.SaveAs(pdir+"/"+name+"_log.pdf");
 
 ##################################################################################################
 def makeCanvasShapeComparison(hs,legname,name,pdir="plots"):
 
-	color = [2,4,6,7,8,3,5,2,4,6,7,8,3,5]
-	style = [1,1,1,1,1,1,1,2,2,2,2,2,2,2]
+	color = [2,4,6,7,8,3,5,2,4,6,7,8,3,5,2,4,6,7,8,3,5]
+	style = [1,1,1,1,1,1,1,2,2,2,2,2,2,2,3,3,3,3,3,3,3]
 	
-	leg = ROOT.TLegend(0.6,0.7,0.9,0.9);
+	leg = ROOT.TLegend(0.6,0.5,0.9,0.9);
 	leg.SetFillStyle(0);
 	leg.SetBorderSize(0);
 	leg.SetTextSize(0.035);
@@ -413,9 +520,13 @@ def makeCanvasShapeComparison(hs,legname,name,pdir="plots"):
 		hs[h].SetLineStyle(style[h]);
 		hs[h].SetLineWidth(2);
 		hs[h].SetFillStyle(0);
-		hs[h].Scale(1./hs[h].Integral());
+		if hs[h].Integral() > 0: hs[h].Scale(1./hs[h].Integral());
 		if hs[h].GetMaximum() > maxval: maxval = hs[h].GetMaximum();
 		leg.AddEntry(hs[h],legname[h],"l");
+
+	tag2 = ROOT.TLatex(0.17,0.90,"CMS preliminary")
+	tag2.SetNDC();
+	tag2.SetTextSize(0.032);
 
 	c = ROOT.TCanvas("c"+name,"c"+name,1000,800);
 	hs[0].SetMaximum(1.5*maxval);
@@ -425,12 +536,13 @@ def makeCanvasShapeComparison(hs,legname,name,pdir="plots"):
 	c.SaveAs(pdir+"/"+name+".pdf");	
 	ROOT.gPad.SetLogy();
 	hs[0].SetMinimum(1e-3);
+	tag2.Draw();
 	c.SaveAs(pdir+"/"+name+"_log.pdf")	
 
 def makeCanvasComparison(hs,legname,name,pdir="plots"):
 
-	color = [2,4,6,7,8,3,5,2,4,6,7,8,3,5]
-	style = [1,1,1,1,1,1,1,2,2,2,2,2,2,2]
+	color = [2,4,6,7,8,3,5,2,4,6,7,8,3,5,2,4,6,7,8,3,5]
+	style = [1,1,1,1,1,1,1,2,2,2,2,2,2,2,3,3,3,3,3,3,3]
 	
 	leg = ROOT.TLegend(0.6,0.7,0.9,0.9);
 	leg.SetFillStyle(0);
@@ -464,15 +576,15 @@ def	makeCanvas2D( TFMap, name, pdir='plots' ):
 	c1.SetRightMargin(0.15);
 	c1.SaveAs(pdir+"/"+name+".pdf");
 
-	hxs = [];
+	# hxs = [];
 	hys = [];
 	
-	for i in range(TFMap.GetNbinsX()):
-		xnam = TFMap.GetYaxis().GetTitle();
-		nbin = TFMap.GetNbinsY();
-		ylo = TFMap.GetYaxis().GetBinLowEdge(1);
-		yhi = TFMap.GetYaxis().GetBinUpEdge(nbin);
-		hxs.append( ROOT.TH1F("hxs"+str(i),";"+xnam+";",nbin,ylo,yhi) );
+	# for i in range(TFMap.GetNbinsX()):
+	# 	xnam = TFMap.GetYaxis().GetTitle();
+	# 	nbin = TFMap.GetNbinsY();
+	# 	ylo = TFMap.GetYaxis().GetBinLowEdge(1);
+	# 	yhi = TFMap.GetYaxis().GetBinUpEdge(nbin);
+	# 	hxs.append( ROOT.TH1F("hxs"+str(i),";"+xnam+";",nbin,ylo,yhi) );
 	
 	for i in range(TFMap.GetNbinsY()):
 		xnam = TFMap.GetXaxis().GetTitle();
@@ -481,10 +593,10 @@ def	makeCanvas2D( TFMap, name, pdir='plots' ):
 		yhi = TFMap.GetXaxis().GetBinUpEdge(nbin);
 		hys.append( ROOT.TH1F("hys"+str(i),";"+xnam+";",nbin,ylo,yhi) );		
 
-	for i in range(TFMap.GetNbinsX()):
-		for j in range(TFMap.GetNbinsY()):
-			hxs[i].SetBinContent( j+1, TFMap.GetBinContent(i+1,j+1) );
-			hxs[i].SetBinError( j+1, TFMap.GetBinError(i+1,j+1) );
+	# for i in range(TFMap.GetNbinsX()):
+	# 	for j in range(TFMap.GetNbinsY()):
+	# 		hxs[i].SetBinContent( j+1, TFMap.GetBinContent(i+1,j+1) );
+	# 		hxs[i].SetBinError( j+1, TFMap.GetBinError(i+1,j+1) );
 
 	for i in range(TFMap.GetNbinsY()):
 		for j in range(TFMap.GetNbinsX()):
@@ -494,20 +606,20 @@ def	makeCanvas2D( TFMap, name, pdir='plots' ):
 	colors = [];
 	for i in range(10):
 		colors.append(1); colors.append(2); colors.append(4); colors.append(6);
-	for i in range(len(hxs)): 
-		hxs[i].SetLineColor(colors[i]);
-		hxs[i].SetMarkerSize(0);
+	# for i in range(len(hxs)): 
+	# 	hxs[i].SetLineColor(colors[i]);
+	# 	hxs[i].SetMarkerSize(0);
 	for i in range(len(hys)): 
 		hys[i].SetLineColor(colors[i]);
 		hys[i].SetMarkerSize(0);
 
-	cx = ROOT.TCanvas("cx","cx",1000,800);
-	hxs[0].SetMaximum( 1.25*TFMap.GetMaximum() );
-	hxs[0].SetMinimum( 0. );
-	hxs[0].Draw("histe");
-	for i in range(1,len(hxs)):
-		hxs[i].Draw("histesames")
-	cx.SaveAs(pdir+"/"+name+"_hxs.pdf");
+	# cx = ROOT.TCanvas("cx","cx",1000,800);
+	# hxs[0].SetMaximum( 1.25*TFMap.GetMaximum() );
+	# hxs[0].SetMinimum( 0. );
+	# hxs[0].Draw("histe");
+	# for i in range(1,len(hxs)):
+	# 	hxs[i].Draw("histesames")
+	# cx.SaveAs(pdir+"/"+name+"_hxs.pdf");
 
 	cy = ROOT.TCanvas("cy","cy",1000,800);
 	hys[0].SetMaximum( 1.25*TFMap.GetMaximum() );

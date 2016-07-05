@@ -24,6 +24,7 @@ parser.add_option("--rhohi", dest="rhohi", default = 6.,help="mass of LSP", meta
 parser.add_option("--DDTcut", dest="DDTcut", default = 0.38,help="mass of LSP", metavar="MLSP")
 parser.add_option('--qcdClosure', action='store_true', dest='qcdClosure', default=False, help='go!')
 parser.add_option("--jetNum", dest="jetNum", default = 0,help="mass of LSP", metavar="MLSP")
+parser.add_option("--ZPrimeMass", dest="ZPrimeMass", default = 50., type=float,help="mass of LSP", metavar="MLSP")
 
 # parser.add_option("--rholo", dest="rholo", default = 0.,help="mass of LSP", metavar="MLSP")
 (options, args) = parser.parse_args()
@@ -42,9 +43,35 @@ ROOT.gStyle.SetPalette(1);
 ROOT.gStyle.SetPaintTextFormat("1.1f");
 ROOT.gStyle.SetOptFit(0000);
 
+"""
+python buildAnalysis.py -b --doMCLooping --doRhalphabet --doCards --doPlots --doData --lumi 2.7 --DDTcut 0.38 --rholo 0.0 --rhohi 6. --jetNum 0 --ZPrimeMass 50. &
+python buildAnalysis.py -b --doMCLooping --doRhalphabet --doCards --doPlots --doData --lumi 2.7 --DDTcut 0.38 --rholo 0.0 --rhohi 6. --jetNum 0 --ZPrimeMass 60. &
+python buildAnalysis.py -b --doMCLooping --doRhalphabet --doCards --doPlots --doData --lumi 2.7 --DDTcut 0.38 --rholo 0.0 --rhohi 6. --jetNum 0 --ZPrimeMass 75. &
+python buildAnalysis.py -b --doMCLooping --doRhalphabet --doCards --doPlots --doData --lumi 2.7 --DDTcut 0.38 --rholo 0.0 --rhohi 6. --jetNum 0 --ZPrimeMass 90. &
+python buildAnalysis.py -b --doMCLooping --doRhalphabet --doCards --doPlots --doData --lumi 2.7 --DDTcut 0.38 --rholo 0.0 --rhohi 6. --jetNum 0 --ZPrimeMass 100. &
+python buildAnalysis.py -b --doMCLooping --doRhalphabet --doCards --doPlots --doData --lumi 2.7 --DDTcut 0.38 --rholo 0.0 --rhohi 6. --jetNum 0 --ZPrimeMass 110. &
+python buildAnalysis.py -b --doMCLooping --doRhalphabet --doCards --doPlots --doData --lumi 2.7 --DDTcut 0.38 --rholo 0.0 --rhohi 6. --jetNum 0 --ZPrimeMass 125. &
+python buildAnalysis.py -b --doMCLooping --doRhalphabet --doCards --doPlots --doData --lumi 2.7 --DDTcut 0.38 --rholo 0.0 --rhohi 6. --jetNum 0 --ZPrimeMass 135. &
+python buildAnalysis.py -b --doMCLooping --doRhalphabet --doCards --doPlots --doData --lumi 2.7 --DDTcut 0.38 --rholo 0.0 --rhohi 6. --jetNum 0 --ZPrimeMass 150. &
+python buildAnalysis.py -b --doMCLooping --doRhalphabet --doCards --doPlots --doData --lumi 2.7 --DDTcut 0.38 --rholo 0.0 --rhohi 6. --jetNum 0 --ZPrimeMass 165. &
+python buildAnalysis.py -b --doMCLooping --doRhalphabet --doCards --doPlots --doData --lumi 2.7 --DDTcut 0.38 --rholo 0.0 --rhohi 6. --jetNum 0 --ZPrimeMass 180. &
+python buildAnalysis.py -b --doMCLooping --doRhalphabet --doCards --doPlots --doData --lumi 2.7 --DDTcut 0.38 --rholo 0.0 --rhohi 6. --jetNum 0 --ZPrimeMass 200. &
+python buildAnalysis.py -b --doMCLooping --doRhalphabet --doCards --doPlots --doData --lumi 2.7 --DDTcut 0.38 --rholo 0.0 --rhohi 6. --jetNum 0 --ZPrimeMass 250. &
+python buildAnalysis.py -b --doMCLooping --doRhalphabet --doCards --doPlots --doData --lumi 2.7 --DDTcut 0.38 --rholo 0.0 --rhohi 6. --jetNum 0 --ZPrimeMass 300. &
+"""
+
+
 ###############################################################################################################
 # M A I N 
 ###############################################################################################################
+
+sigmass = [50.,75.,100.,125.,150.,200.,250.,300]
+NMassBins = [60,60,60,60,60,60,30,30];
+# sigmass = [50.,75.,100.,125.,150.,200.]
+# NMassBins = 60;
+# sigmass = [250.,300.]
+# NMassBins = 30;
+
 def main(): 
 
 	# output directories
@@ -54,7 +81,7 @@ def main():
 	if not os.path.exists('plots'+str(options.jetNum)+'/rhalphabet'): os.makedirs('plots'+str(options.jetNum)+'/rhalphabet')
 	if not os.path.exists('plots'+str(options.jetNum)+'/datacards'): os.makedirs('plots'+str(options.jetNum)+'/datacards')
 
-	idir = "/Users/ntran/Documents/Research/CMS/WZpToQQ/dijetsGH/dijets/sklimming/sklim-v0-May18";
+	idir = "/Users/ntran/Documents/Research/CMS/WZpToQQ/dijetsGH/dijets/sklimming/sklim-v0-Jun16";
 	# idir = "/tmp/cmantill/"
 
 	####################################################################################
@@ -63,89 +90,146 @@ def main():
 	sigContainers = None;
 
 	### signal corrections and other directors
+	## Mass shift [GeV]     : -0.590 +/- 0.872
+	## Mass resolution SF:  1.094 +/- 0.123	
 	# -1.6 GeV +/- 1.2 GeV
-	sig_mass_shift = 0.98;
+	sig_mass_shift = 0.99;
 	sig_mass_shift_unc = 0.015;
 	# sig_res_shift = 0.95;
-	sig_res_shift = 0.9;
-	sig_res_shift_unc = 0.1;
-	qcdSF = 5;
-
+	sig_res_shift = 1.094;
+	sig_res_shift_unc = 0.123;
+	qcdSF = 100;
+	
 	if options.doMCLooping: 
-		
-		bkgContainers = [];
-		bkgNames = ["QCD.root","W.root","DY.root"];
-		bkgLabels = ["QCD","W(qq)","Z+jets"];
-		bkgTags = ["QCD","Winc","Zinc"];
-		bkgmass = [0.0,80.4,91.2];
-		for i in range(len(bkgNames)):
-			tmpsf = qcdSF;
-			if i > 0: tmpsf = 1;
-			bkgContainers.append( MCContainer( idir+"/"+bkgNames[i], float(options.lumi), bkgLabels[i], bkgTags[i], tmpsf, False, options.jetNum ) );
-			# random factor of 3 w.r.t. data
-			if i > 0: 
-				bkgContainers[i].morphSignal("h_peakshape",bkgmass[i],
-											               sig_mass_shift,sig_mass_shift_unc,
-											               sig_res_shift,sig_res_shift_unc);
 
 		sigContainers = [];
 		sigNames = [];
-		sigNames.append("ZPrimeToQQ_50GeV_v4_mc.root")
-		sigNames.append("ZPrimeToQQ_100GeV_v4_mc.root")
-		sigNames.append("ZPrimeToQQ_150GeV_v4_mc.root")
-		sigNames.append("ZPrimeToQQ_200GeV_v4_mc.root")
-		sigNames.append("ZPrimeToQQ_250GeV_v4_mc.root")
-		sigNames.append("ZPrimeToQQ_300GeV_v4_mc.root")	
-		sigLabels = ["Z\'(50 GeV)","Z\'(100 GeV)","Z\'(150 GeV)","Z\'(200 GeV)","Z\'(250 GeV)","Z\'(300 GeV)"]
-		sigTags = ["Zprime50","Zprime100","Zprime150","Zprime200","Zprime250","Zprime300"];
-		# sigXS = [139300.,19430.,5706.,2322.,1131.,619.];
-		# sigXS   = [16.2,12.9,12.4,11.2,11.2,11.2]; # in pb
-		sigXS   = [11,10,10,10,10,10]; # in pb
-		sigmass = [50.,100.,150.,200.,250.,300.]; # in pb
 
-		for i in range(len(sigNames)):
-			sigContainers.append( MCContainer( idir+"/"+sigNames[i], float(options.lumi)*sigXS[i]*1.2, sigLabels[i], sigTags[i], 1, False, options.jetNum ) );
+		sigNames.append("VectorDiJet1Jet_M50_mc.root")
+		sigNames.append("VectorDiJet1Jet_M75_mc.root")
+		sigNames.append("VectorDiJet1Jet_M100_mc.root")		
+		sigNames.append("VectorDiJet1Jet_M125_mc.root")		
+		sigNames.append("VectorDiJet1Jet_M150_mc.root")		
+		sigNames.append("VectorDiJet1Jet_M200_mc.root")	
+		sigNames.append("VectorDiJet1Jet_M250_mc.root")		
+		sigNames.append("VectorDiJet1Jet_M300_mc.root")	
+		sigLabels = ["Z\'(50 GeV)","Z\'(75 GeV)","Z\'(100 GeV)","Z\'(125 GeV)","Z\'(150 GeV)","Z\'(200 GeV)","Z\'(250 GeV)","Z\'(300 GeV)"]
+		sigTags = ["Zprime50","Zprime75","Zprime100","Zprime125","Zprime150","Zprime200","Zprime250","Zprime300"];
+
+		for i in range(0,len(sigNames)):
+			sigContainers.append( MCContainer( idir+"/"+sigNames[i], float(options.lumi), sigLabels[i], sigTags[i], 1, False, options.jetNum,NMassBins[i] ) );
 			# k-factor is 1.2
 			sigContainers[i].morphSignal("h_peakshape",sigmass[i],
 										               sig_mass_shift,sig_mass_shift_unc,
 										               sig_res_shift,sig_res_shift_unc);
 
 			# hsig = [];
-			# hsig.append( getattr( sigContainers[i], "h_peakshape_central" ) );
+			# hsig.append( getattr( sigContainers[i], "h_peakshape" ) );
 			# hsig.append( getattr( sigContainers[i], "h_peakshape_shiftUp" ) );
 			# hsig.append( getattr( sigContainers[i], "h_peakshape_smearUp" ) );
 			# hsig.append( getattr( sigContainers[i], "h_peakshape_shiftDn" ) );
 			# hsig.append( getattr( sigContainers[i], "h_peakshape_smearDn" ) );
 
-			# makeCanvasShapeComparison(hsig,["cen","shiftup","smearup","shiftdn","smeardn"],"mcsignalshapes_"+sigTags[i],"plots/shapes/");
+			# makeCanvasShapeComparison(hsig,["cen","shiftup","smearup","shiftdn","smeardn"],"mcsignalshapes_"+sigTags[i],"plots"+str(options.jetNum)+"/shapes/");
+
+			# dummyaxis = sigContainers[i].h_peakshape_matched.GetXaxis();
+
+		###### creating interpolated sig containers
+		signalMorphersHists  = [];
+		signalMorphersMasses = [];
+		for i in range(6):
+			signalMorphersHists.append( sigContainers[i].h_peakshape_matched );
+			signalMorphersMasses.append( sigmass[i] );
+		morphedHistContainer = hist(signalMorphersMasses,signalMorphersHists);
+		
+		interpolatedMasses = [60.0,90.0,110.0,135.0,165.0,180.0];
+		additionalSigContainers = [];
+		sigLabels = ["Z\'(60 GeV)","Z\'(90 GeV)","Z\'(110 GeV)","Z\'(135 GeV)","Z\'(165 GeV)","Z\'(180 GeV)"];
+		sigTags = ["Zprime60","Zprime90","Zprime110","Zprime135","Zprime165","Zprime180"];
+		interpolatedMasses_nbins = [60,60,60,60,60,60];
+		isMorphed=True;
+		for i in range(len(interpolatedMasses)):
+			additionalSigContainers.append( MCContainer( 'notapplicable', float(options.lumi), sigLabels[i], sigTags[i], 1, False, options.jetNum,interpolatedMasses_nbins[i],isMorphed ) );
+			additionalSigContainers[i].morphSignal( "h_peakshape",sigmass[i],
+										               sig_mass_shift,sig_mass_shift_unc,
+										               sig_res_shift,sig_res_shift_unc,
+										               morphedHistContainer.morph(interpolatedMasses[i]) );
+
+			# hsig = [];
+			# hsig.append( getattr( additionalSigContainers[i], "h_peakshape" ) );
+			# hsig.append( getattr( additionalSigContainers[i], "h_peakshape_shiftUp" ) );
+			# hsig.append( getattr( additionalSigContainers[i], "h_peakshape_smearUp" ) );
+			# hsig.append( getattr( additionalSigContainers[i], "h_peakshape_shiftDn" ) );
+			# hsig.append( getattr( additionalSigContainers[i], "h_peakshape_smearDn" ) );
+
+			# makeCanvasShapeComparison(hsig,["cen","shiftup","smearup","shiftdn","smeardn"],"mcsignalshapes_"+sigTags[i],"plots"+str(options.jetNum)+"/shapes/");
+
+		print len(sigContainers)
+		print sigmass
+		print NMassBins
+		for i in range(len(additionalSigContainers)):
+			for j in range(len(sigmass)-1):
+				if interpolatedMasses[i] > sigmass[j] and interpolatedMasses[i] < sigmass[j+1]:
+					sigContainers.insert(j+1,additionalSigContainers[i]);
+					sigmass.insert(j+1,interpolatedMasses[i]);
+					NMassBins.insert(j+1,interpolatedMasses_nbins[i]);
+					print "newsigmass = ", sigmass
+					break;
+		print len(sigContainers)
+		print sigmass
+		print NMassBins,NMassBins[sigmass.index(options.ZPrimeMass)]
+
+		bkgContainers = [];
+		bkgNames = ["QCD.root","W.root","DY.root","TTT.root"];
+		bkgLabels = ["QCD","W(qq)","Z+jets","top"];
+		bkgTags = ["QCD","Winc","Zinc","top"];
+		bkgmass = [0.0,80.4,91.2,80.4];
+		bkgsf = [1.,0.95,0.95,0.95]; # put in the W tag SF! 
+		for i in range(0,len(bkgNames)):
+			tmpsf = qcdSF;
+			if i > 0: tmpsf = 1;
+			bkgContainers.append( MCContainer( idir+"/"+bkgNames[i], float(options.lumi)*bkgsf[i], bkgLabels[i], bkgTags[i], tmpsf, False, options.jetNum,NMassBins[sigmass.index(options.ZPrimeMass)] ) );
+			# bkgContainers.append( MCContainer( idir+"/"+bkgNames[i], float(options.lumi), bkgLabels[i], bkgTags[i], tmpsf, False, options.jetNum, 60 ) );
+			if i == 1 or i == 2: 
+				bkgContainers[i].morphSignal("h_peakshape",bkgmass[i],
+											               sig_mass_shift,sig_mass_shift_unc,
+											               sig_res_shift,sig_res_shift_unc);		
 
 	####################################################################################
 	# do background estimation
 	theRhalphabet = None;
 	if options.doRhalphabet: 
-	
+		print "Now doing the rhalphabet!"
 		if not options.qcdClosure:		
 			isData = True;
-			theRhalphabet = rhalphabet(idir+"/"+"JetHT.root",1,"rhalphabet",1, False, options.jetNum);
-			theRhalphabet.GetPredictedDistributions( idir+"/"+"JetHT.root", 1, 5, isData);
-		
+			extractTFs = False;
+			# for i in range(len(sigmass)):
+			theRhalphabet = rhalphabet(idir+"/"+"JetHT.root",1,"rhalphabet",1, extractTFs, options.jetNum,int(options.ZPrimeMass),isData,NMassBins[sigmass.index(options.ZPrimeMass)]) ;
+			theRhalphabet.GetPredictedDistributions( idir+"/"+"JetHT.root", 1, 1, isData);
+			# extractTFs = False;
+
+			# theRhalphabet.append( rhalphabet(idir+"/"+"JetHT.root",1,"rhalphabet",1, extractTFs, options.jetNum, 85. ); #add a prediction without the W
+			# theRhalphabet[len(sigmass)].GetPredictedDistributions( idir+"/"+"JetHT.root", 1, 5, isData);
+
 		# there is a flag to do a closure test as well
 		if options.qcdClosure:
 			isData = False;
-			theRhalphabet = rhalphabet(idir+"/"+"QCD.root",options.lumi,"rhalphabetClosure",2, False, options.jetNum);
-			theRhalphabet.GetPredictedDistributions( idir+"/"+"QCD.root", options.lumi, qcdSF, isData );
+			extractTFs = False;
+			theRhalphabet = rhalphabet(idir+"/"+"QCD.root",options.lumi,"rhalphabetClosure",1, extractTFs, options.jetNum,int(options.ZPrimeMass),isData,NMassBins[sigmass.index(options.ZPrimeMass)]) ;
+			theRhalphabet.GetPredictedDistributions( idir+"/"+"QCD.root", options.lumi, 100, isData );
 
 	####################################################################################
 	# do the loop on data
 	theData = None;
 	if options.doData:
+		print "Now doing the data!...."
 		isData = True;
-		theData = MCContainer( idir+"/"+"JetHT.root", 1, "data" ,"data" , 5, isData, options.jetNum);
+		theData = MCContainer( idir+"/"+"JetHT.root", 1, "data" ,"data" , 1, isData, options.jetNum, NMassBins[sigmass.index(options.ZPrimeMass)]);
 
 	####################################################################################
 	# do some plotting
 	if options.doCards: 
-		buildDatacards(bkgContainers,sigContainers,theRhalphabet,theData, options.jetNum);
+		buildDatacards(bkgContainers,sigContainers[sigmass.index(options.ZPrimeMass)],theRhalphabet,theData,options.jetNum);
 
 	####################################################################################
 	# do some plotting
@@ -159,55 +243,73 @@ def BuildPlots(bkgContainers,sigContainers,theRhalphabet,theData):
 
 	if options.doMCLooping and options.doRhalphabet and options.doData: 
 
+		# sigmass = [50.,75.,100.,125.,150.,200.,250.,300.]
+		# sigmass = [50.,75.,100.,125.,150.,200.]
+		# sigmass = [300.]
+		amBlind = False;
+		# for i in range(len(sigmass)):
+
 		makeCanvasDataMC_wpred( theData.h_jetmsd_passcut,
 								theRhalphabet.grpred_jetmsd, 
 								[bkgContainers[0].h_jetmsd_passcut],
 								['qcd'],
-								'jetmsd_pred'+str(options.jetNum),
+								'jetmsd_pred'+str(options.jetNum)+"_"+str(int(options.ZPrimeMass)),
 								'plots'+str(options.jetNum)+'/results/',
-								False);
+								amBlind);
 
 		makeCanvasDataMC_wpred( theData.h_rhoDDT_passcut,
 								theRhalphabet.grpred_rhoDDT, 
 								[bkgContainers[0].h_rhoDDT_passcut],
 								['qcd'],
-								'rhoDDT_pred'+str(options.jetNum),
+								'rhoDDT_pred'+str(options.jetNum)+"_"+str(int(options.ZPrimeMass)),
 								'plots'+str(options.jetNum)+'/results/',
-								False);
+								amBlind);
 
 		makeCanvasDataMC_MONEY( theData.h_jetmsd_passcut,
 								theRhalphabet.grpred_jetmsd, 
-								[bkgContainers[1].h_jetmsd_passcut,bkgContainers[2].h_jetmsd_passcut,sigContainers[0].h_jetmsd_passcut,sigContainers[2].h_jetmsd_passcut],
-								['W(qq)','Z(qq)','Z\' (50 GeV)','Z\' (150 GeV)'],
-								'jetmsd_final'+str(options.jetNum),
+								# [bkgContainers[1].h_jetmsd_passcut,bkgContainers[2].h_jetmsd_passcut,bkgContainers[3].h_jetmsd_passcut,sigContainers[sigmass.index(options.ZPrimeMass)].h_peakshape],
+								[bkgContainers[1].h_jetmsd_passcut,bkgContainers[2].h_jetmsd_passcut,sigContainers[sigmass.index(options.ZPrimeMass)].h_peakshape],
+								# ['W(qq)','Z(qq)','top','Z\' signal'],
+								['W(qq)','Z(qq)','Z\' signal'],
+								'jetmsd_final'+str(options.jetNum)+"_"+str(int(options.ZPrimeMass)),
 								'plots'+str(options.jetNum)+'/results/',
-								False);		
+								amBlind);		
 
 	if options.doMCLooping and options.doRhalphabet and not options.doData:
 
-		makeCanvasDataMC_wpred( bkgContainers[0].h_jetmsd_passcut,
-								theRhalphabet.grpred_jetmsd, 
-								[bkgContainers[0].h_jetmsd_passcut],
-								['qcd'],
-								'jetmsd_pred'+str(options.jetNum),
-								'plots'+str(options.jetNum)+'/results/',
-								False);
+		for i in range(len(sigContainers)):
 
-		makeCanvasDataMC_wpred( bkgContainers[0].h_rhoDDT_passcut,
-								theRhalphabet.grpred_rhoDDT, 
-								[bkgContainers[0].h_rhoDDT_passcut],
-								['qcd'],
-								'rhoDDT_pred'+str(options.jetNum),
-								'plots'+str(options.jetNum)+'/results/',
-								False);
+			makeCanvasDataMC_wpred( bkgContainers[0].h_jetmsd_passcut,
+									theRhalphabet.grpred_jetmsd, 
+									[bkgContainers[0].h_jetmsd_passcut],
+									['qcd'],
+									'jetmsd_pred'+str(options.jetNum),
+									'plots'+str(options.jetNum)+'/results/',
+									False);
 
-		makeCanvasDataMC_MONEY( bkgContainers[0].h_jetmsd_passcut,
-								theRhalphabet.grpred_jetmsd, 
-								[bkgContainers[1].h_jetmsd_passcut,bkgContainers[2].h_jetmsd_passcut,sigContainers[0].h_jetmsd_passcut,sigContainers[2].h_jetmsd_passcut],
-								['W(qq)','Z(qq)','Z\' (50 GeV)','Z\' (150 GeV)'],
-								'jetmsd_final'+str(options.jetNum),
-								'plots'+str(options.jetNum)+'/results/',
-								False);
+			histholder = ROOT.TFile("qcdhists.root","RECREATE");
+			histholder.cd();
+			bkgContainers[0].h_jetmsd_passcut.Write();
+			theRhalphabet.grpred_jetmsd.Write();
+			theRhalphabet.hpred_jetmsd.Write();
+			histholder.Close();
+	
+
+			# makeCanvasDataMC_wpred( bkgContainers[0].h_rhoDDT_passcut,
+			# 						theRhalphabet.grpred_rhoDDT, 
+			# 						[bkgContainers[0].h_rhoDDT_passcut],
+			# 						['qcd'],
+			# 						'rhoDDT_pred'+str(options.jetNum),
+			# 						'plots'+str(options.jetNum)+'/results/',
+			# 						False);
+
+			# makeCanvasDataMC_MONEY( bkgContainers[0].h_jetmsd_passcut,
+			# 						theRhalphabet[i].grpred_jetmsd, 
+			# 						[bkgContainers[1].h_jetmsd_passcut,bkgContainers[2].h_jetmsd_passcut,sigContainers[0].h_jetmsd_passcut,sigContainers[2].h_jetmsd_passcut],
+			# 						['W(qq)','Z(qq)','Z\' (50 GeV)','Z\' (150 GeV)'],
+			# 						'jetmsd_final'+str(options.jetNum),
+			# 						'plots'+str(options.jetNum)+'/results/',
+			# 						False);
 
 	# if options.doMCLooping and options.doData:
 
@@ -239,6 +341,7 @@ def BuildPlots(bkgContainers,sigContainers,theRhalphabet,theData):
 		names.append( "h_jetmsd_passcut" );
 		names.append( "h_jett21_masswindow" );
 		names.append( "h_jett21DDT_masswindow" );		
+		# names.append( "h_peakshape" );		
 
 		harrays = [];
 		for n in names: 
@@ -248,9 +351,9 @@ def BuildPlots(bkgContainers,sigContainers,theRhalphabet,theData):
 			for b in bkgContainers: 
 				harray.append( getattr( b, n ) );
 				hlabels.append( b._name );
-			for s in sigContainers: 
-				harray.append( getattr( s, n ) );
-				hlabels.append( s._name );
+			# for s in sigContainers: 
+			# 	harray.append( getattr( s, n ) );
+			# 	hlabels.append( s._name );
 
 			makeCanvasComparison(harray,hlabels,"mc_"+n,"plots"+str(options.jetNum)+"/yields/");
 			makeCanvasShapeComparison(harray,hlabels,"mc_"+n,"plots"+str(options.jetNum)+"/shapes/");

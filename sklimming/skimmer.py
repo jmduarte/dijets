@@ -55,8 +55,10 @@ def sklimAdd(fn,odir,mass=0):
 	finfo = ROOT.TFile("signalInfo/dijet_pt.root");
 	# h_rw = ROOT.TH1F();
 	h_rw = None
-	if 'ZPrime' in fn and mass > 0: 	
-		hinfo = finfo.Get("med_"+str(mass)+"_0.1_proc_800")
+	if 'VectorDiJet' in fn and mass > 0: 	
+		hname = "med_"+str(mass)+"_0.1_proc_800";
+		if '75' in fn: hname = "med_"+str(mass)+"_0.1_proc_801";
+		hinfo = finfo.Get(hname)
 		hinfo.Scale(100*1000.);
 		hinfo_nbins = hinfo.GetNbinsX();
 		hinfo_xlo = hinfo.GetXaxis().GetBinLowEdge(1);
@@ -64,14 +66,16 @@ def sklimAdd(fn,odir,mass=0):
 		htmp = ROOT.TH1F("htmp","htmp",hinfo_nbins,hinfo_xlo,hinfo_xhi)
 		for i in range(nent):
 			tree.GetEntry(i);
-			htmp.Fill(tree.genVPt,tree.scale1fb*10.)
+			htmp.Fill(tree.genVPt,tree.scale1fb) # 10. is the cross-section
 		
 		h_rw = ROOT.TH1F( hinfo.Clone() );
 		h_rw.Divide(htmp);
 
 	newscale1fb = array( 'f', [ 0. ] ); #rewriting this guy
+	newkfactor  = array( 'f', [ 0. ] ); #rewriting this guy
 	tree.SetBranchAddress("scale1fb",newscale1fb)
-	
+	tree.SetBranchAddress("kfactor",newkfactor)
+
 	for i in range(nent):
 
 		if(i % (1 * nent/100) == 0):
@@ -81,7 +85,7 @@ def sklimAdd(fn,odir,mass=0):
 		tree.GetEntry(i);
 		# print tree.HT, tree.mT2, tree.alphaT, tree.dRazor, tree.mRazor, tree.sumJetMass
 
-		if tree.bst8_PUPPIjet0_pt > 250:
+		if tree.bst8_PUPPIjet0_pt > 350:
 			# throw out NaN values...
 			# print tree.HT, tree.mT2, tree.alphaT, tree.dRazor, tree.mRazor, tree.sumJetMass
 
@@ -93,7 +97,15 @@ def sklimAdd(fn,odir,mass=0):
 			# # print int(tree.HT)
 			# lheWeight[0] = float(weight);
 			# MHTOvHT[0] = tree.MHT/math.sqrt(tree.HT);
-			newscale1fb[0] = tree.scale1fb*h_rw.GetBinContent( h_rw.FindBin(tree.genVPt) )
+			# print tree.genVPt ,tree.scale1fb,h_rw.GetBinContent( h_rw.FindBin(tree.genVPt) )
+			
+			if 'VectorDiJet' in fn and mass > 0: newscale1fb[0] = tree.scale1fb*h_rw.GetBinContent( h_rw.FindBin(tree.genVPt) )
+			else: newscale1fb[0] = tree.scale1fb
+			
+			if 'VectorDiJet' in fn and mass > 0: newkfactor[0] = tree.kfactorNLO;
+			else: newkfactor[0] = tree.kfactor;
+			
+			# print tree.kfactorNLO, tree.kfactor;
 			# print tree.scale1fb
 			# print h_rw.FindBin(tree.genVPt)
 			# print h_rw.GetBinContent( h_rw.FindBin(tree.genVPt) );
@@ -101,7 +113,7 @@ def sklimAdd(fn,odir,mass=0):
 			otree.Fill();   
 
 	fto.cd();
-	h_rw.Write();
+	if 'VectorDiJet' in fn and mass > 0: h_rw.Write();
 	fto.Close();
 
 	print "\n"
@@ -131,24 +143,27 @@ def getFilesRecursively(dir,searchstring,additionalstring = None):
 
 if __name__ == '__main__':
 
-	DataDir = 'zprimebits_17May/'
+	DataDir = 'zprimebits_16Jun/'
 	# DataDir = "/Users/ntran/Documents/Research/Ext/DissectingJetsPlusMET/sampleProcessing/DissectingJetsPlusMET/localData/Backgrounds/Backgrounds_13TEV/TTBAR/";
 	# DataDir = "/Users/ntran/Documents/Research/Ext/DissectingJetsPlusMET/sampleProcessing/DissectingJetsPlusMET/andrewBkg/";
 	# DataDir = "/Users/ntran/Documents/Research/Ext/DissectingJetsPlusMET/sampleProcessing/DissectingJetsPlusMET/rawData-v3/";
-	OutDir = 'sklim-v0-May18'
+	OutDir = 'sklim-v0-Jun16'
 
 	tags = [];
 	# tags.append( ['QCD',0] );
-	# tags.append( ['W.ro',0] );
-	# tags.append( ['DY.ro',0] );
-	tags.append( ['ZPrimeToQQ_50GeV_v4_mc',50] );
-	tags.append( ['ZPrimeToQQ_100GeV_v4_mc',100] );
-	tags.append( ['ZPrimeToQQ_150GeV_v4_mc',150] );
-	tags.append( ['ZPrimeToQQ_200GeV_v4_mc',200] );
-	tags.append( ['ZPrimeToQQ_250GeV_v4_mc',250] );
-	tags.append( ['ZPrimeToQQ_300GeV_v4_mc',300] );
-	# tags.append( ['JetHT',0] );
-
+	# tags.append( ['W',0] );
+	# tags.append( ['DY',0] );
+	# tags.append( ['VectorDiJet1Jet_M50',50] );
+	# tags.append( ['VectorDiJet1Jet_M75',75] );
+	# tags.append( ['VectorDiJet1Jet_M100',100] );
+	# tags.append( ['VectorDiJet1Jet_M125',125] );
+	# tags.append( ['VectorDiJet1Jet_M150',150] );
+	# tags.append( ['VectorDiJet1Jet_M200',200] );
+	# tags.append( ['VectorDiJet1Jet_M250',250] );
+	# tags.append( ['VectorDiJet1Jet_M300',300] );
+	# tags.append( ['TT.roo',0] );
+	# tags.append( ['T.roo',0] );
+	tags.append( ['JetHTsilver',0] );
 
 	# make a tmp dir
 	#####
