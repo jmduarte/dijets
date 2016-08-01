@@ -1,6 +1,6 @@
 import ROOT
 from fullLims_1cat import getAsymLimits,makeAFillGraph,makeAGraph
-from massplot import end,make2DGraph
+from massplot import end,make2DGraph,avtotwidth
 import math,sys,time,os,glob,tdrstyle
 from array import array
 tdrstyle.setTDRStyle()
@@ -289,11 +289,14 @@ def dijetxs(color):
     lGraph.SetMarkerColor(color)
     return lGraph
 
-def divide(iG,iXS,iGB=False):
+def divide(iG,iXS,iGB=False,iGDM=1,iGQ=0.25,iMDM=1.):
     for i0 in range(0,iG.GetN()):
         iG.GetY()[i0] = iG.GetY()[i0]/iXS.Eval(iG.GetX()[i0])
+        lDMWidth = avtotwidth(1,iGDM,iGQ,iG.GetX()[i0],iMDM)
+        lWidth   = avtotwidth(1,0.  ,iGQ,iG.GetX()[i0],iMDM)
+        iG.GetY()[i0] = (lWidth/lDMWidth)*iG.GetY()[i0]
         if iGB:
-            iG.GetY()[i0]=math.sqrt(iG.GetY()[i0])*0.25*6
+            iG.GetY()[i0]=math.sqrt(iG.GetY()[i0])*iGQ*6
         
 def main():
     leg   = ROOT.TLegend(0.20,0.55,0.4,0.85)
@@ -304,10 +307,12 @@ def main():
     divide(exp,xs,True)
     divide(obs,xs,True)
     exp.GetXaxis().SetTitle("m_{med}")
-    exp.GetYaxis().SetTitle("#sigma")
+    exp.GetYaxis().SetTitle("g_{B}")
     exp.Draw("alp")
     obs.Draw("lp")
     #xs .Draw("lp")
+    end()
+    return
     canv0.Update()
     gdm=1
     canv1 = ROOT.TCanvas("can1","can1",1200,800)

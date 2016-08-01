@@ -78,7 +78,7 @@ def avtotwidth(iType,gdm,gsm,med,mdm):
         t=avwidth(iType,gsm,med,172.5)
     quarks=3*(u+d+s+c+b+t)
     dm=avwidth(iType,gdm,med,mdm)
-    print u,d,s,c,b,t,dm,quarks
+    #print u,d,s,c,b,t,dm,quarks
     return dm+quarks
 
 def BRCorrGQ(iGQ,iGDM,iMed,iMDM):
