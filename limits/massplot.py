@@ -17,7 +17,7 @@ ROOT.gStyle.SetPalette(1);
 
 
 def end():
-    if __name__ == '__main__':
+    #if __name__ == '__main__':
         rep = ''
         while not rep in [ 'q', 'Q','a',' ' ]:
             rep = raw_input( 'enter "q" to quit: ' )
@@ -78,13 +78,14 @@ def avtotwidth(iType,gdm,gsm,med,mdm):
         t=avwidth(iType,gsm,med,172.5)
     quarks=3*(u+d+s+c+b+t)
     dm=avwidth(iType,gdm,med,mdm)
-    #print u,d,s,c,b,t,dm,quarks
+    print u,d,s,c,b,t,dm,quarks
     return dm+quarks
 
 def BRCorrGQ(iGQ,iGDM,iMed,iMDM):
-    lNewWidth = avtotwidth(2,iGDM,iGQ,iMed,iMDM)
-    lOldWidth = avtotwidth(2,0.  ,iGQ,iMed,iMDM)
+    lNewWidth = avtotwidth(1,iGDM,iGQ,iMed,iMDM)
+    lOldWidth = avtotwidth(1,0.  ,iGQ,iMed,iMDM)
     lGQNew = math.sqrt(lNewWidth/lOldWidth)*iGQ
+    print iMDM,lGQNew/iGQ,lNewWidth/lOldWidth
     return lGQNew
 
 def convertgq(iGraph,iGDM,iMDM,iConvertGB=True):
@@ -92,9 +93,9 @@ def convertgq(iGraph,iGDM,iMDM,iConvertGB=True):
     ynew = array('d', []);
     for i0 in range(0,iGraph.GetN()):
         xnew.append(iGraph.GetX()[i0])
-        ynew.append(BRCorrGQ(iGraph.GetY()[i0],iGDM,iGraph.GetX()[i0],iMDM))
+        ynew.append(BRCorrGQ(iGraph.GetY()[i0]/6.,iGDM,iGraph.GetX()[i0],iMDM))
         if iConvertGB:
-            ynew[i0]=ynew[i0]/6.
+            ynew[i0]=ynew[i0]
     lGraph    = makeAGraph( xnew, ynew, 1, 3);
     return lGraph
 
@@ -102,6 +103,7 @@ def getCont(iGraph,iVal,color):
   #iGraph.SetContour(1,iVal)
   #iGraph.Draw("contz list")
   lContours = iGraph.GetContourList(iVal);
+  print lContours,lContours.GetSize()
   xnew = array('d', []);
   ynew = array('d', []);
   for i0 in range(0,lContours.GetSize()):
@@ -160,8 +162,19 @@ def main():
     canv0.SaveAs("gq_mdm_mmed.png")
     canv0.SaveAs("gq_mdm_mmed.pdf")
     lFile = ROOT.TFile("MMedMDM.root","RECREATE")
+    lObs.SetName("obs")
+    lObs.SetTitle("obs")
+    lExp.SetName("exp")
+    lExp.SetTitle("exp")
+
+    lXObs.SetName("obs_025")
+    lXObs.SetTitle("obs_025")
+    lXExp.SetName("exp_025")
+    lXExp.SetTitle("exp_025")
     lObs.Write()
     lExp.Write()
+    lXObs.Write()
+    lXExp.Write()
     end()
         
 if __name__ == '__main__':
