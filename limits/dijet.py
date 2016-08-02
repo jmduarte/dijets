@@ -1,16 +1,45 @@
 import ROOT
 from fullLims_1cat import getAsymLimits,makeAFillGraph,makeAGraph
-from massplot import end,make2DGraph,avtotwidth
+from massplot import end,make2DGraph,avtotwidth,parser
 import math,sys,time,os,glob,tdrstyle
 from array import array
 tdrstyle.setTDRStyle()
 ROOT.gStyle.SetPadRightMargin(0.18);
 ROOT.gStyle.SetPadLeftMargin(0.18);
 ROOT.gStyle.SetPadTopMargin(0.10);
-ROOT.gStyle.SetPalette(1);
+ROOT.gStyle.SetPalette(55);
+
+def merge(iPGraph,iCGraph,color,iX=-1,iXMax=100000):
+    x = array('d', [])
+    y = array('d', [])
+    for i0 in range(0,iCGraph.GetN()):
+        if iCGraph.GetX()[i0] > iX and iX > 0:
+            break
+        x.append(iCGraph.GetX()[i0])
+        y.append(iCGraph.GetY()[i0])
+
+    for i0 in range(0,iPGraph.GetN()):
+        if iPGraph.GetX()[i0] > iXMax:
+            break
+        if iX < 0:
+            x.append(iPGraph.GetX()[i0])
+            y.append(iPGraph.GetY()[i0])
+        elif iPGraph.GetX()[i0] > iX:
+            x.append(iPGraph.GetX()[i0])
+            y.append(iPGraph.GetY()[i0])
+    lGraph    = makeAGraph( x, y, color, 3 )
+    lGraph.SetMarkerColor(color)
+    return lGraph
 
 
-def dijetexp(color):
+def dijetexp(color,i90CL=False):
+    if i90CL:
+        lPFile = ROOT.TFile("PF90CL.root")
+        lPGraph = lPFile.Get("exp")
+        lCFile = ROOT.TFile("Calo90CL.root")
+        lCGraph = lCFile.Get("exp")
+        lGraph = merge(lPGraph,lCGraph,color,1400,3900)
+        return lGraph
     x = array('d', [])
     y = array('d', [])
     x.append(601.9305019305019)
@@ -83,7 +112,14 @@ def dijetexp(color):
     lGraph.SetMarkerColor(color)
     return lGraph
 
-def dijetobs(color):
+def dijetobs(color,i90CL=False):
+    if i90CL:
+        lPFile  = ROOT.TFile("PF90CL.root")
+        lPGraph = lPFile.Get("obs")
+        lCFile  = ROOT.TFile("Calo90CL.root")
+        lCGraph = lCFile.Get("obs")
+        lGraph  = merge(lPGraph,lCGraph,color,1400,3900)
+        return lGraph
     x = array('d', [])
     y = array('d', [])
     x.append(598.0694980694981)
@@ -296,34 +332,66 @@ def divide(iG,iXS,iGB=False,iGDM=1,iGQ=0.25,iMDM=1.):
         if iGB:
             iG.GetY()[i0]=(math.sqrt(iG.GetY()[i0]))*0.25*6
             
-def main():
-    leg   = ROOT.TLegend(0.20,0.55,0.4,0.85)
-    leg.SetHeader("g_{DM}=1.0")
+def main(iAxial,i90CL,iExp):
+    leg   = ROOT.TLegend(0.60,0.60,0.80,0.85)
+    #leg.SetHeader("g_{DM}=0.0 g_{q}=0.25")
     leg.SetFillColor(0)    
     leg.SetBorderSize(0)  
+    leg.SetFillStyle(0)  
     canv0 = ROOT.TCanvas("can0","can0",1200,800)
-    exp=dijetexp(ROOT.kGreen)
-    obs=dijetobs(ROOT.kRed)
+    exp=dijetexp(ROOT.kGreen,i90CL)
+    obs=dijetobs(ROOT.kRed  ,i90CL)
     xs=dijetxs(ROOT.kBlack)
     divide(exp,xs,True)
     divide(obs,xs,True)
     exp.GetXaxis().SetTitle("m_{med}")
-    exp.GetYaxis().SetTitle("g_{B}")
+    #exp.GetYaxis().SetTitle("g_{B}")
+    #exp.GetYaxis().SetTitle("#sigma_{J}(m_{med})")
+    exp.GetYaxis().SetTitle("#mu=#sigma_{J}/#sigma_{0}")
     exp.Draw("alp")
     obs.Draw("lp")
-    #xs .Draw("lp")
+    #xs .Draw("lp")                                                                                                                                      #leg.AddEntry(exp,"expected","lp")
+    #leg.AddEntry(obs,"observed","lp")
+    leg.Draw()
     canv0.Update()
     gdm=1
     canv1 = ROOT.TCanvas("can1","can1",1200,800)
-    lExp,lXExp=make2DGraph(exp,gdm,canv1,leg,"expected 95% CL.",1)
-    lObs,lXObs=make2DGraph(obs,gdm,canv1,leg,"observed 95% CL.",ROOT.kOrange)
-    lObs.Draw("colz")
+    lExp,lXExp=make2DGraph(exp,gdm,canv1,leg,"expected 95% CL.",1,iAxial)
+    lObs,lXObs=make2DGraph(obs,gdm,canv1,leg,"observed 95% CL.",ROOT.kOrange,iAxial)
+    if iExp:
+	    lExp.Draw("colz")
+    else:
+	    lObs.Draw("colz")
     lXExp.Draw("l sames")
     lXObs.Draw("l sames")
     leg.Draw()
     canv1.Update()
+    lExp.GetXaxis().SetTitle("m_{med} (GeV)")
+    lExp.GetYaxis().SetTitle("m_{dm}  (GeV)")
+    lExp.GetZaxis().SetTitle("g_{q}")
+    ROOT.gPad.Modified()
+    ROOT.gPad.RedrawAxis()
+    fileend="_dijet_av" if iAxial else "_dijet_v"
+    fileend=fileend+"_90" if i90CL else fileend
+    fileend=fileend+"_Exp" if iExp else fileend
+    canv1.SaveAs("gq_mdm_mmed"+fileend+".png")
+    canv1.SaveAs("gq_mdm_mmed"+fileend+".pdf")
+    lFile = ROOT.TFile("MMedMDM"+fileend+".root","RECREATE")
+    lObs.SetName("obs")
+    lObs.SetTitle("obs")
+    lExp.SetName("exp")
+    lExp.SetTitle("exp")
+    lXObs.SetName("obs_025")
+    lXObs.SetTitle("obs_025")
+    lXExp.SetName("exp_025")
+    lXExp.SetTitle("exp_025")
+    lObs.Write()
+    lExp.Write()
+    lXObs.Write()
+    lXExp.Write()
     end()
         
 if __name__ == '__main__':
-	main()
+    options=parser()
+    main(options.Axial,options.CL90,options.Exp)
 
