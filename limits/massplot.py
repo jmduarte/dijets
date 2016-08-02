@@ -13,23 +13,31 @@ tdrstyle.setTDRStyle()
 ROOT.gStyle.SetPadRightMargin(0.18);
 ROOT.gStyle.SetPadLeftMargin(0.18);
 ROOT.gStyle.SetPadTopMargin(0.10);
-ROOT.gStyle.SetPalette(1);
+ROOT.gStyle.SetPalette(70);
 
-
+def parser():
+	parser = OptionParser()
+	parser.add_option('--Axial',action='store_true',dest='Axial',default=False,help='Run Axial')
+	parser.add_option('--90CL' ,action='store_true',dest='CL90' ,default=False,help='Run 90% CL')
+	parser.add_option('--Exp'  ,action='store_true',dest='Exp'  ,default=False,help='Exp 2D plot')
+	(options, args) = parser.parse_args()
+	return options
+	
 def end():
     #if __name__ == '__main__':
-        rep = ''
-        while not rep in [ 'q', 'Q','a',' ' ]:
-            rep = raw_input( 'enter "q" to quit: ' )
-            if 1 < len(rep):
-                rep = rep[0]
+    rep = ''
+    while not rep in [ 'q', 'Q','a',' ' ]:
+        rep = raw_input( 'enter "q" to quit: ' )
+        if 1 < len(rep):
+            rep = rep[0]
 
-def load():
+def load(i90CL=False):
     idir = "datacards"
+    if i90CL:
+	    idir="datacards_90"
     #masses = [50,60,75,90,100,110, 125, 135, 150, 165, 180, 200, 250, 300]
     masses = [100,110, 125, 135, 150, 165, 180, 200, 250, 300]
     KFACTOR = 1.218
-    idir = "datacards"
     results = [];
     for i in range(len(masses)):
         results.append( getAsymLimits(idir+'/higgsCombineZprime'+str(masses[i])+'.Asymptotic.mH120.root','Zp'+str(masses[i])) );
@@ -81,56 +89,56 @@ def avtotwidth(iType,gdm,gsm,med,mdm):
     #print u,d,s,c,b,t,dm,quarks
     return dm+quarks
 
-def BRCorrGQ(iGQ,iGDM,iMed,iMDM):
-    lNewWidth = avtotwidth(1,iGDM,iGQ,iMed,iMDM)
-    lOldWidth = avtotwidth(1,0.  ,iGQ,iMed,1.)
+def BRCorrGQ(iGQ,iGDM,iMed,iMDM,iAxial):
+    option=2 if iAxial else 1	
+    lNewWidth = avtotwidth(option,iGDM,iGQ,iMed,iMDM)
+    lOldWidth = avtotwidth(option,0.  ,iGQ,iMed,1.)
     lDelta=lNewWidth-lOldWidth
-    lCorr = 0.5+0.5*math.sqrt(1+lDelta/lOldWidth)
+    lCorr = 0.5+0.5*math.sqrt(1+4.*lDelta/lOldWidth)
     lGQNew = math.sqrt(lCorr)*iGQ
-    #if iMDM < 10 and iMed == 200:
-    #    print "Scale:",iGQ,lGQNew,lDelta/lOldWidth,lCorr,iMed,iMDM
+    #if iMDM == 10:
+    #   lNewWidth = avtotwidth(2,iGDM,lGQNew,iMed,iMDM)
+    #   xs=lCorr*lCorr*(lOldWidth/lNewWidth)
+    #   print "Scale:",iGQ,lGQNew,lDelta/lOldWidth,lCorr,iMed,iMDM,xs #xs==1
     return lGQNew
 
-def convertgq(iGraph,iGDM,iMDM,iConvertGB=True):
+def convertgq(iGraph,iGDM,iMDM,iAxial,iConvertGB=True):
     xnew = array('d', []);
     ynew = array('d', []);
     for i0 in range(0,iGraph.GetN()):
         xnew.append(iGraph.GetX()[i0])
-        ynew.append(BRCorrGQ(iGraph.GetY()[i0]/6.,iGDM,iGraph.GetX()[i0],iMDM))
+        ynew.append(BRCorrGQ(iGraph.GetY()[i0]/6.,iGDM,iGraph.GetX()[i0],iMDM,iAxial))
         if iConvertGB:
             ynew[i0]=ynew[i0]
     lGraph    = makeAGraph( xnew, ynew, 1, 3);
     return lGraph
 
 def getCont(iGraph,iVal,color):
-  #iGraph.SetContour(1,iVal)
-  #iGraph.Draw("contz list")
   lContours = iGraph.GetContourList(iVal);
   print lContours,lContours.GetSize()
   xnew = array('d', []);
   ynew = array('d', []);
   for i0 in range(0,lContours.GetSize()):
+    if i0 > 0:
+	    continue
     pCurv = lContours.At(i0)
-    #pCurv = pCont.First()
-    #for i1 in range(0,pCont.GetSize()):
     for i2 in range(0,pCurv.GetN()):
         xnew.append(pCurv.GetX()[i2])
         ynew.append(pCurv.GetY()[i2])
-      #pCurv = pContLevel.fter(pCurv)
-  lGraph    = makeAGraph( xnew, ynew, color, 3 )
+  lGraph    = makeAGraph( xnew, ynew, color, 1 )
   lGraph.GetXaxis().SetTitle("m_{med} (GeV)")
   lGraph.GetYaxis().SetTitle("m_{dm}  (GeV)")
   lGraph.SetLineWidth(4)
   return lGraph
 
-def make2DGraph(gr,gdm,canv,leg,label,color):
+def make2DGraph(gr,gdm,canv,leg,label,color,iAxial):
     mdmarr = array('d', []);
     medarr = array('d', []);
     gqarr  = array('d', []);
     for i0 in range(0,100):
-        gqgraph=convertgq(gr,gdm,i0*20,True)
+        gqgraph=convertgq(gr,gdm,i0*20,iAxial,True)
         for i1 in range(0,gqgraph.GetN()):
-            mdmarr .append(i0*20)
+            mdmarr .append(i0*10)
             medarr.append(gqgraph.GetX()[i1])
             gqarr .append(gqgraph.GetY()[i1])
     lOGraph = ROOT.TGraph2D(len(mdmarr),medarr,mdmarr,gqarr)
@@ -143,33 +151,40 @@ def make2DGraph(gr,gdm,canv,leg,label,color):
     leg.AddEntry(lCont,label,"l")
     return lOGraph,lCont
 
-def main():
-    grexp,grobs=load()
+def main(iAxial,i90CL,iExp):
+    grexp,grobs=load(i90CL)
     gdm=1
     leg   = ROOT.TLegend(0.20,0.55,0.4,0.85)
     canv0 = ROOT.TCanvas("can0","can0",1200,800)
     leg.SetHeader("g_{DM}="+str(gdm))
     leg.SetFillColor(0)    
-    leg.SetBorderSize(0)  
-    lExp,lXExp=make2DGraph(grexp,gdm,canv0,leg,"expected 95% CL.",1)
-    lObs,lXObs=make2DGraph(grobs,gdm,canv0,leg,"observed 95% CL.",ROOT.kOrange)
-    lObs.Draw("colz")
+    leg.SetFillStyle(0)    
+    leg.SetBorderSize(0)
+    leg.SetTextColor(ROOT.kGreen)
+    lExp,lXExp=make2DGraph(grexp,gdm,canv0,leg,"expected 95% CL.",1,iAxial)
+    lObs,lXObs=make2DGraph(grobs,gdm,canv0,leg,"observed 95% CL.",ROOT.kGreen+1,iAxial)
+    if iExp:
+	    lExp.Draw("colz")
+    else:
+	    lObs.Draw("colz")
     lXExp.Draw("l sames")
     lXObs.Draw("l sames")
     leg.Draw()
-    lObs.GetXaxis().SetTitle("m_{med} (GeV)")
-    lObs.GetYaxis().SetTitle("m_{dm}  (GeV)")
-    lObs.GetZaxis().SetTitle("g_{q}")
+    lExp.GetXaxis().SetTitle("m_{med} (GeV)")
+    lExp.GetYaxis().SetTitle("m_{dm}  (GeV)")
+    lExp.GetZaxis().SetTitle("g_{q}")
     ROOT.gPad.Modified()
     ROOT.gPad.RedrawAxis()
-    canv0.SaveAs("gq_mdm_mmed.png")
-    canv0.SaveAs("gq_mdm_mmed.pdf")
-    lFile = ROOT.TFile("MMedMDM.root","RECREATE")
+    end="_av" if iAxial else "_v"
+    end=end+"_90" if i90CL else end
+    end=end+"_Exp" if iExp else end
+    canv0.SaveAs("gq_mdm_mmed"+end+".png")
+    canv0.SaveAs("gq_mdm_mmed"+end+".pdf")
+    lFile = ROOT.TFile("MMedMDM"+end+".root","RECREATE")
     lObs.SetName("obs")
     lObs.SetTitle("obs")
     lExp.SetName("exp")
     lExp.SetTitle("exp")
-
     lXObs.SetName("obs_025")
     lXObs.SetTitle("obs_025")
     lXExp.SetName("exp_025")
@@ -178,8 +193,8 @@ def main():
     lExp.Write()
     lXObs.Write()
     lXExp.Write()
-    end()
+    #end()
         
 if __name__ == '__main__':
-
-	main();
+	options=parser()
+	main(options.Axial,options.CL90,options.Exp);
