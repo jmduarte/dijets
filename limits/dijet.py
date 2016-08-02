@@ -178,8 +178,6 @@ def dijetobs(color):
     y.append(0.014709523294944023)
     x.append(3880.004473272198)
     y.append(0.01605472139402788)
-    x.append(3880.004473272198)
-    y.append(0.01605472139402788)
     #x.append(4014.291172742861)
     #y.append(0.014301172804579109)
     #x.append(4096.781107880414)
@@ -292,14 +290,17 @@ def dijetxs(color):
 def divide(iG,iXS,iGB=False,iGDM=1,iGQ=0.25,iMDM=1.):
     for i0 in range(0,iG.GetN()):
         iG.GetY()[i0] = iG.GetY()[i0]/iXS.Eval(iG.GetX()[i0])
-        lDMWidth = avtotwidth(1,iGDM,iGQ,iG.GetX()[i0],iMDM)
-        lWidth   = avtotwidth(1,0.  ,iGQ,iG.GetX()[i0],iMDM)
+        lDMWidth = avtotwidth(2,iGDM,iGQ,iG.GetX()[i0],iMDM)
+        lWidth   = avtotwidth(2,0.  ,iGQ,iG.GetX()[i0],iMDM)
         iG.GetY()[i0] = (lWidth/lDMWidth)*iG.GetY()[i0]
         if iGB:
-            iG.GetY()[i0]=math.sqrt(iG.GetY()[i0])*iGQ*6
-        
+            iG.GetY()[i0]=(math.sqrt(iG.GetY()[i0]))*0.25*6
+            
 def main():
     leg   = ROOT.TLegend(0.20,0.55,0.4,0.85)
+    leg.SetHeader("g_{DM}=1.0")
+    leg.SetFillColor(0)    
+    leg.SetBorderSize(0)  
     canv0 = ROOT.TCanvas("can0","can0",1200,800)
     exp=dijetexp(ROOT.kGreen)
     obs=dijetobs(ROOT.kRed)
@@ -311,8 +312,6 @@ def main():
     exp.Draw("alp")
     obs.Draw("lp")
     #xs .Draw("lp")
-    end()
-    return
     canv0.Update()
     gdm=1
     canv1 = ROOT.TCanvas("can1","can1",1200,800)
@@ -322,6 +321,7 @@ def main():
     lXExp.Draw("l sames")
     lXObs.Draw("l sames")
     leg.Draw()
+    canv1.Update()
     end()
         
 if __name__ == '__main__':

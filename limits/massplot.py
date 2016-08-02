@@ -83,9 +83,12 @@ def avtotwidth(iType,gdm,gsm,med,mdm):
 
 def BRCorrGQ(iGQ,iGDM,iMed,iMDM):
     lNewWidth = avtotwidth(1,iGDM,iGQ,iMed,iMDM)
-    lOldWidth = avtotwidth(1,0.  ,iGQ,iMed,iMDM)
-    lGQNew = math.sqrt(lNewWidth/lOldWidth)*iGQ
-    print iMDM,lGQNew/iGQ,lNewWidth/lOldWidth
+    lOldWidth = avtotwidth(1,0.  ,iGQ,iMed,1.)
+    lDelta=lNewWidth-lOldWidth
+    lCorr = 0.5+0.5*math.sqrt(1+lDelta/lOldWidth)
+    lGQNew = math.sqrt(lCorr)*iGQ
+    #if iMDM < 10 and iMed == 200:
+    #    print "Scale:",iGQ,lGQNew,lDelta/lOldWidth,lCorr,iMed,iMDM
     return lGQNew
 
 def convertgq(iGraph,iGDM,iMDM,iConvertGB=True):
@@ -125,9 +128,9 @@ def make2DGraph(gr,gdm,canv,leg,label,color):
     medarr = array('d', []);
     gqarr  = array('d', []);
     for i0 in range(0,100):
-        gqgraph=convertgq(gr,gdm,i0*10,True)
+        gqgraph=convertgq(gr,gdm,i0*20,True)
         for i1 in range(0,gqgraph.GetN()):
-            mdmarr .append(i0*10)
+            mdmarr .append(i0*20)
             medarr.append(gqgraph.GetX()[i1])
             gqarr .append(gqgraph.GetY()[i1])
     lOGraph = ROOT.TGraph2D(len(mdmarr),medarr,mdmarr,gqarr)
