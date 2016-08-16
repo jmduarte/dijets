@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 import ROOT as r,sys,math,array,os
+from hist import hist
 from optparse import OptionParser
 from ROOT import std,RooDataHist
 r.gROOT.Macro(os.path.expanduser('~/rootlogon.C'))
@@ -33,12 +34,15 @@ def parser():
     parser.add_option('--2D'      ,action='store_true',         dest='fit2D'   ,default=False,       help='2D fit')
     parser.add_option('--fail'    ,action='store_true',         dest='fail'    ,default=False,       help='fit failing') 
     parser.add_option('--passfail',action='store_true',         dest='passfail',default=False,       help='fit pass and failng') 
+    parser.add_option('--dummy',   action='store_true',         dest='dummy'   ,default=False,       help='dummy card') 
     parser.add_option('--input'   ,action='store',type='string',dest='input'   ,default='hists.root',help='input file')
     parser.add_option('--func'    ,action='store',type='int'   ,dest='func'    ,default=0           ,help='n=ith order of Bernstein')
     parser.add_option('--output'  ,action='store',type='string',dest='output'  ,default='bern.root' ,help='workspace output')
-    parser.add_option('--xMin'    ,action='store',type='float' ,dest='xmin'    ,default=28          ,help='x-min')
+    parser.add_option('--xMin'    ,action='store',type='float' ,dest='xmin'    ,default=32          ,help='x-min')
     parser.add_option('--xMax'    ,action='store',type='float' ,dest='xmax'    ,default=300         ,help='x-max')
-    parser.add_option('--nBins'   ,action='store',type='int'   ,dest='nbins'    ,default=68          ,help='n-bins')
+    parser.add_option('--nBins'   ,action='store',type='int'   ,dest='nbins'    ,default=67          ,help='n-bins')
+    #parser.add_option('--xMax'    ,action='store',type='float' ,dest='xmax'    ,default=200         ,help='x-max')
+    #parser.add_option('--nBins'   ,action='store',type='int'   ,dest='nbins'    ,default=38          ,help='n-bins')
     (options,args) = parser.parse_args()
     return options
 
@@ -114,11 +118,11 @@ def smear(iVar,iDataHist,iScale=0.1):
 
 def workspace(iDatas,iFuncs,iVars,iCat="cat0",iShift=True):
     lW = r.RooWorkspace("w_"+str(iCat))
-    for var in iVars:
-        try:
-            var.setConstant(True)
-        except:
-            pass
+    #for var in iVars:
+        #try:
+            #var.setConstant(True)
+        #except:
+        #    pass
     for pData in iDatas:
         getattr(lW,'import')(pData,r.RooFit.RecycleConflictNodes())
     
@@ -195,36 +199,84 @@ def bestFit(iEffQCD,iDM,iVEff,iA0,iA1,iA2,iP1,iR1,iSigma):
     iDM.setConstant(True)
     iVEff.setConstant(True)
         
-def command(iBase,iPt,iM,iRho,iPass=True,iNR=1,iNP=1,iNRNP=1):
-    lFunc=iBase
-    if iPt > 0 and iNP > 0:
-        lFunc+=("*(1+p1*"+str(iPt-500))
-        if iNP > 1:
-            lFunc+=("+p2*"+str(iPt-500)+"*"+str(iPt-500))
-        lFunc+=")"
+def command(iPt,iRho,iQCD,iVars,iNR=1,iNP=1,iNRNP=1):
+    lPt  = r.RooConstVar("Var_Pt_" +str(iPt)+"_"+str(iRho), "Var_Pt_" +str(iPt)+"_"+str(iRho),(iPt-500))
+    lRho = r.RooConstVar("Var_Rho_"+str(iPt)+"_"+str(iRho), "Var_Rho_"+str(iPt)+"_"+str(iRho),(iRho-2.5))
+    lPtArray  = r.RooArgList()
+    lRhoArray = r.RooArgList()
+    lPtArray.add(iQCD)
+    lNCount=0
+    if iNP > 0:
+        lPtArray.add(iVars[lNCount])
+        lNCount=lNCount+1
+    if iNP > 1:
+        lPtArray.add(iVars[lNCount])
+        lNCount=lNCount+1
+    if iNP > 2:
+        lPtArray.add(iVars[lNCount])
+        lNCount=lNCount+1
+    if iNP > 3:
+        lPtArray.add(iVars[lNCount])
+        lNCount=lNCount+1
+        
+    lPtPol = r.RooPolyVar("Var_PtPol_Bin_"+str(iPt)+"_"+str(iRho),"Var_PtPol_Bin_"+str(iPt)+"_"+str(iRho),lPt,lPtArray)
+    lRhoArray.add(lPtPol)
     if iNR > 0:
-        lRho = '(log(x*x/'+str(iPt)+')-2.5)' if iM < 0 else str(iRho-2.5)
-        lFunc+=("*(1+r1*"+lRho)
-        if iNR > 1:
-            lFunc+=("+r2*"+lRho+"*"+lRho)            
-        lFunc+=")"
-    
-    if iPt > 0 and iNRNP > 0:
-        lRho  = '(log(x*x/'+str(iPt)+')-2.5)'           if iM < 0 else str(iRho-2.5)
-        lPRho = '(log(x*x/'+str(iPt)+')-2.5)*'+str(iPt) if iM < 0 else str((iRho-2.5)*(iPt-500))
-        lFunc+=("*(1+pr1*"+str(lPRho))
+        lTmpArray = r.RooArgList()
+        lTmpArray.add(iVars[lNCount])
+        lNCount=lNCount+1
+        if iNRNP > 0:
+            lTmpArray.add(iVars[lNCount])
+            lNCount=lNCount+1
         if iNRNP > 1:
-            lFunc+=("+pr2*"+str(iPt-500)+"*"+lPRho)
+            lTmpArray.add(iVars[lNCount])
+            lNCount=lNCount+1
+        lRhoPol0 = r.RooPolyVar("Var_RhoPol0_Bin_"+str(iPt)+"_"+str(iRho),"Var_RhoPol0_Bin_"+str(iPt)+"_"+str(iRho),lPt,lTmpArray)
+        fVars.append(lRhoPol0)
+        lRhoArray.add(lRhoPol0)
+    if iNR > 1:
+        lTmpArray = r.RooArgList()
+        lTmpArray.add(iVars[lNCount])
+        lNCount=lNCount+1
         if iNRNP > 2:
-            lFunc+=("+pr3*"+lPRho+"*"+lRho)
+            lTmpArray.add(iVars[lNCount])
+            lNCount=lNCount+1
         if iNRNP > 3:
-            lFunc+=("+pr4*"+lPRho+"*"+lPRho)
-        lFunc+=")"
+            lTmpArray.add(iVars[lNCount])
+            lNCount=lNCount+1
+        lRhoPol1 = r.RooPolyVar("Var_RhoPol1_Bin_"+str(iPt)+"_"+str(iRho),"Var_RhoPol1_Bin_"+str(iPt)+"_"+str(iRho),lPt,lTmpArray)
+        fVars.append(lRhoPol1)
+        lRhoArray.add(lRhoPol1)
+    if iNR > 2:
+        lTmpArray = r.RooArgList()
+        lTmpArray.add(iVars[lNCount])
+        lNCount=lNCount+1
+        if iNRNP > 4:
+            lTmpArray.add(iVars[lNCount])
+            lNCount=lNCount+1
+        if iNRNP > 5:
+            lTmpArray.add(iVars[lNCount])
+            lNCount=lNCount+1
+        lRhoPol2 = r.RooPolyVar("Var_RhoPol2_Bin_"+str(iPt)+"_"+str(iRho),"Var_RhoPol2_Bin_"+str(iPt)+"_"+str(iRho),lPt,lTmpArray)
+        fVars.append(lRhoPol2)
+        lRhoArray.add(lRhoPol2)
+    if iNR > 3:
+        lTmpArray = r.RooArgList()
+        lTmpArray.add(iVars[lNCount])
+        lNCount=lNCount+1
+        if iNRNP > 6:
+            lTmpArray.add(iVars[lNCount])
+            lNCount=lNCount+1
+        if iNRNP > 7:
+            lTmpArray.add(iVars[lNCount])
+            lNCount=lNCount+1
+        lRhoPol3 = r.RooPolyVar("Var_RhoPol3_Bin_"+str(iPt)+"_"+str(iRho),"Var_RhoPol2_Bin_"+str(iPt)+"_"+str(iRho),lPt,lTmpArray)
+        fVars.append(lRhoPol3)
+        lRhoArray.add(lRhoPol3)
 
-    if not iPass:
-        lFunc=lFunc.replace("+p","-p")
-        lFunc=lFunc.replace("+r","-r")
-    return lFunc
+    lRhoPol = r.RooPolyVar("Var_RhoPol_Bin_"+str(iPt)+"_"+str(iRho),"Var_RhoPol_Bin_"+str(iPt)+"_"+str(iRho),lRho,lRhoArray)
+    fVars.extend([lPt,lRho,lPtPol,lRhoPol])
+    return lRhoPol
 
 def qcdFunc(iH,iVars,iBin="_cat0",iFunc=0,i1D=True,iPt=-1):
     lNTot   = r.RooRealVar   ("qcdnorm"+iBin,"qcdnorm"+iBin,(iH[0].Integral()+iH[1].Integral()),0.,3000.*(iH[0].Integral()+iH[1].Integral()))
@@ -237,6 +289,11 @@ def qcdFunc(iH,iVars,iBin="_cat0",iFunc=0,i1D=True,iPt=-1):
     lA4     = r.RooRealVar   ("a4"          ,"a4"          ,0.0,-0.1,0.1)
     lA5     = r.RooRealVar   ("a5"          ,"a5"          ,0.0,-0.1,0.1)
     lA6     = r.RooRealVar   ("a6"          ,"a6"          ,0.0,-0.1,0.1)
+    lA7     = r.RooRealVar   ("a7"          ,"a7"          ,0.0,-0.1,0.1)
+    lA8     = r.RooRealVar   ("a8"          ,"a8"          ,0.0,-0.1,0.1)
+    lA9     = r.RooRealVar   ("a9"          ,"a9"          ,0.0,-0.1,0.1)
+    lA10    = r.RooRealVar   ("a10"         ,"a10"         ,0.0,-0.1,0.1)
+    lA11    = r.RooRealVar   ("a11"         ,"a11"         ,0.0,-0.1,0.1)
     lSigma1 = r.RooRealVar   ("sigma1"      ,"sigma1"      ,50,0,1000)
     lP1     = r.RooRealVar   ("p1" ,"p1", 0.0   ,-1.0  ,1.0)
     lP2     = r.RooRealVar   ("p2" ,"p2", 0.0   ,-0.001,0.001)
@@ -258,6 +315,30 @@ def qcdFunc(iH,iVars,iBin="_cat0",iFunc=0,i1D=True,iPt=-1):
         elif iFunc == 6:
             lQFuncP1 = r.RooBernstein("qcd_pass_"+iBin,"qcd_pass_"+iBin,iVars[0],r.RooArgList(lA0,lA1,lA2,lA3,lA4,lA5,lA6))
             lQFuncF1 = r.RooBernstein("qcd_fail_"+iBin,"qcd_fail_"+iBin,iVars[0],r.RooArgList(lA0,lA1,lA2,lA3,lA4,lA5,lA6))
+        elif iFunc == 7:
+            lQFuncP1 = r.RooBernstein("qcd_pass_"+iBin,"qcd_pass_"+iBin,iVars[0],r.RooArgList(lA0,lA1,lA2,lA3,lA4,lA5,lA6,lA7))
+            lQFuncF1 = r.RooBernstein("qcd_fail_"+iBin,"qcd_fail_"+iBin,iVars[0],r.RooArgList(lA0,lA1,lA2,lA3,lA4,lA5,lA6,lA7))
+        elif iFunc == 8:
+            lQFuncP1 = r.RooBernstein("qcd_pass_"+iBin,"qcd_pass_"+iBin,iVars[0],r.RooArgList(lA0,lA1,lA2,lA3,lA4,lA5,lA6,lA7,lA8))
+            lQFuncF1 = r.RooBernstein("qcd_fail_"+iBin,"qcd_fail_"+iBin,iVars[0],r.RooArgList(lA0,lA1,lA2,lA3,lA4,lA5,lA6,lA7,lA8))
+        elif iFunc == 9:
+            lArg = r.RooArgList(lA0,lA1,lA2,lA3,lA4,lA5,lA6,lA7,lA8) 
+            lArg.add(lA9)
+            lQFuncP1 = r.RooBernstein("qcd_pass_"+iBin,"qcd_pass_"+iBin,iVars[0],lArg)
+            lQFuncF1 = r.RooBernstein("qcd_fail_"+iBin,"qcd_fail_"+iBin,iVars[0],lArg)
+        elif iFunc == 10:
+            lArg = r.RooArgList(lA0,lA1,lA2,lA3,lA4,lA5,lA6,lA7,lA8) 
+            lArg.add(lA9)
+            lArg.add(lA10)
+            lQFuncP1 = r.RooBernstein("qcd_pass_"+iBin,"qcd_pass_"+iBin,iVars[0],lArg)
+            lQFuncF1 = r.RooBernstein("qcd_fail_"+iBin,"qcd_fail_"+iBin,iVars[0],lArg)
+        elif iFunc == 11:
+            lArg = r.RooArgList(lA0,lA1,lA2,lA3,lA4,lA5,lA6,lA7,lA8) 
+            lArg.add(lA9)
+            lArg.add(lA10)
+            lArg.add(lA11)
+            lQFuncP1 = r.RooBernstein("qcd_pass_"+iBin,"qcd_pass_"+iBin,iVars[0],lArg)
+            lQFuncF1 = r.RooBernstein("qcd_fail_"+iBin,"qcd_fail_"+iBin,iVars[0],lArg)
         elif iFunc == 2:
             lQFuncP1 = r.RooBernstein("qcd_pass_"+iBin,"qcd_pass_"+iBin,iVars[0],r.RooArgList(lA0,lA1,lA2))
             lQFuncF1 = r.RooBernstein("qcd_fail_"+iBin,"qcd_fail_"+iBin,iVars[0],r.RooArgList(lA0,lA1,lA2))
@@ -289,7 +370,7 @@ def qcdFunc(iH,iVars,iBin="_cat0",iFunc=0,i1D=True,iPt=-1):
     lQCDP   = r.RooExtendPdf ("qcdpassE"+iBin,"qcdpass"+iBin,lQFuncP,lNPass)
     lQCDF   = r.RooExtendPdf ("qcdfailE"+iBin,"qcdfail"+iBin,lQFuncF,lNFail)
     lQCD    = [lQCDP,lQCDF,lQFuncP,lQFuncF]
-    fVars.extend([lNTot,lA0,lA1,lA2,lR1,lSigma1,lNPass,lNFail,lP1,lR1,lR2,lP2,lA3,lA4,lA5,lA6])
+    fVars.extend([lNTot,lA0,lA1,lA2,lR1,lSigma1,lNPass,lNFail,lP1,lR1,lR2,lP2,lA3,lA4,lA5,lA6,lA7,lA8,lA9,lA10,lA11])
     fFuncs.extend(lQCD)
     fPars.extend([lA0,lA1,lA2,lP1,lR1,lP2,lR2,lSigma1])
     lP1.setConstant(True)
@@ -318,11 +399,25 @@ def histFunc(iH,iVars,iLabel="w",iBin="_cat0",i1D=True):
     return lHist
 
 def getSignals(iHP,iHF,iBin,iBase):
-    lPSigs = []
-    lFSigs = []
-    masses=[50,75,100,125,150,200,250,300]
+    lPSigs  = []
+    lFSigs  = []
+    lPHists = [] 
+    lFHists = [] 
+    lVars=[50,75,100,125,150,200,250,300]
+    for i0 in range(0,len(lVars)):
+        lPHists.append(iHP[i0+3])
+        lFHists.append(iHF[i0+3])
+    lPHist = hist(lVars,lPHists)
+    lFHist = hist(lVars,lFHists)
+    masses=[50,60,75,90,100,112,125,140,150,160,170,180,190,200,210,220,230,240,250,260,270,280,290,300]
     for i0 in range(0,len(masses)):
-        lSig = histFunc([iHP[i0+3],iHF[i0+3]],iBase,"zqq"+str(masses[i0]),iBin)
+        pHP   = lPHist.morph(masses[i0])
+        pHF   = lFHist.morph(masses[i0])
+        for i1 in range(0,len(lVars)):
+            if lVars[i1] == masses[i0]:
+                pHP=iHP[i1+3]
+                pHF=iHF[i1+3]
+        lSig = histFunc([pHP,pHF],iBase,"zqq"+str(masses[i0]),iBin)
         lPSigs.append(lSig[4])
         lFSigs.append(lSig[5])
     return (lPSigs,lFSigs)
@@ -335,10 +430,14 @@ def fit1D(iHP,iHF,iFail,iFunc=0,iBin="cat0"):
         lData = r.RooDataHist("data_obs_"+iBin,"data_obs_"+iBin,r.RooArgList(lBase[0]),iHP[0])
     lW    = histFunc([iHP[1],iHF[1]],lBase,"wqq",iBin)
     lZ    = histFunc([iHP[2],iHF[2]],lBase,"zqq",iBin)
-    lQCD  = qcdFunc ([iHP[len(iHP)-1],iHF[len(iHF)-1]],lBase,iBin,iFunc)
-    lTot  = r.RooAddPdf("tot"+iBin,"tot"+iBin,r.RooArgList(lQCD[0+iFail]))#,lW[2+iFail],lZ[2+iFail]))
-    lTot.fitTo(lData,r.RooFit.Extended(),r.RooFit.Minos())
-    lHists=[lW[4+iFail],lZ[4+iFail],lQCD[0+iFail]]
+    lTT   = histFunc([iHP[len(iHP)-1],iHF[len(iHF)-1]],lBase,"tt" ,iBin)
+    lQCD  = qcdFunc ([iHP[len(iHP)-2],iHF[len(iHF)-2]],lBase,iBin,iFunc)
+    #lBase[0].setRange("R1",30,60)
+    #lBase[0].setRange("R2",110,300)
+    lTot  = r.RooAddPdf("tot"+iBin,"tot"+iBin,r.RooArgList(lQCD[0+iFail],lW[2+iFail]))#,lZ[2+iFail]))
+    #lTot.fitTo(lData,r.RooFit.Extended())
+    lTot.fitTo(lData,r.RooFit.Extended())#,r.RooFit.Minos())
+    lHists=[lTT[4+iFail],lW[4+iFail],lZ[4+iFail],lQCD[0+iFail]]
     lHists.extend(getSignals(iHP,iHF,iBin,lBase)[iFail])
     workspace([lData],lHists,fVars,iBin)
     lFuncs=[lTot,lQCD[0+iFail]]#,lW[2+iFail],lZ[2+iFail]]
@@ -354,7 +453,7 @@ def fit1DPF(iHP,iHF,iFunc=0,iBin="cat0"):
     lData  = r.RooDataHist("comb_data_obs","comb_data_obs",r.RooArgList(lBase[0]),r.RooFit.Index(lCats),r.RooFit.Import("pass",lPData),r.RooFit.Import("fail",lFData))
     lW    = histFunc([iHP[1],iHF[1]],lBase,"wqq",iBin)
     lZ    = histFunc([iHP[2],iHF[2]],lBase,"zqq",iBin)
-    lQCD  = qcdFunc ([iHP[len(iHP)-1],iHF[len(iHF)-1]],lBase,iBin,iFunc)
+    lQCD  = qcdFunc ([iHP[len(iHP)-2],iHF[len(iHF)-2]],lBase,iBin,iFunc)
     lTotP = r.RooAddPdf("tot_pass"+iBin,"tot_pass"+iBin,r.RooArgList(lQCD[0],lW[2],lZ[2]))
     lTotF = r.RooAddPdf("tot_fail"+iBin,"tot_fail"+iBin,r.RooArgList(lQCD[1]))#,lW[3],lZ[3]))
     lTot  = r.RooSimultaneous("tot","tot",lCats) 
@@ -430,7 +529,7 @@ def cat(iCat,iHP,iHF,iBin,iBase,iPt,iFunc):
     lData  = r.RooDataHist("comb_data_obs","comb_data_obs",r.RooArgList(iBase[0]),r.RooFit.Index(lCats),r.RooFit.Import("pass",lPData),r.RooFit.Import("fail",lFData))
     lW    = histFunc([iHP[1],iHF[1]],iBase,"wqq",iBin)
     lZ    = histFunc([iHP[2],iHF[2]],iBase,"zqq",iBin)
-    lQCD  = qcdFunc ([iHP[len(iHP)-1],iHF[len(iHF)-1]],iBase,iBin,iFunc)#,True,iPt)
+    lQCD  = qcdFunc ([iHP[len(iHP)-2],iHF[len(iHF)-2]],iBase,iBin,iFunc)#,True,iPt)
     lTotP = r.RooAddPdf("tot_pass"+iBin,"tot_pass"+iBin,r.RooArgList(lQCD[0]))#,lW[2],lZ[2]))
     lTotF = r.RooAddPdf("tot_fail"+iBin,"tot_fail"+iBin,r.RooArgList(lQCD[1]))#,lW[3],lZ[3]))
     lEWKP = r.RooAddPdf("ewk_pass"+iBin,"ewk_pass"+iBin,r.RooArgList(lW[2],lZ[2]))
@@ -487,38 +586,61 @@ def fitCat(iHP,iHF,iFunc=0,iBin="_cat0"):
     #for i0 in range(0,lPtBins):
     #    drawPF(lBase[0],[lRDatas[2*i0],lRDatas[2*i0+1]],[[lPdfs[2*i0]],[lPdfs[2*i0+1]]],i0)
 
-def dumpRalph(iH,iBase,iPt,iCat):
+def dumpRalph(iHs,iBase,iPt,iCat):
     #lName=(((iH.GetName().replace("_fail_","")).replace("_pass_","")).replace(iCat,"")).replace("2D_","")
     lName="qcd"
     iBase[5].setVal(iPt)
     lP1     = r.RooRealVar   ("p1" ,"p1", 0.0   ,-0.1  ,0.1)
-    lP2     = r.RooRealVar   ("p2" ,"p2", 0.0   ,-0.001,0.001)
+    lP2     = r.RooRealVar   ("p2" ,"p2", 0.0   ,-0.1  ,0.1)
+    lP3     = r.RooRealVar   ("p3" ,"p3", 0.0   ,-0.1  ,0.1)
     lR1     = r.RooRealVar   ("r1" ,"r1", 0.0   ,-10.5 ,10.5)
     lR2     = r.RooRealVar   ("r2" ,"r2", 0.0   ,-10.5 ,10.5)
+    lR3     = r.RooRealVar   ("r3" ,"r3", 0.0   ,-10.5 ,10.5)
+    lR4     = r.RooRealVar   ("r4" ,"r4", 0.0   ,-10.5 ,10.5)
     lPR1    = r.RooRealVar   ("pr1","pr1", 0.0   ,-0.5 ,0.5)
     lPR2    = r.RooRealVar   ("pr2","pr2", 0.0   ,-0.1 ,0.1)
     lPR3    = r.RooRealVar   ("pr3","pr3", 0.0   ,-0.1 ,0.1)
     lPR4    = r.RooRealVar   ("pr4","pr4", 0.0   ,-0.1 ,0.1)
+    lPR5    = r.RooRealVar   ("pr5","pr5", 0.0   ,-0.1 ,0.1)
+    lPR6    = r.RooRealVar   ("pr6","pr6", 0.0   ,-0.1 ,0.1)
+    lPR7    = r.RooRealVar   ("pr7","pr7", 0.0   ,-0.1 ,0.1)
+    lPR8    = r.RooRealVar   ("pr8","pr8", 0.0   ,-0.1 ,0.1)
+    lPR9    = r.RooRealVar   ("pr9","pr9", 0.0   ,-0.1 ,0.1)
+    lVars = r.RooArgList(lP1,lP2,lR1,lPR1,lPR2,lR2,lPR3,lPR4,lR3)
+    lVars.add(lPR5)
+    lVars.add(lPR6)
+    lVars.add(lR4)
+    lVars.add(lPR7)
+    lVars.add(lPR8)
     lPassBins = r.RooArgList()
     lFailBins = r.RooArgList()
     iBase[2].setVal(0.02)
     iBase[2].setConstant(False)
-    for i0 in range(1,iH.GetNbinsX()+1):
-        iBase[0].setVal(iH.GetXaxis().GetBinCenter(i0)) 
-        lPass = command("qcdeff"    ,iPt,iBase[0].getVal(),iBase[6].getVal(),True ,2,2,2)
-        lFail = command("(1-qcdeff)",iPt,iBase[0].getVal(),iBase[6].getVal(),False,2,2,2)
-        pFail = r.RooRealVar   (lName+"_fail_"+iCat+"_Bin"+str(i0),lName+"_fail_"+iCat+"_Bin"+str(i0),iH.GetBinContent(i0),-5,50000000.)
-        #pPass = r.RooFormulaVar(lName+"_pass_"+iCat+"_Bin"+str(i0),lName+"_pass_"+iCat+"_Bin"+str(i0),lPass+"/("+lFail+")*"+pFail.GetName(),r.RooArgList(pFail,lP1,lR1,lP2,lR2,lPR1,lPR2,lPR3,iBase[2]))
-        #pPass = r.RooFormulaVar(lName+"_pass_"+iCat+"_Bin"+str(i0),lName+"_pass_"+iCat+"_Bin"+str(i0),lPass+"*"+pFail.GetName(),r.RooArgList(pFail,lP1,lR1,iBase[2]))
-        pPass = r.RooFormulaVar(lName+"_pass_"+iCat+"_Bin"+str(i0),lName+"_pass_"+iCat+"_Bin"+str(i0),lPass+"*"+pFail.GetName(),r.RooArgList(pFail,lP1,lR1,lP2,lR2,lPR1,lPR2,iBase[2]))
-        #pFail.setConstant(True)
+    lUnity    = r.RooConstVar("unity","unity",1.)
+    for i0 in range(1,iHs[0].GetNbinsX()+1):
+        iBase[0].setVal(iHs[0].GetXaxis().GetBinCenter(i0)) 
+        lPass = command(iBase[0].getVal(),iBase[6].getVal(),lUnity,lVars,4,2,8)
+        pSum = 0
+        for i1 in range(0,len(iHs)):
+            pSum = pSum + iHs[i1].GetBinContent(i0) if i1 == 0 else pSum - iHs[i1].GetBinContent(i0)
+        if pSum < 0:
+            pSum = 0
+        pUnc = math.sqrt(pSum)*5+10
+        pFail = r.RooRealVar   (lName+"_fail_"+iCat+"_Bin"+str(i0),lName+"_fail_"+iCat+"_Bin"+str(i0),pSum,max(pSum-pUnc,0),max(pSum+pUnc,0))
+        lArg = r.RooArgList(pFail,lPass,iBase[2])
+        pPass = r.RooFormulaVar(lName+"_pass_"+iCat+"_Bin"+str(i0),lName+"_pass_"+iCat+"_Bin"+str(i0),"@0*max(@1,0)*@2",lArg)
+        #pPass = r.RooPolyVar(lName+"_pass_"+iCat+"_Bin"+str(i0),lName+"_pass_"+iCat+"_Bin"+str(i0),pFail,lArg)
+        if pSum < 4:
+            pFail.setConstant(True)
+            pPass = r.RooRealVar   (lName+"_pass_"+iCat+"_Bin"+str(i0),lName+"_pass_"+iCat+"_Bin"+str(i0),0,0,0)
+            pPass.setConstant(True)
         lPassBins.add(pPass)
         lFailBins.add(pFail)
         fVars.extend([pPass,pFail])
         fPars.extend([pPass,pFail])
-        print  pFail.GetName(),"flatParam"#,lPass+"/("+lFail+")*@0"
-    lPass  = r.RooParametricHist(lName+"_pass_"+iCat,lName+"_pass_"+iCat,iBase[0],lPassBins,iH)
-    lFail  = r.RooParametricHist(lName+"_fail_"+iCat,lName+"_fail_"+iCat,iBase[0],lFailBins,iH)
+        print  pFail.GetName(),"flatParam",lPass#,lPass+"/("+lFail+")*@0"
+    lPass  = r.RooParametricHist(lName+"_pass_"+iCat,lName+"_pass_"+iCat,iBase[0],lPassBins,iHs[0])
+    lFail  = r.RooParametricHist(lName+"_fail_"+iCat,lName+"_fail_"+iCat,iBase[0],lFailBins,iHs[0])
     lNPass = r.RooAddition(lName+"_pass_"+iCat+"_norm",lName+"_pass_"+iCat+"_norm",lPassBins)
     lNFail = r.RooAddition(lName+"_fail_"+iCat+"_norm",lName+"_fail_"+iCat+"_norm",lFailBins)
     fFuncs.extend([lPass,lFail,lNPass,lNFail])
@@ -568,7 +690,9 @@ def rhoCard(iHP,iHF,iBin="cat"):
         for i0 in range(0,len(pPdfs)-2):
             lRDatas.append(pDatas[i0])
         lPPdfs.extend([pPdfs[0],pPdfs[1]])
-        lParHists = dumpRalph(lFCat[0],lBase,iHP[0].GetYaxis().GetBinCenter(pt),iBin+str(pt))
+        pPt = iHP[0].GetYaxis().GetBinLowEdge(pt)+iHP[0].GetYaxis().GetBinWidth(pt)*0.3
+        print "!!!!!",pPt
+        lParHists = dumpRalph([lFCat[0],lFCat[1],lFCat[2]],lBase,pPt,iBin+str(pt))
         #pSPass,pSFail = sigcat(lCats,lPCat,lFCat,iBin+str(pt),lBase,iHP[0].GetYaxis().GetBinCenter(pt))
         lPHists=[pHists[0],pHists[1]]
         lFHists=[pHists[2],pHists[3]]
@@ -597,27 +721,66 @@ def rhoCard(iHP,iHF,iBin="cat"):
     #print lSigs[0].GetName()
     #writeHist(lRDatas,lBase[3],lSigs,lBlanks)  
 
-def load(iFileName,iHP,iHF,i2D):
+def dummy(iHP,iHF,iBin="cat"):
+    lBase = baseVars(False)
+    lPtBins = iHP[0].GetNbinsY()
+    for pt in range(1,lPtBins+1):
+        lPCat = []
+        lFCat = []
+        for pH in iHP:
+            lHP = proj(iBin,str(pt),pH)
+            lPCat.append(lHP)
+ 
+        for pH in iHF:
+            lHF = proj(iBin,str(pt),pH)
+            lFCat.append(lHF)
+ 
+        lPData = r.RooDataHist("data_obs_pass_"+iBin+str(pt),"data_obs_pass_"+iBin,r.RooArgList(lBase[0]),lPCat[0])
+        lFData = r.RooDataHist("data_obs_fail_"+iBin+str(pt),"data_obs_fail_"+iBin,r.RooArgList(lBase[0]),lFCat[0])
+        lPW    = r.RooDataHist("wqq_pass_"     +iBin+str(pt),"wqq_pass_"     +iBin,r.RooArgList(lBase[0]),lPCat[1])
+        lFW    = r.RooDataHist("wqq_fail_"     +iBin+str(pt),"wqq_fail_"     +iBin,r.RooArgList(lBase[0]),lFCat[1])
+        lPZ    = r.RooDataHist("zqq_pass_"     +iBin+str(pt),"zqq_pass_"     +iBin,r.RooArgList(lBase[0]),lPCat[2])
+        lFZ    = r.RooDataHist("zqq_fail_"     +iBin+str(pt),"zqq_fail_"     +iBin,r.RooArgList(lBase[0]),lFCat[2])
+        lPQCD  = r.RooDataHist("qcd_pass_"     +iBin+str(pt),"qcd_pass_"     +iBin,r.RooArgList(lBase[0]),lPCat[len(iHP)-2])
+        lFQCD  = r.RooDataHist("qcd_fail_"     +iBin+str(pt),"qcd_fail_"     +iBin,r.RooArgList(lBase[0]),lFCat[len(iHF)-2])
+        lPHists=[lPW,lPZ,lPQCD]
+        lFHists=[lFW,lFZ,lFQCD]
+        lPHists.extend(getSignals(lPCat,lFCat,"cat"+str(pt),lBase)[0])
+        lFHists.extend(getSignals(lPCat,lFCat,"cat"+str(pt),lBase)[1])
+        workspace([lPData],lPHists,fVars,"pass_"+iBin+str(pt),True)
+        workspace([lFData],lFHists,fVars,"fail_"+iBin+str(pt),True)
+            
+
+def load(iFileName,iHP,iHF,i2D,iPseudo=False):
     end=""
     if i2D:
         end="_2D"
     lFile = r.TFile(iFileName)
-    lHP0 = lFile.Get("data_pass"+end)
-    lHF0 = lFile.Get("data_fail"+end)
+    lHP0 = lFile.Get("data_obs_pass"+end)
+    lHF0 = lFile.Get("data_obs_fail"+end)
     lHP1 = lFile.Get("wqq_pass" +end)
     lHF1 = lFile.Get("wqq_fail" +end)
     lHP2 = lFile.Get("zqq_pass" +end)
     lHF2 = lFile.Get("zqq_fail" +end)
     lHP3 = lFile.Get("qcd_pass" +end)
     lHF3 = lFile.Get("qcd_fail" +end)
+    lHP4 = lFile.Get("tt_pass" +end)
+    lHF4 = lFile.Get("tt_fail" +end)
+    if iPseudo:
+        lHP0 = lHP3.Clone("data_obs_pass"+end)
+        lHF0 = lHF3.Clone("data_obs_fail"+end)
+        lHP0.Add(lHP1)
+        lHF0.Add(lHF1)
+        lHP0.Add(lHP2)
+        lHF0.Add(lHF2)
     iHP.extend([lHP0,lHP1,lHP2])
     iHF.extend([lHF0,lHF1,lHF2])
     masses=[50,75,100,125,150,200,250,300]
     for mass in masses:
         lHP.append(lFile.Get("zqq"+str(mass)+"_pass" +end))
         iHF.append(lFile.Get("zqq"+str(mass)+"_fail" +end))
-    iHP.append(lHP3)
-    iHF.append(lHF3)
+    iHP.extend([lHP3,lHP4])
+    iHF.extend([lHF3,lHF4])
     for lH in (iHP+iHF):
         lH.SetDirectory(0)
     return 
@@ -631,7 +794,7 @@ if __name__ == "__main__":
     fXMin   = options.xmin
     fXMax   = options.xmax
     fNBins  = options.nbins
-    load(options.input,lHP,lHF,options.fit2D or (options.cat and not options.fit1D) or (options.card and not options.fit1D))
+    load(options.input,lHP,lHF,options.fit2D or (options.cat and not options.fit1D) or (options.card and not options.fit1D) or options.dummy)
     if options.fit1D and not options.cat and not options.card:
         if options.passfail:
             fit1DPF(lHP,lHF,options.func)
@@ -650,3 +813,6 @@ if __name__ == "__main__":
     
     if options.card:
         rhoCard(lHP,lHF)
+    
+    if options.dummy:
+        dummy(lHP,lHF)
