@@ -20,6 +20,7 @@ def parser():
 	parser.add_option('--Axial',action='store_true',dest='Axial',default=False,help='Run Axial')
 	parser.add_option('--90CL' ,action='store_true',dest='CL90' ,default=False,help='Run 90% CL')
 	parser.add_option('--Exp'  ,action='store_true',dest='Exp'  ,default=False,help='Exp 2D plot')
+	parser.add_option('--gb'   ,action='store_true',dest='gb'   ,default=False,help='gB plot')
 	(options, args) = parser.parse_args()
 	return options
 	
@@ -115,16 +116,30 @@ def convertgq(iGraph,iGDM,iMDM,iAxial,iConvertGB=True):
 
 def getCont(iGraph,iVal,color):
   lContours = iGraph.GetContourList(iVal);
-  print lContours,lContours.GetSize()
   xnew = array('d', []);
   ynew = array('d', []);
   for i0 in range(0,lContours.GetSize()):
-    if i0 > 0:
-	    continue
     pCurv = lContours.At(i0)
+    #if i0 > 0:
+    #break
     for i2 in range(0,pCurv.GetN()):
+	lY = pCurv.GetY()[i2]
+	if lY < 10:
+		lY = -100
         xnew.append(pCurv.GetX()[i2])
-        ynew.append(pCurv.GetY()[i2])
+        ynew.append(lY)
+
+  xnew.append(xnew[len(xnew)-1])
+  ynew.append(ynew[len(ynew)-1]+100000)
+  xnew.append(iGraph.GetX()[0])
+  ynew.append(ynew[len(ynew)-1])
+  xnew.append(iGraph.GetX()[0])
+  ynew.append(-100)
+  xnew.append(xnew[0])
+  ynew.append(-100)
+  xnew.append(xnew[0])
+  ynew.append(ynew[0])
+
   lGraph    = makeAGraph( xnew, ynew, color, 1 )
   lGraph.GetXaxis().SetTitle("m_{med} (GeV)")
   lGraph.GetYaxis().SetTitle("m_{dm}  (GeV)")
@@ -138,7 +153,7 @@ def make2DGraph(gr,gdm,canv,leg,label,color,iAxial):
     for i0 in range(0,100):
         gqgraph=convertgq(gr,gdm,i0*20,iAxial,True)
         for i1 in range(0,gqgraph.GetN()):
-            mdmarr .append(i0*10)
+            mdmarr .append(i0*20)
             medarr.append(gqgraph.GetX()[i1])
             gqarr .append(gqgraph.GetY()[i1])
     lOGraph = ROOT.TGraph2D(len(mdmarr),medarr,mdmarr,gqarr)
@@ -149,6 +164,9 @@ def make2DGraph(gr,gdm,canv,leg,label,color,iAxial):
     canv.Update()
     lCont = getCont(lOGraph,0.25,color)
     leg.AddEntry(lCont,label,"l")
+    lOGraph.GetXaxis().SetTitle("m_{med} (GeV)")
+    lOGraph.GetYaxis().SetTitle("m_{dm}  (GeV)")
+    lOGraph.GetZaxis().SetTitle("g_{q}")
     return lOGraph,lCont
 
 def main(iAxial,i90CL,iExp):
@@ -161,26 +179,26 @@ def main(iAxial,i90CL,iExp):
     leg.SetFillStyle(0)    
     leg.SetBorderSize(0)
     leg.SetTextColor(ROOT.kGreen)
-    lExp,lXExp=make2DGraph(grexp,gdm,canv0,leg,"expected 95% CL.",1,iAxial)
-    lObs,lXObs=make2DGraph(grobs,gdm,canv0,leg,"observed 95% CL.",ROOT.kGreen+1,iAxial)
+    lCL="90" if i90CL else "95"
+    lExp,lXExp=make2DGraph(grexp,gdm,canv0,leg,"expected "+lCL+"% CL.",1,iAxial)
+    lObs,lXObs=make2DGraph(grobs,gdm,canv0,leg,"observed "+lCL+"% CL.",ROOT.kGreen+1,iAxial)
     if iExp:
 	    lExp.Draw("colz")
     else:
 	    lObs.Draw("colz")
+    lXObs.SetFillColor(ROOT.kGreen+4)
+    lXObs.SetFillStyle(3001)
     lXExp.Draw("l sames")
     lXObs.Draw("l sames")
     leg.Draw()
-    lExp.GetXaxis().SetTitle("m_{med} (GeV)")
-    lExp.GetYaxis().SetTitle("m_{dm}  (GeV)")
-    lExp.GetZaxis().SetTitle("g_{q}")
     ROOT.gPad.Modified()
     ROOT.gPad.RedrawAxis()
-    end="_av" if iAxial else "_v"
-    end=end+"_90" if i90CL else end
-    end=end+"_Exp" if iExp else end
-    canv0.SaveAs("gq_mdm_mmed"+end+".png")
-    canv0.SaveAs("gq_mdm_mmed"+end+".pdf")
-    lFile = ROOT.TFile("MMedMDM"+end+".root","RECREATE")
+    endstr="_av" if iAxial else "_v"
+    endstr=endstr+"_90" if i90CL else endstr
+    endstr=endstr+"_Exp" if iExp else endstr
+    canv0.SaveAs("gq_mdm_mmed"+endstr+".png")
+    canv0.SaveAs("gq_mdm_mmed"+endstr+".pdf")
+    lFile = ROOT.TFile("MMedMDM"+endstr+".root","RECREATE")
     lObs.SetName("obs")
     lObs.SetTitle("obs")
     lExp.SetName("exp")
@@ -193,7 +211,7 @@ def main(iAxial,i90CL,iExp):
     lExp.Write()
     lXObs.Write()
     lXExp.Write()
-    #end()
+    end()
         
 if __name__ == '__main__':
 	options=parser()

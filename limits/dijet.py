@@ -7,11 +7,13 @@ tdrstyle.setTDRStyle()
 ROOT.gStyle.SetPadRightMargin(0.18);
 ROOT.gStyle.SetPadLeftMargin(0.18);
 ROOT.gStyle.SetPadTopMargin(0.10);
-ROOT.gStyle.SetPalette(55);
+ROOT.gStyle.SetPalette(109);
 
 def merge(iPGraph,iCGraph,color,iX=-1,iXMax=100000):
     x = array('d', [])
     y = array('d', [])
+    #x.append(500)
+    #y.append(iCGraph.GetY()[0])
     for i0 in range(0,iCGraph.GetN()):
         if iCGraph.GetX()[i0] > iX and iX > 0:
             break
@@ -42,6 +44,8 @@ def dijetexp(color,i90CL=False):
         return lGraph
     x = array('d', [])
     y = array('d', [])
+    #x.append(500)
+    #y.append(8.619535664753032)
     x.append(601.9305019305019)
     y.append(8.619535664753032)
     x.append(650.1930501930501)
@@ -122,6 +126,8 @@ def dijetobs(color,i90CL=False):
         return lGraph
     x = array('d', [])
     y = array('d', [])
+    #x.append(500)
+    #y.append(4.417344703140073)
     x.append(598.0694980694981)
     y.append(4.417344703140073)
     x.append(630.8880308880309)
@@ -325,16 +331,16 @@ def dijetxs(color):
 
 def divide(iG,iXS,iGB=False,iGDM=1,iGQ=0.25,iMDM=1.):
     for i0 in range(0,iG.GetN()):
-        iG.GetY()[i0] = iG.GetY()[i0]/iXS.Eval(iG.GetX()[i0])
+        iG.GetY()[i0] = iG.GetY()[i0]/iXS.Eval(iG.GetX()[i0])/(5./6.)
         lDMWidth = avtotwidth(2,iGDM,iGQ,iG.GetX()[i0],iMDM)
         lWidth   = avtotwidth(2,0.  ,iGQ,iG.GetX()[i0],iMDM)
         iG.GetY()[i0] = (lWidth/lDMWidth)*iG.GetY()[i0]
         if iGB:
             iG.GetY()[i0]=(math.sqrt(iG.GetY()[i0]))*0.25*6
             
-def main(iAxial,i90CL,iExp):
-    leg   = ROOT.TLegend(0.60,0.60,0.80,0.85)
-    #leg.SetHeader("g_{DM}=0.0 g_{q}=0.25")
+def main(iAxial,i90CL,iExp,iGB):
+    leg   = ROOT.TLegend(0.62,0.60,0.82,0.85)
+    leg.SetHeader("g_{q}=0.25")
     leg.SetFillColor(0)    
     leg.SetBorderSize(0)  
     leg.SetFillStyle(0)  
@@ -345,30 +351,42 @@ def main(iAxial,i90CL,iExp):
     divide(exp,xs,True)
     divide(obs,xs,True)
     exp.GetXaxis().SetTitle("m_{med}")
-    #exp.GetYaxis().SetTitle("g_{B}")
+    exp.GetYaxis().SetTitle("g_{B}")
     #exp.GetYaxis().SetTitle("#sigma_{J}(m_{med})")
-    exp.GetYaxis().SetTitle("#mu=#sigma_{J}/#sigma_{0}")
-    exp.Draw("alp")
-    obs.Draw("lp")
-    #xs .Draw("lp")                                                                                                                                      #leg.AddEntry(exp,"expected","lp")
-    #leg.AddEntry(obs,"observed","lp")
-    leg.Draw()
-    canv0.Update()
+    #exp.GetYaxis().SetTitle("#mu=#sigma_{J}/#sigma_{0}")
+    if iGB:
+        exp.Draw("alp")
+        obs.Draw("lp")
+        lFile = ROOT.TFile("Output.root","RECREATE")
+        exp.SetName("exp")
+        obs.SetName("obs")
+        exp.Write()
+        obs.Write()
+        lFile.Close()
+        #xs .Draw("lp")                                                                                                                                      #leg.AddEntry(exp,"expected","lp")
+        leg.AddEntry(obs,"observed","lp")
+        leg.AddEntry(exp,"expected","lp")
+        leg.Draw()
+        canv0.Update()
+        #leg.AddEntry(xs ,"DM Model","lp")
+        end()
+        exit()
     gdm=1
     canv1 = ROOT.TCanvas("can1","can1",1200,800)
-    lExp,lXExp=make2DGraph(exp,gdm,canv1,leg,"expected 95% CL.",1,iAxial)
-    lObs,lXObs=make2DGraph(obs,gdm,canv1,leg,"observed 95% CL.",ROOT.kOrange,iAxial)
+    lCL="90" if i90CL else "95"
+    lExp,lXExp=make2DGraph(exp,gdm,canv1,leg,"expected "+lCL+"% CL.",1,iAxial)
+    lObs,lXObs=make2DGraph(obs,gdm,canv1,leg,"observed "+lCL+"% CL.",ROOT.kOrange,iAxial)
     if iExp:
 	    lExp.Draw("colz")
     else:
 	    lObs.Draw("colz")
+
+    lXObs.SetFillColor(ROOT.kOrange+5)
+    lXObs.SetFillStyle(3001)
     lXExp.Draw("l sames")
     lXObs.Draw("l sames")
     leg.Draw()
     canv1.Update()
-    lExp.GetXaxis().SetTitle("m_{med} (GeV)")
-    lExp.GetYaxis().SetTitle("m_{dm}  (GeV)")
-    lExp.GetZaxis().SetTitle("g_{q}")
     ROOT.gPad.Modified()
     ROOT.gPad.RedrawAxis()
     fileend="_dijet_av" if iAxial else "_dijet_v"
@@ -393,5 +411,5 @@ def main(iAxial,i90CL,iExp):
         
 if __name__ == '__main__':
     options=parser()
-    main(options.Axial,options.CL90,options.Exp)
+    main(options.Axial,options.CL90,options.Exp,options.gb)
 
