@@ -119,42 +119,53 @@ def buildDatacards(bkgContainers,sigContainer,theRhalphabet,theData,jetNum):
 	theZincShape_smearUp.Write();
 	theZincShape_smearDn.Write();		
 
-	# qcd closure
-	qcdHist1ClosureUp = theQCDShape.Clone();
-	qcdHist1ClosureDn = theQCDShape.Clone();
-	qcdHist1ClosureUp.SetName("qcd_qcdClosure1Up")
-	qcdHist1ClosureDn.SetName("qcd_qcdClosure1Down")
-	qcdHist2ClosureUp = theQCDShape.Clone();
-	qcdHist2ClosureDn = theQCDShape.Clone();
-	qcdHist2ClosureUp.SetName("qcd_qcdClosure2Up")
-	qcdHist2ClosureDn.SetName("qcd_qcdClosure2Down")
-	qcdHist3ClosureUp = theQCDShape.Clone();
-	qcdHist3ClosureDn = theQCDShape.Clone();
-	qcdHist3ClosureUp.SetName("qcd_qcdClosure3Up")
-	qcdHist3ClosureDn.SetName("qcd_qcdClosure3Down")	
+	# # qcd closure
+	# qcdHist1ClosureUp = theQCDShape.Clone();
+	# qcdHist1ClosureDn = theQCDShape.Clone();
+	# qcdHist1ClosureUp.SetName("qcd_qcdClosure1Up")
+	# qcdHist1ClosureDn.SetName("qcd_qcdClosure1Down")
+	# qcdHist2ClosureUp = theQCDShape.Clone();
+	# qcdHist2ClosureDn = theQCDShape.Clone();
+	# qcdHist2ClosureUp.SetName("qcd_qcdClosure2Up")
+	# qcdHist2ClosureDn.SetName("qcd_qcdClosure2Down")
+	# qcdHist3ClosureUp = theQCDShape.Clone();
+	# qcdHist3ClosureDn = theQCDShape.Clone();
+	# qcdHist3ClosureUp.SetName("qcd_qcdClosure3Up")
+	# qcdHist3ClosureDn.SetName("qcd_qcdClosure3Down")	
 	
-	bound1 = 10; 
-	bound2 = 30;
-	if theQCDShape.GetNbinsX() == 30: 
-		bound1 = 5; 
-		bound2 = 15;
+	# bound1 = 10; 
+	# bound2 = 30;
+	# if theQCDShape.GetNbinsX() == 30: 
+	# 	bound1 = 5; 
+	# 	bound2 = 15;
 
-	for i in range(theQCDShape.GetNbinsX()):
+	# for i in range(theQCDShape.GetNbinsX()):
 		
-		closurefactor = 0.01 + 0.005*float(i);
+	# 	closurefactor = 0.01 + 0.005*float(i);
 
-		if i < bound1:
-			qcdHist1ClosureUp.SetBinContent(i+1, (1+closurefactor)*theQCDShape.GetBinContent(i+1));
-			qcdHist1ClosureDn.SetBinContent(i+1, (1-closurefactor)*theQCDShape.GetBinContent(i+1));
+	# 	if i < bound1:
+	# 		qcdHist1ClosureUp.SetBinContent(i+1, (1+closurefactor)*theQCDShape.GetBinContent(i+1));
+	# 		qcdHist1ClosureDn.SetBinContent(i+1, (1-closurefactor)*theQCDShape.GetBinContent(i+1));
 
-		if i >= bound1 and i < bound2:
-			qcdHist2ClosureUp.SetBinContent(i+1, (1+0.05)*theQCDShape.GetBinContent(i+1));
-			qcdHist2ClosureDn.SetBinContent(i+1, (1-0.05)*theQCDShape.GetBinContent(i+1));
+	# 	if i >= bound1 and i < bound2:
+	# 		qcdHist2ClosureUp.SetBinContent(i+1, (1+0.05)*theQCDShape.GetBinContent(i+1));
+	# 		qcdHist2ClosureDn.SetBinContent(i+1, (1-0.05)*theQCDShape.GetBinContent(i+1));
 
-		if i >= bound2:
-			qcdHist3ClosureUp.SetBinContent(i+1, 1.15*theQCDShape.GetBinContent(i+1));
-			qcdHist3ClosureDn.SetBinContent(i+1, 0.85*theQCDShape.GetBinContent(i+1));
+	# 	if i >= bound2:
+	# 		qcdHist3ClosureUp.SetBinContent(i+1, 1.15*theQCDShape.GetBinContent(i+1));
+	# 		qcdHist3ClosureDn.SetBinContent(i+1, 0.85*theQCDShape.GetBinContent(i+1));
 	
+	## The fit uncertainty
+	curpred_jetmsd_altup = [];
+	curpred_jetmsd_altdn = [];
+	for i,h in enumerate(theRhalphabet.hpred_jetmsd_altup): curpred_jetmsd_altup.append( h.Clone("qcd_qcdEigen"+str(i)+"Up") );
+	for i,h in enumerate(theRhalphabet.hpred_jetmsd_altdn): curpred_jetmsd_altdn.append( h.Clone("qcd_qcdEigen"+str(i)+"Down") );
+
+	fout.cd();
+	for h in curpred_jetmsd_altup: h.Write();
+	for h in curpred_jetmsd_altdn: h.Write();
+
+	## MC Closure / Fit bias test
 	lBFile = ROOT.TFile("qcdhists.root")
 	lBQCD  = lBFile.Get("h_jetmsd_passcutQCD")
 	lHist  = lBFile.Get("qcd")
@@ -167,13 +178,6 @@ def buildDatacards(bkgContainers,sigContainer,theRhalphabet,theData,jetNum):
 			lDown3.SetBinContent(i0,lDown3.GetBinContent(i0)*1./(lBQCD.GetBinContent(i0)))
 
 	fout.cd();
-
-	qcdHist1ClosureUp.Write();
-	qcdHist1ClosureDn.Write();
-	qcdHist2ClosureUp.Write();
-	qcdHist2ClosureDn.Write();
-	qcdHist3ClosureUp.Write();
-	qcdHist3ClosureDn.Write();
 	lUp3.Write();
 	lDown3.Write();
 
@@ -234,12 +238,9 @@ def buildDatacards(bkgContainers,sigContainer,theRhalphabet,theData,jetNum):
 		WriteBinByBinUncertainties(theQCDShape," - 1 - - - ",allLines,"BinByBin",True);
 		WriteBinByBinUncertainties(theSignalShape," 1 - - - - ",allLines,"BinByBinSig",True);		
 
-		line = "qcdClosure1 shapeN2 - 1 - - - \n";
-		allLines.append(line);		
-		line = "qcdClosure2 shapeN2 - 1 - - - \n";
-		allLines.append(line);		
-		line = "qcdClosure3 shapeN2 - 1 - - - \n";
-		allLines.append(line);		
+		for i in range(len(curpred_jetmsd_altup)):
+			line = "qcdEigen%i shapeN2 - 1 - - - \n" % i;
+			allLines.append(line);		
 		line = "mcclosure shapeN2 - 1 - - - \n";
 		allLines.append(line);		
 
@@ -271,12 +272,9 @@ def buildDatacards(bkgContainers,sigContainer,theRhalphabet,theData,jetNum):
 		WriteBinByBinUncertainties(theQCDShape," - 1 - - ",allLines,"BinByBin",True);
 		WriteBinByBinUncertainties(theSignalShape," 1 - - - ",allLines,"BinByBinSig",True);		
 		
-		line = "qcdClosure1 shapeN2 - 1 - - \n";
-		allLines.append(line);		
-		line = "qcdClosure2 shapeN2 - 1 - - \n";
-		allLines.append(line);		
-		line = "qcdClosure3 shapeN2 - 1 - - \n";
-		allLines.append(line);		
+		for i in range(len(curpred_jetmsd_altup)):
+			line = "qcdEigen%i shapeN2 - 1 - - \n" % i;
+			allLines.append(line);		
 		line = "mcclosure shapeN2 - 1 - - \n";
 		allLines.append(line);		
 
@@ -284,66 +282,7 @@ def buildDatacards(bkgContainers,sigContainer,theRhalphabet,theData,jetNum):
 		ofile.write(l);
 	ofile.close();
 
-		# ###############################################################
-		# ########### make a card with W as signal
-		# if i == (len(sigContainers)-1):
-
-		# 	ofileW = open("plots"+str(jetNum)+"/datacards/combine_WZsignal"+"_"+str(jetNum)+".dat",'w');
-
-		# 	#write the damn thing
-		# 	allLines = [];
-
-		# 	line = "#card for signal = %s \n" % (tag);
-		# 	allLines.append(line);
-
-		# 	line = "imax 1 #number of channels \n";
-		# 	allLines.append(line);
-		# 	line = "jmax * #number of backgrounds \n";
-		# 	allLines.append(line);
-		# 	allLines.append("kmax * nuissance \n");
-		# 	allLines.append("------------ \n");
-
-		# 	line = "shapes * * %s $PROCESS $PROCESS_$SYSTEMATIC \n" % (basename);
-		# 	allLines.append(line);
-		# 	allLines.append("------------ \n");
-
-
-		# 	allLines.append("bin ch0 \n");
-		# 	line = "observation %s \n" % (str(round(theDataObs.Integral(),4)));
-		# 	allLines.append(line);
-		# 	allLines.append("------------ \n");
-
-		# 	line = "bin ch0 ch0 ch0 \n"
-		# 	allLines.append(line);
-		# 	line = "process -1 0 1 \n";
-		# 	allLines.append(line);
-		# 	line = "process %s %s %s \n" % ( theWincName, theZincName, theQCDName );
-		# 	allLines.append(line);
-		# 	line = "rate %s %s %s \n" % ( str(round(theWincShape.Integral(),4)), str(round(theZincShape.Integral(),4)), str(round(theQCDShape.Integral(),4)) )
-		# 	allLines.append(line);		
-		# 	allLines.append("------------ \n");
-
-		# 	line = "lumi_13TEV lnN 1.027 1.027 - \n"
-		# 	allLines.append(line);		
-		# 	line = "bkgd_QCDNorm lnN - - 1.15 \n"
-		# 	allLines.append(line);		
-		# 	line = "bkgd_WincNorm lnN 1.2 - - \n"
-		# 	allLines.append(line);		
-		# 	line = "bkgd_ZincNorm lnN - 1.2 - \n"
-		# 	allLines.append(line);
-
-		# 	line = "shift shapeN2 1 1 - \n"
-		# 	allLines.append(line);			
-		# 	line = "smear shapeN2 1 1 - \n"
-		# 	allLines.append(line);			
-		# 	line = "WtagSF lnN 1.2 1.2 - \n"
-		# 	allLines.append(line);			
-
-		# 	WriteBinByBinUncertainties(theQCDShape," - - 1 ",allLines,"BinByBin",False);					
-
-		# 	for l in allLines:
-		# 		ofileW.write(l);
-		# 	ofileW.close();	
+	# ################################
 
 	fout.Close();
 

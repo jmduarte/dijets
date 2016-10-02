@@ -17,6 +17,35 @@ ROOT.gStyle.SetPadTopMargin(0.10);
 ROOT.gStyle.SetPalette(1);
 
 ########################################################################################
+def userfunc(x):
+	
+	Zwidth = 2.4952;
+	ZwidthError = 0.0023*2.; # times 2 to give 2 sigma
+	relZwidthUnc = ZwidthError/Zwidth;
+	sinthetaW2 = 0.2312;
+	sinthetaW = math.sqrt(sinthetaW2);
+	costhetaW = math.sqrt(1 - sinthetaW2);
+	mW = 80.;
+	vev = 246.;
+	g = mW*2./vev;
+	Vu = 0.25 - (4. * sinthetaW2 / 6);
+	Vd = -0.25 - (2. * sinthetaW2 / 6);
+	mZ = 91.18;
+	mZp = x[0];
+
+	# y = gZ
+	ynum = relZwidthUnc * 3 * g * (1-(mZp*mZp/(mZ*mZ))) * (2*Vu*Vu + 3*Vd*Vd + 5/16.)
+	yden = 2*0.01*costhetaW*sinthetaW*(2*Vu+3*Vd);
+	# print ynum,yden,x[0],math.sqrt(ynum/yden)
+	if ynum > 0: ynum *= -1.;
+	y = math.sqrt(ynum/yden);
+	
+	###
+	y = math.sqrt( math.fabs(1-(mZp*mZp/(mZ*mZ))) )
+
+	return y;
+
+
 ########################################################################################
 def main():
 	
@@ -260,8 +289,11 @@ def main():
 
 	#####
 
+	myfunc = ROOT.TF1('myfunc',userfunc,0,1000,0);
+	myfunc.SetNpx(1000) 
+
 	can_gB2 = ROOT.TCanvas("can_gB2","can_gB2",1200,800);
-	hrl2 = can_gB.DrawFrame(40,0,800,5);
+	hrl2 = can_gB.DrawFrame(10,0.1,800,5);
 	hrl2.GetYaxis().SetTitle("g_{B}");
 	hrl2.GetYaxis().SetTitleOffset(0.85);	
 	hrl2.GetXaxis().SetTitle("Z\' mass (GeV)");
@@ -284,11 +316,13 @@ def main():
 	txtc.Draw();
 	# txtd.Draw();
 	leg2.Draw();
+	myfunc.Draw("sames");
 
 	gr_gB_2sigma.GetXaxis().SetMoreLogLabels(True);	
 	gr_gB_2sigma.GetXaxis().SetNdivisions(10);	
 
 	ROOT.gPad.SetLogx();
+	ROOT.gPad.SetLogy();
 	can_gB2.SaveAs('limplots/gB_logx.pdf');
 
 
