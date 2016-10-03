@@ -18,6 +18,7 @@ parser.add_option('--doData', action='store_true', dest='doData', default=True, 
 parser.add_option('--doPlots', action='store_true', dest='doPlots', default=True, help='go!')
 parser.add_option('--doCards', action='store_true', dest='doCards', default=False, help='go!')
 
+parser.add_option('--extractTF', action='store_true', dest='extractTF', default=False, help='go!')
 parser.add_option("--lumi", dest="lumi", default = 0.44,help="mass of LSP", metavar="MLSP")
 parser.add_option("--rholo", dest="rholo", default = 0.,help="mass of LSP", metavar="MLSP")
 parser.add_option("--rhohi", dest="rhohi", default = 6.,help="mass of LSP", metavar="MLSP")
@@ -44,20 +45,20 @@ ROOT.gStyle.SetPaintTextFormat("1.1f");
 ROOT.gStyle.SetOptFit(0000);
 
 """
-python buildAnalysis.py -b --doMCLooping --doRhalphabet --doCards --doPlots --doData --lumi 2.7 --DDTcut 0.38 --rholo 0.0 --rhohi 6. --jetNum 0 --ZPrimeMass 50. &
-python buildAnalysis.py -b --doMCLooping --doRhalphabet --doCards --doPlots --doData --lumi 2.7 --DDTcut 0.38 --rholo 0.0 --rhohi 6. --jetNum 0 --ZPrimeMass 60. &
-python buildAnalysis.py -b --doMCLooping --doRhalphabet --doCards --doPlots --doData --lumi 2.7 --DDTcut 0.38 --rholo 0.0 --rhohi 6. --jetNum 0 --ZPrimeMass 75. &
-python buildAnalysis.py -b --doMCLooping --doRhalphabet --doCards --doPlots --doData --lumi 2.7 --DDTcut 0.38 --rholo 0.0 --rhohi 6. --jetNum 0 --ZPrimeMass 90. &
-python buildAnalysis.py -b --doMCLooping --doRhalphabet --doCards --doPlots --doData --lumi 2.7 --DDTcut 0.38 --rholo 0.0 --rhohi 6. --jetNum 0 --ZPrimeMass 100. &
-python buildAnalysis.py -b --doMCLooping --doRhalphabet --doCards --doPlots --doData --lumi 2.7 --DDTcut 0.38 --rholo 0.0 --rhohi 6. --jetNum 0 --ZPrimeMass 110. &
-python buildAnalysis.py -b --doMCLooping --doRhalphabet --doCards --doPlots --doData --lumi 2.7 --DDTcut 0.38 --rholo 0.0 --rhohi 6. --jetNum 0 --ZPrimeMass 125. &
-python buildAnalysis.py -b --doMCLooping --doRhalphabet --doCards --doPlots --doData --lumi 2.7 --DDTcut 0.38 --rholo 0.0 --rhohi 6. --jetNum 0 --ZPrimeMass 135. &
-python buildAnalysis.py -b --doMCLooping --doRhalphabet --doCards --doPlots --doData --lumi 2.7 --DDTcut 0.38 --rholo 0.0 --rhohi 6. --jetNum 0 --ZPrimeMass 150. &
-python buildAnalysis.py -b --doMCLooping --doRhalphabet --doCards --doPlots --doData --lumi 2.7 --DDTcut 0.38 --rholo 0.0 --rhohi 6. --jetNum 0 --ZPrimeMass 165. &
-python buildAnalysis.py -b --doMCLooping --doRhalphabet --doCards --doPlots --doData --lumi 2.7 --DDTcut 0.38 --rholo 0.0 --rhohi 6. --jetNum 0 --ZPrimeMass 180. &
-python buildAnalysis.py -b --doMCLooping --doRhalphabet --doCards --doPlots --doData --lumi 2.7 --DDTcut 0.38 --rholo 0.0 --rhohi 6. --jetNum 0 --ZPrimeMass 200. &
-python buildAnalysis.py -b --doMCLooping --doRhalphabet --doCards --doPlots --doData --lumi 2.7 --DDTcut 0.38 --rholo 0.0 --rhohi 6. --jetNum 0 --ZPrimeMass 250. &
-python buildAnalysis.py -b --doMCLooping --doRhalphabet --doCards --doPlots --doData --lumi 2.7 --DDTcut 0.38 --rholo 0.0 --rhohi 6. --jetNum 0 --ZPrimeMass 300. &
+python buildAnalysis.py -b --doMCLooping --doRhalphabet --extractTF --doCards --doPlots --doData --lumi 2.7 --DDTcut 0.38 --rholo 0.0 --rhohi 6. --jetNum 0 --ZPrimeMass 50. &
+python buildAnalysis.py -b --doMCLooping --doRhalphabet --extractTF --doCards --doPlots --doData --lumi 2.7 --DDTcut 0.38 --rholo 0.0 --rhohi 6. --jetNum 0 --ZPrimeMass 60. &
+python buildAnalysis.py -b --doMCLooping --doRhalphabet --extractTF --doCards --doPlots --doData --lumi 2.7 --DDTcut 0.38 --rholo 0.0 --rhohi 6. --jetNum 0 --ZPrimeMass 75. &
+python buildAnalysis.py -b --doMCLooping --doRhalphabet --extractTF --doCards --doPlots --doData --lumi 2.7 --DDTcut 0.38 --rholo 0.0 --rhohi 6. --jetNum 0 --ZPrimeMass 90. &
+python buildAnalysis.py -b --doMCLooping --doRhalphabet --extractTF --doCards --doPlots --doData --lumi 2.7 --DDTcut 0.38 --rholo 0.0 --rhohi 6. --jetNum 0 --ZPrimeMass 100. &
+python buildAnalysis.py -b --doMCLooping --doRhalphabet --extractTF --doCards --doPlots --doData --lumi 2.7 --DDTcut 0.38 --rholo 0.0 --rhohi 6. --jetNum 0 --ZPrimeMass 110. &
+python buildAnalysis.py -b --doMCLooping --doRhalphabet --extractTF --doCards --doPlots --doData --lumi 2.7 --DDTcut 0.38 --rholo 0.0 --rhohi 6. --jetNum 0 --ZPrimeMass 125. &
+python buildAnalysis.py -b --doMCLooping --doRhalphabet --extractTF --doCards --doPlots --doData --lumi 2.7 --DDTcut 0.38 --rholo 0.0 --rhohi 6. --jetNum 0 --ZPrimeMass 135. &
+python buildAnalysis.py -b --doMCLooping --doRhalphabet --extractTF --doCards --doPlots --doData --lumi 2.7 --DDTcut 0.38 --rholo 0.0 --rhohi 6. --jetNum 0 --ZPrimeMass 150. &
+python buildAnalysis.py -b --doMCLooping --doRhalphabet --extractTF --doCards --doPlots --doData --lumi 2.7 --DDTcut 0.38 --rholo 0.0 --rhohi 6. --jetNum 0 --ZPrimeMass 165. &
+python buildAnalysis.py -b --doMCLooping --doRhalphabet --extractTF --doCards --doPlots --doData --lumi 2.7 --DDTcut 0.38 --rholo 0.0 --rhohi 6. --jetNum 0 --ZPrimeMass 180. &
+python buildAnalysis.py -b --doMCLooping --doRhalphabet --extractTF --doCards --doPlots --doData --lumi 2.7 --DDTcut 0.38 --rholo 0.0 --rhohi 6. --jetNum 0 --ZPrimeMass 200. &
+python buildAnalysis.py -b --doMCLooping --doRhalphabet --extractTF --doCards --doPlots --doData --lumi 2.7 --DDTcut 0.38 --rholo 0.0 --rhohi 6. --jetNum 0 --ZPrimeMass 250. &
+python buildAnalysis.py -b --doMCLooping --doRhalphabet --extractTF --doCards --doPlots --doData --lumi 2.7 --DDTcut 0.38 --rholo 0.0 --rhohi 6. --jetNum 0 --ZPrimeMass 300. &
 """
 
 
@@ -221,7 +222,7 @@ def main():
 		print "Now doing the rhalphabet!"
 		if not options.qcdClosure:		
 			isData = True;
-			extractTFs = True;
+			extractTFs = options.extractTF;
 			# for i in range(len(sigmass)):
 			theRhalphabet = rhalphabet(idir+"/"+"JetHT350.root",1,"rhalphabet",1, extractTFs, options.jetNum,int(options.ZPrimeMass),isData,NMassBins[sigmass.index(options.ZPrimeMass)]) ;
 			theRhalphabet.GetPredictedDistributions( idir+"/"+"JetHT.root", 1, 1, isData);
@@ -233,7 +234,7 @@ def main():
 		# there is a flag to do a closure test as well
 		if options.qcdClosure:
 			isData = False;
-			extractTFs = False;
+			extractTFs = options.extractTF;
 			theRhalphabet = rhalphabet(idir+"/"+"QCD.root",options.lumi,"rhalphabetClosure",1, extractTFs, options.jetNum,int(options.ZPrimeMass),isData,NMassBins[sigmass.index(options.ZPrimeMass)]) ;
 			theRhalphabet.GetPredictedDistributions( idir+"/"+"QCD.root", options.lumi, 100, isData );
 
