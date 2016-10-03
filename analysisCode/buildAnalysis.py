@@ -221,7 +221,7 @@ def main():
 		print "Now doing the rhalphabet!"
 		if not options.qcdClosure:		
 			isData = True;
-			extractTFs = False;
+			extractTFs = True;
 			# for i in range(len(sigmass)):
 			theRhalphabet = rhalphabet(idir+"/"+"JetHT350.root",1,"rhalphabet",1, extractTFs, options.jetNum,int(options.ZPrimeMass),isData,NMassBins[sigmass.index(options.ZPrimeMass)]) ;
 			theRhalphabet.GetPredictedDistributions( idir+"/"+"JetHT.root", 1, 1, isData);
