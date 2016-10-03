@@ -313,52 +313,53 @@ class rhalphabet:
 			self.thePtFits[i].Draw("sames");
 			curcan2.SaveAs("plots"+str(self._jetNum)+"/rhalphabet/map_ptdependence_par"+str(i)+"_"+self._jetNum+"_"+str(self._ZPrimeMass)+".pdf")	
 
-		self.effPlane = ROOT.TF2("TransferPlane", "(([0]+ [1]*y + [2]*y*y + [9]*y*y*y) + ([3]+ [4]*y + [5]*y*y + [10]*y*y*y)*x + ([6]+ [7]*y + [8]*y*y + [11]*y*y*y)*x*x + ([12]+ [13]*y + [14]*y*y)*x*x*x)",THEFITRHOMIN,6.,self._ptlo,self._pthi);
+		# self.effPlane = ROOT.TF2("TransferPlane", "(([0]+ [1]*y + [2]*y*y + [9]*y*y*y) + ([3]+ [4]*y + [5]*y*y + [10]*y*y*y)*x + ([6]+ [7]*y + [8]*y*y + [11]*y*y*y)*x*x + ([12]+ [13]*y + [14]*y*y)*x*x*x)",THEFITRHOMIN,6.,self._ptlo,self._pthi);
+		self.effPlane = ROOT.TF2("TransferPlane", "(([0]+ [1]*y + [2]*y*y + [9]*y*y*y) + ([3]+ [4]*y + [5]*y*y + [10]*y*y*y)*x + ([6]+ [7]*y + [8]*y*y + [11]*y*y*y)*x*x)",THEFITRHOMIN,6.,self._ptlo,self._pthi);
 
-		par0_2d = self.thePtFits[0].GetParameter(0);
-		par1_2d = self.thePtFits[0].GetParameter(1);
-		par2_2d = self.thePtFits[0].GetParameter(2);
+		# par0_2d = self.thePtFits[0].GetParameter(0);
+		# par1_2d = self.thePtFits[0].GetParameter(1);
+		# par2_2d = self.thePtFits[0].GetParameter(2);
 		
-		par3_2d = self.thePtFits[1].GetParameter(0);
-		par4_2d = self.thePtFits[1].GetParameter(1);
-		par5_2d = self.thePtFits[1].GetParameter(2);
+		# par3_2d = self.thePtFits[1].GetParameter(0);
+		# par4_2d = self.thePtFits[1].GetParameter(1);
+		# par5_2d = self.thePtFits[1].GetParameter(2);
 		
-		par6_2d = self.thePtFits[2].GetParameter(0);
-		par7_2d = self.thePtFits[2].GetParameter(1);
-		par8_2d = self.thePtFits[2].GetParameter(2);
+		# par6_2d = self.thePtFits[2].GetParameter(0);
+		# par7_2d = self.thePtFits[2].GetParameter(1);
+		# par8_2d = self.thePtFits[2].GetParameter(2);
 
-		par9_2d  = self.thePtFits[0].GetParameter(3);
-		par10_2d = self.thePtFits[1].GetParameter(3);
-		par11_2d = self.thePtFits[2].GetParameter(3);
+		# par9_2d  = self.thePtFits[0].GetParameter(3);
+		# par10_2d = self.thePtFits[1].GetParameter(3);
+		# par11_2d = self.thePtFits[2].GetParameter(3);
 
-		self.effPlane.SetParameter(0,par0_2d);
-		# self.effPlane.SetParError(0,self.thePtFits[0].GetParError(0));
-		self.effPlane.SetParameter(1,self.thePtFits[0].GetParameter(1));
-		# self.effPlane.SetParError(1,self.thePtFits[0].GetParError(1));
-		self.effPlane.SetParameter(2,self.thePtFits[0].GetParameter(2));
-		# self.effPlane.SetParError(2,self.thePtFits[0].GetParError(2));
+		# self.effPlane.SetParameter(0,par0_2d);
+		# # self.effPlane.SetParError(0,self.thePtFits[0].GetParError(0));
+		# self.effPlane.SetParameter(1,self.thePtFits[0].GetParameter(1));
+		# # self.effPlane.SetParError(1,self.thePtFits[0].GetParError(1));
+		# self.effPlane.SetParameter(2,self.thePtFits[0].GetParameter(2));
+		# # self.effPlane.SetParError(2,self.thePtFits[0].GetParError(2)); 
 
-		self.effPlane.SetParameter(3,self.thePtFits[1].GetParameter(0));
-		# self.effPlane.SetParError(3,self.thePtFits[1].GetParError(0));
-		self.effPlane.SetParameter(4,self.thePtFits[1].GetParameter(1));
-		# self.effPlane.SetParError(4,self.thePtFits[1].GetParError(1));
-		self.effPlane.SetParameter(5,self.thePtFits[1].GetParameter(2));
-		# self.effPlane.SetParError(5,self.thePtFits[1].GetParError(2));
+		# self.effPlane.SetParameter(3,self.thePtFits[1].GetParameter(0));
+		# # self.effPlane.SetParError(3,self.thePtFits[1].GetParError(0));
+		# self.effPlane.SetParameter(4,self.thePtFits[1].GetParameter(1));
+		# # self.effPlane.SetParError(4,self.thePtFits[1].GetParError(1));
+		# self.effPlane.SetParameter(5,self.thePtFits[1].GetParameter(2));
+		# # self.effPlane.SetParError(5,self.thePtFits[1].GetParError(2));
 
-		self.effPlane.SetParameter(6,self.thePtFits[2].GetParameter(0));
-		# self.effPlane.SetParError(6,self.thePtFits[2].GetParError(0));
-		self.effPlane.SetParameter(7,self.thePtFits[2].GetParameter(1));
-		# self.effPlane.SetParError(7,self.thePtFits[2].GetParError(1));
-		self.effPlane.SetParameter(8,self.thePtFits[2].GetParameter(2));
-		# self.effPlane.SetParError(8,self.thePtFits[2].GetParError(2));
+		# self.effPlane.SetParameter(6,self.thePtFits[2].GetParameter(0));
+		# # self.effPlane.SetParError(6,self.thePtFits[2].GetParError(0));
+		# self.effPlane.SetParameter(7,self.thePtFits[2].GetParameter(1));
+		# # self.effPlane.SetParError(7,self.thePtFits[2].GetParError(1));
+		# self.effPlane.SetParameter(8,self.thePtFits[2].GetParameter(2));
+		# # self.effPlane.SetParError(8,self.thePtFits[2].GetParError(2));
 
-		self.effPlane.SetParameter(9,self.thePtFits[0].GetParameter(3));
-		self.effPlane.SetParameter(10,self.thePtFits[1].GetParameter(3));
-		self.effPlane.SetParameter(11,self.thePtFits[2].GetParameter(3));
+		# self.effPlane.SetParameter(9,self.thePtFits[0].GetParameter(3));
+		# self.effPlane.SetParameter(10,self.thePtFits[1].GetParameter(3));
+		# self.effPlane.SetParameter(11,self.thePtFits[2].GetParameter(3));
 
-		self.effPlane.SetParameter(12,0.0);
-		self.effPlane.SetParameter(13,0.0);
-		self.effPlane.SetParameter(14,0.0);
+		# self.effPlane.SetParameter(12,0.0);
+		# self.effPlane.SetParameter(13,0.0);
+		# self.effPlane.SetParameter(14,0.0);
 		# self.effPlane.SetParError(9,self.thePtFits[0].GetParError(3));
 		# self.effPlane.SetParError(10,self.thePtFits[1].GetParError(3));
 		# self.effPlane.SetParError(11,self.thePtFits[2].GetParError(3));
@@ -370,52 +371,11 @@ class rhalphabet:
 		# self.effPlane.FixParameter(9,0);
 		# self.effPlane.FixParameter(10,0);
 		# self.effPlane.FixParameter(11,0);
-		self.effPlane.FixParameter(12,0);
-		self.effPlane.FixParameter(13,0);
-		self.effPlane.FixParameter(14,0);
-
-
-		lolim = 0.5;
-		hilim = 1.5;
-		# if par0_2d > 0:  self.effPlane.SetParLimits(0,lolim*par0_2d,hilim*par0_2d);
-		# else:            self.effPlane.SetParLimits(0,hilim*par0_2d,lolim*par0_2d);
-		# if par1_2d > 0:  self.effPlane.SetParLimits(1,lolim*par1_2d,hilim*par1_2d);
-		# else:            self.effPlane.SetParLimits(1,hilim*par1_2d,lolim*par1_2d);
-		# if par2_2d > 0:  self.effPlane.SetParLimits(2,lolim*par2_2d,hilim*par2_2d);
-		# else:            self.effPlane.SetParLimits(2,hilim*par2_2d,lolim*par2_2d);
-		# if par3_2d > 0:  self.effPlane.SetParLimits(3,lolim*par3_2d,hilim*par3_2d);
-		# else:            self.effPlane.SetParLimits(3,hilim*par3_2d,lolim*par3_2d);
-		# if par4_2d > 0:  self.effPlane.SetParLimits(4,lolim*par4_2d,hilim*par4_2d);
-		# else:            self.effPlane.SetParLimits(4,hilim*par4_2d,lolim*par4_2d);
-		# if par5_2d > 0:  self.effPlane.SetParLimits(5,lolim*par5_2d,hilim*par5_2d);
-		# else:            self.effPlane.SetParLimits(5,hilim*par5_2d,lolim*par5_2d);
-		# if par6_2d > 0:  self.effPlane.SetParLimits(6,lolim*par6_2d,hilim*par6_2d);
-		# else:            self.effPlane.SetParLimits(6,hilim*par6_2d,lolim*par6_2d);
-		# if par7_2d > 0:  self.effPlane.SetParLimits(7,lolim*par7_2d,hilim*par7_2d);
-		# else:            self.effPlane.SetParLimits(7,hilim*par7_2d,lolim*par7_2d);
-		# if par8_2d > 0:  self.effPlane.SetParLimits(8,lolim*par8_2d,hilim*par8_2d);
-		# else:            self.effPlane.SetParLimits(8,hilim*par8_2d,lolim*par8_2d);
-		# if par9_2d > 0:  self.effPlane.SetParLimits(9,lolim*par9_2d,hilim*par9_2d);
-		# else:            self.effPlane.SetParLimits(9,hilim*par9_2d,lolim*par9_2d);
-		# if par10_2d > 0: self.effPlane.SetParLimits(10,lolim*par10_2d,hilim*par10_2d);
-		# else:            self.effPlane.SetParLimits(10,hilim*par10_2d,lolim*par10_2d);
-		# if par10_2d > 0: self.effPlane.SetParLimits(11,lolim*par11_2d,hilim*par1_2d);
-		# else:            self.effPlane.SetParLimits(11,hilim*par11_2d,lolim*par1_2d);
-
-		# if par1_2dself.effPlane.SetParLimits(1 ,0.5*par1_2d ,1.5*par1_2d);
-		# self.effPlane.SetParLimits(2 ,0.5*par2_2d ,1.5*par2_2d);
-		# self.effPlane.SetParLimits(3 ,0.5*par3_2d ,1.5*par3_2d);
-		# self.effPlane.SetParLimits(4 ,0.5*par4_2d ,1.5*par4_2d);
-		# self.effPlane.SetParLimits(5 ,0.5*par5_2d ,1.5*par5_2d);
-		# self.effPlane.SetParLimits(6 ,0.5*par6_2d ,1.5*par6_2d);
-		# self.effPlane.SetParLimits(7 ,0.5*par7_2d ,1.5*par7_2d);
-		# self.effPlane.SetParLimits(8 ,0.5*par8_2d ,1.5*par8_2d);
-		# self.effPlane.SetParLimits(9 ,0.5*par9_2d ,1.5*par9_2d);
-		# self.effPlane.SetParLimits(10,0.5*par10_2d,1.5*par10_2d);
-		# self.effPlane.SetParLimits(11,0.5*par11_2d,1.5*par11_2d);
+		# self.effPlane.FixParameter(12,0);
+		# self.effPlane.FixParameter(13,0);
+		# self.effPlane.FixParameter(14,0);
 
 		self.effPlane_prefit = self.effPlane.Clone();
-
 
 		txta = ROOT.TLatex(0.05,0.90,"CMS");
 		txta.SetNDC();
@@ -441,7 +401,8 @@ class rhalphabet:
 
 		# need to update this to the TGraph2D with the mass windows missing?
 		self.TF_pafa_gr2D = self.convertHistToGraph2D(self.TF_pafa,91,89,self._ZPrimeMass);
-		self.theFitResult = self.TF_pafa_gr2D.Fit(self.effPlane,"RS");
+		self.theFitResult0 = self.TF_pafa_gr2D.Fit(self.effPlane,"RS");
+		self.theFitResult = self.TF_pafa_gr2D.Fit(self.effPlane,"RSEM");
 
 		# get baseline parameters:
 		self.base_parameters = [];
@@ -463,8 +424,8 @@ class rhalphabet:
 			cureigen_dn = []
 			for j in range(lEigVecs.GetNrows()):
 				
-				if self.effPlane.GetParameter(j) != 0: print round(lEigVecs(j,i),10),
-				else: print "0.0",
+				# if self.effPlane.GetParameter(j) != 0: print round(lEigVecs(j,i),10),
+				# else: print "0.0",
 				cureigen = lEigVals(j);
 				if cureigen < 0: cureigen = 0.;
 				cureigen_up.append( self.effPlane.GetParameter(j) + math.sqrt(cureigen)*lEigVecs(j,i)*self.effPlane.GetParameter(j) );
@@ -472,13 +433,13 @@ class rhalphabet:
 				# cureigen_up.append( self.effPlane.GetParameter(j) + math.sqrt(lEigVals(j))*lEigVecs(j,i) );
 				# cureigen_dn.append( self.effPlane.GetParameter(j) - math.sqrt(lEigVals(j))*lEigVecs(j,i) );
 
-			print "\n"
+			# print "\n"
 			self.eigen_parameters_up.append(cureigen_up);
 			self.eigen_parameters_dn.append(cureigen_dn);
 		
-		print self.base_parameters
-		print len(self.eigen_parameters_up),len(self.eigen_parameters_dn)
-		print self.eigen_parameters_up;
+		# print self.base_parameters
+		# print len(self.eigen_parameters_up),len(self.eigen_parameters_dn)
+		# print self.eigen_parameters_up;
 
 		# TMatrixD  lEigVecs(3,3);    
 		# lEigVecs = TMatrixDSymEigen(lCovMatrix).GetEigenVectors();
@@ -580,9 +541,9 @@ class rhalphabet:
 		self.hpred_jetmsd         = ROOT.TH1F("hpred_jetmsd"+self._name,"; soft drop mass (GeV);", nbinsmass, 30, 330);
 		self.hpred_jetmsd_errup   = ROOT.TH1F("hpred_jetmsd_errup"+self._name,"; soft drop mass (GeV);", nbinsmass, 30, 330);
 		self.hpred_jetmsd_failcut = ROOT.TH1F("hpred_jetmsd_failcut"+self._name,"; soft drop mass (GeV);", nbinsmass, 30, 330);
-		self.hpred_rhoDDT         = ROOT.TH1F("hpred_rhoDDT"+self._name,"; soft drop mass (GeV);", self._nrhobins, float(options.rholo),float(options.rhohi));
-		self.hpred_rhoDDT_errup    = ROOT.TH1F("hpred_rhoDDT_errup"+self._name,"; soft drop mass (GeV);", self._nrhobins, float(options.rholo),float(options.rhohi));
-		self.hpred_rhoDDT_failcut = ROOT.TH1F("hpred_rhoDDT_failcut"+self._name,"; soft drop mass (GeV);", self._nrhobins, float(options.rholo),float(options.rhohi));
+		self.hpred_rhoDDT         = ROOT.TH1F("hpred_rhoDDT"+self._name,"; #rho^{DDT};", self._nrhobins, float(options.rholo),float(options.rhohi));
+		self.hpred_rhoDDT_errup    = ROOT.TH1F("hpred_rhoDDT_errup"+self._name,"; #rho^{DDT};", self._nrhobins, float(options.rholo),float(options.rhohi));
+		self.hpred_rhoDDT_failcut = ROOT.TH1F("hpred_rhoDDT_failcut"+self._name,"; #rho^{DDT};", self._nrhobins, float(options.rholo),float(options.rhohi));
 		
 		self.hpred_jetmsd_altup = [];
 		self.hpred_jetmsd_altdn = [];
@@ -601,7 +562,7 @@ class rhalphabet:
 		print "size = ",nent
 		for i in range(self.pred_tt.GetEntries()):
 
-			if i > 1000000: break;
+			# if i > 20000: break;
 
 			# preamble
 			self.pred_tt.GetEntry(i);
@@ -628,8 +589,8 @@ class rhalphabet:
 			if rhP > 0.2 and jt21P > DDTCUT:
 				self.hpred_jetmsd_failcut.Fill( jmsd, weight );
 				self.hpred_rhoDDT_failcut.Fill( rhP, weight );
- 				curval,altvals_up,altvals_dn = self.predictedVal(rhP,jpt);
- 				curerr = 0.; # this will ensure keeping only the statistical errors from fit region
+ 				curval,curerr,altvals_up,altvals_dn = self.predictedVal(rhP,jpt);
+ 				# curerr = 0.; # this will ensure keeping only the statistical errors from fit region
 				self.hpred_jetmsd.Fill( jmsd, weight*curval );
 				self.hpred_rhoDDT.Fill( rhP, weight*curval );
 				self.hpred_jetmsd_errup.Fill( jmsd, weight*(curval+curerr) );
@@ -638,28 +599,107 @@ class rhalphabet:
 				for i,v in enumerate(altvals_up): self.hpred_jetmsd_altup[i].Fill( jmsd, weight*v );
 				for i,v in enumerate(altvals_dn): self.hpred_jetmsd_altdn[i].Fill( jmsd, weight*v );
 
-		print "\n"
-
+		print "\n";
 		print "predicted integral = ", self.hpred_jetmsd.Integral(), self.hpred_jetmsd.GetNbinsX();
+		hpred_jetmsdClone = self.hpred_jetmsd.Clone("hpred_jetmsdClone");
+
+		if self._isData: 
+			hpred_jetmsd_WZToSubtract = ROOT.TH1F("hpred_jetmsd_WZToSubtract"+self._name,"; soft drop mass (GeV);", nbinsmass, 30, 330);
+			hpred_rhoDDT_WZToSubtract = ROOT.TH1F("hpred_rhoDDT_WZToSubtract"+self._name,"; #rho^{DDT};", self._nrhobins, float(options.rholo),float(options.rhohi)); 
+			print "subtracting EWK contributions from fail template..."
+			self._fileEWK = ROOT.TFile("/Users/ntran/Documents/Research/CMS/WZpToQQ/dijetsGH/dijets/sklimming/sklim-v0-Jun16/EWK.root");
+			self._treeEWK = self._fileEWK.Get("otree");
+			nent = self._treeEWK.GetEntries();
+			for i in range( self._treeEWK.GetEntries() ):		
+
+				# preamble
+				self._treeEWK.GetEntry(i);
+				if(i % (1 * nent/100) == 0):
+					sys.stdout.write("\r[" + "="*int(20*i/nent) + " " + str(round(100.*i/nent,0)) + "% done");
+					sys.stdout.flush();
+				
+				jpt = getattr(self._treeEWK,"bst8_PUPPIjet"+self._jetNum+"_pt");
+				jeta = getattr(self._treeEWK,"bst8_PUPPIjet"+self._jetNum+"_eta");
+				jmsd = getattr(self._treeEWK,"bst8_PUPPIjet"+self._jetNum+"_msd");		
+				if jmsd == 0.: jmsd = 0.01;
+				weight = self._lumi*getattr(self._treeEWK,"scale1fb")*getattr(self._treeEWK,"kfactor")*getattr(self._treeEWK,"puWeight");
+				# weight = weight*-1.;
+				if jpt < 500: continue;
+
+				jt21 = getattr(self._treeEWK,"bst8_PUPPIjet"+self._jetNum+"_tau21");
+				rhP = math.log(jmsd*jmsd/jpt);                  
+				jt21P = jt21 + 0.063*rhP;
+
+				if rhP > 0.2 and jt21P > DDTCUT:
+	 				curval,curerr,altvals_up,altvals_dn = self.predictedVal(rhP,jpt);
+	 				# curerr = 0.; # this will ensure keeping only the statistical errors from fit region
+					hpred_jetmsd_WZToSubtract.Fill( jmsd, weight*curval );
+					hpred_rhoDDT_WZToSubtract.Fill( rhP, weight*curval );		
+
+			for i in range(self.hpred_jetmsd.GetNbinsX()): self.hpred_jetmsd.SetBinContent(i+1, self.hpred_jetmsd.GetBinContent(i+1)-hpred_jetmsd_WZToSubtract.GetBinContent(i+1)  );
+			for i in range(self.hpred_rhoDDT.GetNbinsX()): self.hpred_rhoDDT.SetBinContent(i+1, self.hpred_rhoDDT.GetBinContent(i+1)-hpred_rhoDDT_WZToSubtract.GetBinContent(i+1)  );
+			for h in self.hpred_jetmsd_altup:
+				for i in range(h.GetNbinsX()): h.SetBinContent(i+1, h.GetBinContent(i+1)-hpred_jetmsd_WZToSubtract.GetBinContent(i+1)  );	
+			for h in self.hpred_jetmsd_altdn: 
+				for i in range(h.GetNbinsX()): h.SetBinContent(i+1, h.GetBinContent(i+1)-hpred_jetmsd_WZToSubtract.GetBinContent(i+1)  );	
+				
+		print "\n";
+		print "predicted integral after EWK subtraction = ", self.hpred_jetmsd.Integral(), self.hpred_jetmsd.GetNbinsX();
 
 		# adjust histogram errors
 		self.grpred_jetmsd = self.AdjustHistogramErrors(self.hpred_jetmsd,self.hpred_jetmsd_errup);
 		self.grpred_rhoDDT = self.AdjustHistogramErrors(self.hpred_rhoDDT,self.hpred_rhoDDT_errup);
 
 		ceigtest = ROOT.TCanvas("ceigtest","ceigtest",1000,800);
-		for i,h in enumerate(self.hpred_jetmsd_altup): 
-			if i == 0: 
-				h.SetMaximum(1.05);
-				h.SetMinimum(0.95);
-			# h.Scale(self.hpred_jetmsd.Integral()/h.Integral())
+		hpred_jetmsd_altup_cloned = [];
+		hpred_jetmsd_altdn_cloned = [];
+		for h in self.hpred_jetmsd_altup: hpred_jetmsd_altup_cloned.append(h.Clone());
+		for h in self.hpred_jetmsd_altdn: hpred_jetmsd_altdn_cloned.append(h.Clone());
+
+		for i,h in enumerate(hpred_jetmsd_altup_cloned): 
+			# h = h0.Clone();
+			h.Scale(self.hpred_jetmsd.Integral()/h.Integral())
 			h.Divide(self.hpred_jetmsd)
+			if i == 0: 
+				h.SetMaximum(1.2);
+				h.SetMinimum(0.8);
+				h.GetYaxis().SetTitle("Shape variations for fit eigenvectors");
 			h.Draw('histsames');
-		for i,h in enumerate(self.hpred_jetmsd_altdn): 
+		for i,h in enumerate(hpred_jetmsd_altdn_cloned): 
+			# h = h0.Clone();
 			h.SetLineColor(2);
+			h.Scale(self.hpred_jetmsd.Integral()/h.Integral())
 			h.Divide(self.hpred_jetmsd)
 			h.Draw('histsames');
 		# ROOT.gPad.SetLogy();			
-		ceigtest.SaveAs("eigtest.pdf");
+		ceigtest.SaveAs("plots"+str(self._jetNum)+"/rhalphabet/eigenvectors"+self._jetNum+"_"+str(self._ZPrimeMass)+".pdf")
+
+		ceigtest2 = ROOT.TCanvas("ceigtest2","ceigtest2",1000,800);
+		hpred_jetmsd_altup_cloned = [];
+		hpred_jetmsd_altdn_cloned = [];
+		for h in self.hpred_jetmsd_altup: hpred_jetmsd_altup_cloned.append(h.Clone());
+		for h in self.hpred_jetmsd_altdn: hpred_jetmsd_altdn_cloned.append(h.Clone());		
+		for i,h in enumerate(hpred_jetmsd_altup_cloned): 
+			h.Divide(self.hpred_jetmsd)
+			if i == 0: 
+				h.SetMaximum(1.2);
+				h.SetMinimum(0.8);
+				h.GetYaxis().SetTitle("Shape variations for fit eigenvectors");
+			h.Draw('histsames');
+		for i,h in enumerate(hpred_jetmsd_altdn_cloned): 
+			h.SetLineColor(2);
+			h.Divide(self.hpred_jetmsd)
+			h.Draw('histsames');
+		ceigtest2.SaveAs("plots"+str(self._jetNum)+"/rhalphabet/eigenvectors_raw_"+self._jetNum+"_"+str(self._ZPrimeMass)+".pdf")
+
+		efname = "plots"+str(self._jetNum)+"/rhalphabet/eigenshapes"+self._jetNum+"_"+str(self._ZPrimeMass)+".root";
+		efile = ROOT.TFile(efname,"RECREATE")
+		for h in self.hpred_jetmsd_altup: h.Write();
+		for h in self.hpred_jetmsd_altdn: h.Write();
+		self.hpred_jetmsd.Write();
+		hpred_jetmsdClone.Write();
+		self.grpred_jetmsd.Write();
+		efile.Close();
 
 
 
@@ -670,7 +710,7 @@ class rhalphabet:
 		curpoint.append( yval );
 		curerr = array.array('d', []);
 		curerr.append(0.)
-		# self.theFitResult.GetConfidenceIntervals(1,1,1,curpoint,curerr, 0.683, False);	
+		self.theFitResult.GetConfidenceIntervals(1,1,1,curpoint,curerr,0.683,False);	
 		
 		# print self.base_parameters
 		# print self.eigen_parameters_up[0]
@@ -703,7 +743,7 @@ class rhalphabet:
 		# # print xval,yval,self.TF_pafa.GetTitle();#,self.TF_pafa.GetXaxis().FindBin(xval), self.TF_pafa.GetYaxis().FindBin(yval)
 		# curval = tfpafa.GetBinContent( tfpafa.GetXaxis().FindBin(xval), tfpafa.GetYaxis().FindBin(yval) );
 
-		return curval,altval_up,altval_dn;
+		return curval,curerr[0],altval_up,altval_dn;
 
 	################################################################################################
 	# helpers
@@ -764,7 +804,10 @@ class rhalphabet:
 				# f(500) = 4.0;
 				# f(600) = 4.2;
 				# f(x) = 3.0 + 0.2*pT/100
-				if curx > 3.0 + 0.2*cury/100: continue;
+				# if curx > 3.0+ 0.10*cury/100: continue; ## for use with 250 only...
+				if curx > 3.0+ 0.2*cury/100: continue; ## default
+				# if curx > 3.0+ 0.15*cury/100: continue; ## use for 125, 180
+				# if curx > 3.8: continue;
 				# if curx > 3.8: continue;
 				# if curx > 3.4 + 0.1*cury/100: continue;
 				# if curx < 0.2: continue;
@@ -798,6 +841,8 @@ class rhalphabet:
 			mccloseerr = 0.00*h.GetBinContent(i+1);
 			totalerrorup = math.sqrt(curerror*curerror + errup*errup + mccloseerr*mccloseerr);
 			h.SetBinError( i+1, totalerrorup );
+
+			# print "errors = ", curerror, errup
 
 			ax_vals.append( h.GetBinCenter(i+1) )
 			axerr_vals.append( h.GetBinWidth(i+1)/2 )

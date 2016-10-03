@@ -73,6 +73,9 @@ NMassBins = [60,60,60,60,60,60,30,30];
 # NMassBins = 30;
 
 def main(): 
+	
+	#ROOT::Math::MinimizerOptions::SetDefaultMinimizer(fitter)
+	# ROOT.Math.MinimizerOptions.SetDefaultMinimizer("Minuit2");
 
 	# output directories
 	if not os.path.exists('plots'+str(options.jetNum)+'/results'): os.makedirs('plots'+str(options.jetNum)+'/results')
@@ -81,7 +84,7 @@ def main():
 	if not os.path.exists('plots'+str(options.jetNum)+'/rhalphabet'): os.makedirs('plots'+str(options.jetNum)+'/rhalphabet')
 	if not os.path.exists('plots'+str(options.jetNum)+'/datacards'): os.makedirs('plots'+str(options.jetNum)+'/datacards')
 
-	idir = "/Users/ntran/Documents/Research/CMS/WZpToQQ/dijetsGH/dijets/sklimming/sklim-v0-Jun16";
+	idir = "../sklimming/sklim-v0-Jun16";
 	# idir = "/tmp/cmantill/"
 
 	####################################################################################
@@ -140,7 +143,17 @@ def main():
 		for i in range(6):
 			signalMorphersHists.append( sigContainers[i].h_peakshape_matched );
 			signalMorphersMasses.append( sigmass[i] );
+
 		morphedHistContainer = hist(signalMorphersMasses,signalMorphersHists);
+
+		ctmp = ROOT.TCanvas("ctmp","ctmp",1000,800);
+		htmp = morphedHistContainer.morph(165.);
+		htmp.SetLineColor(6);
+		htmp.Draw();
+		morphedHistContainer.morph(180.).Draw("sames");
+		ctmp.SaveAs("mtmp.pdf");
+
+
 		
 		interpolatedMasses = [60.0,90.0,110.0,135.0,165.0,180.0];
 		additionalSigContainers = [];
@@ -150,10 +163,13 @@ def main():
 		isMorphed=True;
 		for i in range(len(interpolatedMasses)):
 			additionalSigContainers.append( MCContainer( 'notapplicable', float(options.lumi), sigLabels[i], sigTags[i], 1, False, options.jetNum,interpolatedMasses_nbins[i],isMorphed ) );
-			additionalSigContainers[i].morphSignal( "h_peakshape",sigmass[i],
+			
+
+			print "interpolating, ",sigTags[i],interpolatedMasses[i],sigLabels[i]
+			additionalSigContainers[i].morphSignal( "h_peakshape",interpolatedMasses[i],
 										               sig_mass_shift,sig_mass_shift_unc,
 										               sig_res_shift,sig_res_shift_unc,
-										               morphedHistContainer.morph(interpolatedMasses[i]) );
+										               morphedHistContainer.morph(interpolatedMasses[i]));
 
 			# hsig = [];
 			# hsig.append( getattr( additionalSigContainers[i], "h_peakshape" ) );
@@ -164,9 +180,6 @@ def main():
 
 			# makeCanvasShapeComparison(hsig,["cen","shiftup","smearup","shiftdn","smeardn"],"mcsignalshapes_"+sigTags[i],"plots"+str(options.jetNum)+"/shapes/");
 
-		print len(sigContainers)
-		print sigmass
-		print NMassBins
 		for i in range(len(additionalSigContainers)):
 			for j in range(len(sigmass)-1):
 				if interpolatedMasses[i] > sigmass[j] and interpolatedMasses[i] < sigmass[j+1]:
@@ -175,9 +188,10 @@ def main():
 					NMassBins.insert(j+1,interpolatedMasses_nbins[i]);
 					print "newsigmass = ", sigmass
 					break;
-		print len(sigContainers)
-		print sigmass
-		print NMassBins,NMassBins[sigmass.index(options.ZPrimeMass)]
+
+		for s in sigContainers:
+			print s._tag,s._name;
+
 
 		bkgContainers = [];
 		bkgNames = ["QCD.root","W.root","DY.root","TTT.root"];
@@ -185,6 +199,11 @@ def main():
 		bkgTags = ["QCD","Winc","Zinc","top"];
 		bkgmass = [0.0,80.4,91.2,80.4];
 		bkgsf = [1.,0.95,0.95,0.95]; # put in the W tag SF! 
+		# bkgNames = ["QCD.root","W.root","DY.root"];
+		# bkgLabels = ["QCD","W(qq)","Z+jets"];
+		# bkgTags = ["QCD","Winc","Zinc"];
+		# bkgmass = [0.0,80.4,91.2];
+		# bkgsf = [1.,0.95,0.95]; # put in the W tag SF! 
 		for i in range(0,len(bkgNames)):
 			tmpsf = qcdSF;
 			if i > 0: tmpsf = 1;
@@ -204,7 +223,7 @@ def main():
 			isData = True;
 			extractTFs = False;
 			# for i in range(len(sigmass)):
-			theRhalphabet = rhalphabet(idir+"/"+"JetHT.root",1,"rhalphabet",1, extractTFs, options.jetNum,int(options.ZPrimeMass),isData,NMassBins[sigmass.index(options.ZPrimeMass)]) ;
+			theRhalphabet = rhalphabet(idir+"/"+"JetHT350.root",1,"rhalphabet",1, extractTFs, options.jetNum,int(options.ZPrimeMass),isData,NMassBins[sigmass.index(options.ZPrimeMass)]) ;
 			theRhalphabet.GetPredictedDistributions( idir+"/"+"JetHT.root", 1, 1, isData);
 			# extractTFs = False;
 
@@ -224,7 +243,7 @@ def main():
 	if options.doData:
 		print "Now doing the data!...."
 		isData = True;
-		theData = MCContainer( idir+"/"+"JetHT.root", 1, "data" ,"data" , 1, isData, options.jetNum, NMassBins[sigmass.index(options.ZPrimeMass)]);
+		theData = MCContainer( idir+"/"+"JetHT.root", 1, "data" ,"data" , 1, isData, options.jetNum, NMassBins[sigmass.index(options.ZPrimeMass)], False, True );
 
 	####################################################################################
 	# do some plotting
@@ -341,29 +360,34 @@ def BuildPlots(bkgContainers,sigContainers,theRhalphabet,theData):
 		names.append( "h_jetmsd_passcut" );
 		names.append( "h_jett21_masswindow" );
 		names.append( "h_jett21DDT_masswindow" );		
-		# names.append( "h_peakshape" );		
+		names.append( "h_peakshape" );		
 
 		harrays = [];
 		for n in names: 
 	
 			harray = [];
 			hlabels = [];
-			for b in bkgContainers: 
-				harray.append( getattr( b, n ) );
-				hlabels.append( b._name );
-			# for s in sigContainers: 
-			# 	harray.append( getattr( s, n ) );
-			# 	hlabels.append( s._name );
+			# for b in bkgContainers: 
+			# 	harray.append( getattr( b, n ) );
+			# 	hlabels.append( b._name );
+			for i,s in enumerate(sigContainers):
+				if i > 3: 
+					curh = getattr( s, n );
+					curh.GetXaxis().SetRangeUser(70,330);
+					curh.GetYaxis().SetTitle( "fraction of events" );
+
+					harray.append( curh );
+					hlabels.append( s._name );
 
 			makeCanvasComparison(harray,hlabels,"mc_"+n,"plots"+str(options.jetNum)+"/yields/");
 			makeCanvasShapeComparison(harray,hlabels,"mc_"+n,"plots"+str(options.jetNum)+"/shapes/");
 
 			harrays.append(harray);
 			
-		#roc comp
-		gr_t21    = makeROCFromHisto([harrays[2][1],harrays[2][0]], False);
-		gr_t21ddt = makeROCFromHisto([harrays[3][1],harrays[3][0]], False);
-		plotROCs([gr_t21,gr_t21ddt],["t21","t21DDT"],"plots"+str(options.jetNum)+'/shapes/','roccomp')
+		# #roc comp
+		# gr_t21    = makeROCFromHisto([harrays[2][1],harrays[2][0]], False);
+		# gr_t21ddt = makeROCFromHisto([harrays[3][1],harrays[3][0]], False);
+		# plotROCs([gr_t21,gr_t21ddt],["t21","t21DDT"],"plots"+str(options.jetNum)+'/shapes/','roccomp')
 
 
 #----------------------------------------------------------------------------------------------------------------
