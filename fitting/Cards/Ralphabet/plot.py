@@ -144,13 +144,15 @@ if __name__ == "__main__":
     lDFile = r.TFile(options.data)
     lDSum=[]
     lSum=[]
+    iC=0
     for cat in options.cats.split(','):
+        iC=iC+1
         lData  = loadData(lDFile,"pass_cat"+cat)
-        lHists = loadHist(lHFile,"ch"+cat+"_pass_cat"+cat,options.mass)
+        lHists = loadHist(lHFile,"ch"+str(iC)+"_pass_cat"+cat,options.mass)
         #lHists = loadHist(lHFile,"pass_cat"+cat,options.mass)
         if options.passfail:
             lData .extend(loadData(lDFile,"fail_cat"+cat))
-            lHists.extend(loadHist(lHFile,"ch"+cat+"_fail_cat"+cat,options.mass,True,True))
+            lHists.extend(loadHist(lHFile,"ch"+str(iC)+"_fail_cat"+cat,options.mass,True,True))
             #lHists.extend(loadHist(lHFile,"fail_cat"+cat,options.mass,True,True))
         if len(lSum) == 0:
             lDSum = lData
