@@ -17,7 +17,6 @@ parser.add_option('--mass'    ,action='store',              dest='mass'    ,defa
 (options,args) = parser.parse_args()
 
 def end():
-    return
     if __name__ == '__main__':
         rep = ''
         while not rep in [ 'q', 'Q','a',' ' ]:
@@ -50,7 +49,8 @@ def divide(iData,iHists):
 def draw(iData,iHists,iName="A",iPF=True,iDivide=False):
     if iDivide:
         divide(iData,iHists)
-
+        iData[0].GetYaxis().SetRangeUser(0.6,1.4)
+        iData[1].GetYaxis().SetRangeUser(0.9,1.1)
     lC0 = r.TCanvas("Can"+iName,"Can"+iName,800,600);
     if iPF:
         lC0.Divide(2)
@@ -63,6 +63,8 @@ def draw(iData,iHists,iName="A",iPF=True,iDivide=False):
             pDraw=True
     iData[0].Draw("ep sames")
     lLegend = r.TLegend(0.63,0.63,0.88,0.88)
+    if iDivide:
+        lLegend = r.TLegend(0.23,0.23,0.48,0.48)
     lLegend.SetFillColor(0)
     lLegend.SetBorderSize(0)
     lLegend.AddEntry(iData [0],"data","lp")
@@ -142,13 +144,15 @@ if __name__ == "__main__":
     lDFile = r.TFile(options.data)
     lDSum=[]
     lSum=[]
+    iC=0
     for cat in options.cats.split(','):
+        iC=iC+1
         lData  = loadData(lDFile,"pass_cat"+cat)
-        lHists = loadHist(lHFile,"ch"+cat+"_pass_cat"+cat,options.mass)
+        lHists = loadHist(lHFile,"ch"+str(iC)+"_pass_cat"+cat,options.mass)
         #lHists = loadHist(lHFile,"pass_cat"+cat,options.mass)
         if options.passfail:
             lData .extend(loadData(lDFile,"fail_cat"+cat))
-            lHists.extend(loadHist(lHFile,"ch"+cat+"_fail_cat"+cat,options.mass,True,True))
+            lHists.extend(loadHist(lHFile,"ch"+str(iC)+"_fail_cat"+cat,options.mass,True,True))
             #lHists.extend(loadHist(lHFile,"fail_cat"+cat,options.mass,True,True))
         if len(lSum) == 0:
             lDSum = lData
