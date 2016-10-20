@@ -20,7 +20,7 @@ fPars=[]
 def parser():
     parser = OptionParser()
     parser.add_option('--input'   ,action='store',type='string',dest='input'   ,default='hists.root',help='input file')
-    parser.add_option('--output'  ,action='store',type='string',dest='output'  ,default='bern.root' ,help='workspace output')
+    parser.add_option('--output'  ,action='store',type='string',dest='output'  ,default='base.root' ,help='workspace output')
     parser.add_option('--xMin'    ,action='store',type='float' ,dest='xmin'    ,default=32          ,help='x-min')
     parser.add_option('--xMax'    ,action='store',type='float' ,dest='xmax'    ,default=300         ,help='x-max')
     parser.add_option('--nBins'   ,action='store',type='int'   ,dest='nbins'    ,default=67          ,help='n-bins')
@@ -82,7 +82,7 @@ def getSignals(iHP,iHF,iBin,iBase):
         lFHists.append(iHF[i0+3])
     lPHist = hist(lVars,lPHists)
     lFHist = hist(lVars,lFHists)
-    masses=[50,60,75,90,100,112,125,140,150,160,170,180,190,200,210,220,230,240,250,260,270,280,290,300]
+    masses=[50,60,75,90,100,112,125,140,150,160,170,180,190,200,210,220,230,240,250,260,270,280,290]
     for i0 in range(0,len(masses)):
         pHP   = lPHist.morph(masses[i0])
         pHF   = lFHist.morph(masses[i0])
@@ -203,10 +203,10 @@ def makeRalph(iHs,iBase,iPt,iCat):
     getattr(lWFail,'import')(lFail,r.RooFit.RecycleConflictNodes())
     getattr(lWFail,'import')(lNFail,r.RooFit.RecycleConflictNodes())
     if iCat.find("1") > -1:
-        lWPass.writeToFile("paramHist"+fOutput)
+        lWPass.writeToFile("ralpha"+fOutput)
     else:
-        lWPass.writeToFile("paramHist"+fOutput,False)
-    lWFail.writeToFile("paramHist"+fOutput,False)
+        lWPass.writeToFile("ralpha"+fOutput,False)
+    lWFail.writeToFile("ralpha"+fOutput,False)
     return [lPass,lFail]
 
 #pt categories with rhalpha Fit constraints does on as RateParams
