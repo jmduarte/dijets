@@ -49,16 +49,16 @@ def main():
 
 	exp_gq.SetLineStyle(2);
 	exp1s_gq.SetFillStyle(1001);
-	exp1s_gq.SetFillColor(3);
+	exp1s_gq.SetFillColor(ROOT.kGreen+1);
 	exp2s_gq.SetFillStyle(1001);
-	exp2s_gq.SetFillColor(5);
+	exp2s_gq.SetFillColor(ROOT.kOrange);
 
 	#--------------------------------
 	DMM0func = ROOT.TF1("DMM0func",DMConstraintsM0,0,5000,0);
 	DMMInffunc = ROOT.TF1("DMMInffunc",DMConstraintsInfty,0,5000,0);
 	DMM0func.SetLineColor(ROOT.kGray+2);
 	DMMInffunc.SetLineColor(ROOT.kGray+2);
-	DMM0func.SetLineStyle(2);
+	DMM0func.SetLineStyle(3);
 	DMMInffunc.SetLineStyle(3);
 	DMM0func.SetLineWidth(2);
 	DMMInffunc.SetLineWidth(2);
@@ -70,26 +70,30 @@ def main():
 	txta = ROOT.TLatex(0.16,0.92,"CMS"); txta.SetNDC();
 	txtc = ROOT.TLatex(0.73,0.92,"12.9 fb^{-1} (13 TeV)");
 	txtc.SetNDC(); txtc.SetTextFont(42); txtc.SetTextSize(0.04);
+
+	txtd = ROOT.TLatex(0.22,0.83,"95% CL upper limits");
+	txtd.SetNDC(); txtd.SetTextFont(42); txtd.SetTextSize(0.04);
 	
-	leg = ROOT.TLegend(0.20,0.65,0.6,0.85);
+	leg = ROOT.TLegend(0.20,0.63,0.6,0.81);
 	leg.SetFillStyle(0);
 	leg.SetFillColor(0);    
 	leg.SetBorderSize(0);
 	leg.SetTextFont(42); 
-	leg.AddEntry(obs_gq,"Observed, 95% CL Limit","l")
-	leg.AddEntry(exp_gq,"Expected, 95% CL Limit","l")
-	leg.AddEntry(exp1s_gq,"Expected, #pm 1 #sigma","f")
-	leg.AddEntry(exp2s_gq,"Expected, #pm 2 #sigma","f")
+	# leg.AddEntry(obs_gq,"95% CL upper limits","")
+	leg.AddEntry(obs_gq,"Observed","l")
+	leg.AddEntry(exp_gq,"Expected","l")
+	leg.AddEntry(exp1s_gq,"#pm 1 std. deviation","f")
+	leg.AddEntry(exp2s_gq,"#pm 2 std. deviation","f")
 
 	can_gB = ROOT.TCanvas("can_gB","can_gB",1200,800);
 	hrl = can_gB.DrawFrame(lowlim,0,4001,0.45);
-	hrl.GetYaxis().SetTitle("coupling g_{q}");
+	hrl.GetYaxis().SetTitle("Coupling g_{q}'");
 	hrl.GetYaxis().SetTitleOffset(1.0);
 	hrl.GetXaxis().SetTitle("Z\' mass (GeV)");
 
-	txt1 = ROOT.TLatex(0.20,0.58,"g_{q} = 0.25, g_{#chi} = 1, m_{#chi} = 0");
+	txt1 = ROOT.TLatex(0.18,0.58,"m_{DM} > M_{Med} / 2");
 	txt1.SetNDC(); txt1.SetTextFont(42); txt1.SetTextSize(0.03);
-	txt2 = ROOT.TLatex(0.20,0.46,"g_{q} = 0.25, g_{#chi} = 1, m_{#chi} = #infty");
+	txt2 = ROOT.TLatex(0.18,0.46,"m_{DM} = 0");
 	txt2.SetNDC(); txt2.SetTextFont(42); txt2.SetTextSize(0.03);
 
 	exp2s_gq.Draw("f");
@@ -100,6 +104,7 @@ def main():
 	DMMInffunc.Draw("SAMES")
 	txta.Draw();
 	txtc.Draw();
+	txtd.Draw();
 	txt1.Draw();
 	txt2.Draw();
 	leg.Draw();
