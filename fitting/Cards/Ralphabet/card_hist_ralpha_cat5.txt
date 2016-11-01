@@ -9,7 +9,7 @@ bin          pass_cat5 fail_cat5
 observation -1         -1
 ------------------------------
 bin          pass_cat5	pass_cat5  pass_cat5 pass_cat5 fail_cat5  fail_cat5  fail_cat5	fail_cat5   
-process      zqq100	wqq        zqq	     qcd       zqq300	  wqq        zqq	qcd  
+process      zqq100	wqq        zqq	     qcd       zqq100	  wqq        zqq	qcd  
 process      0		1	   2   	     3         0	  1	     2		3
 rate         -1		-1         -1  	     1         -1	  -1	     -1		1
 --------------------------------
