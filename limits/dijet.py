@@ -42,6 +42,11 @@ def dijetexp(color,i90CL=False):
         lCGraph = lCFile.Get("exp")
         lGraph = merge(lPGraph,lCGraph,color,1400,3900)
         return lGraph
+    lPFile = ROOT.TFile("limits_freq_qq_calodijet2016_pfdijet2016.root")
+    lCGraph = lPFile.Get("exp1sigma_qq_calodijet2016")
+    lPGraph = lPFile.Get("exp1sigma_qq_pfdijet2016")
+    lGraph = merge(lPGraph,lCGraph,color,1400,3900)
+    return lGraph
     x = array('d', [])
     y = array('d', [])
     #x.append(500)
@@ -124,6 +129,11 @@ def dijetobs(color,i90CL=False):
         lCGraph = lCFile.Get("obs")
         lGraph  = merge(lPGraph,lCGraph,color,1400,3900)
         return lGraph
+    lPFile = ROOT.TFile("limits_freq_qq_calodijet2016_pfdijet2016.root")
+    lCGraph = lPFile.Get("obs_qq_calodijet2016")
+    lPGraph = lPFile.Get("obs_qq_pfdijet2016")
+    lGraph = merge(lPGraph,lCGraph,color,1400,3900)
+    return lGraph
     x = array('d', [])
     y = array('d', [])
     #x.append(500)
