@@ -68,9 +68,9 @@ def load(i90CL=False):
     return [gr_mu_exp,gr_mu_obs]
 
 def avwidth(iType,g,med,mfm):
-    front=g*g*(med*med+2*mfm*mfm)/(12*med*3.141159265)
+    front=g*g*(med*med+2*mfm*mfm)/(12*med*3.14159265)
     if abs(iType) == 2:
-        front=g*g*(med*med-4*mfm*mfm)/(12*med*3.141159265)
+        front=g*g*(med*med-4*mfm*mfm)/(12*med*3.14159265)
     if 2.*mfm > med:
         return 0.001
     sqrtV=math.sqrt(1-4*(mfm/med)*(mfm/med))
