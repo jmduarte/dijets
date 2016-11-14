@@ -16,6 +16,7 @@ parser.add_option('--doData', action='store_true', dest='doData', default=False,
 parser.add_option('--doPlots', action='store_true', dest='doPlots', default=False, help='go!')
 parser.add_option('--doCards', action='store_true', dest='doCards', default=False, help='go!')
 
+parser.add_option('--extractTF', action='store_true', dest='extractTF', default=False, help='go!')
 parser.add_option("--lumi", dest="lumi", default = 0.44,help="mass of LSP", metavar="MLSP")
 parser.add_option("--rholo", dest="rholo", default = 0.,help="mass of LSP", metavar="MLSP")
 parser.add_option("--rhohi", dest="rhohi", default = 6.,help="mass of LSP", metavar="MLSP")
@@ -160,6 +161,14 @@ class rhalphabet:
 			print self.TF_fail.Integral(),self.TF_pafa.Integral(),self.TF_failEWK.Integral(),self.TF_pafaEWK.Integral();
 
 		#####!!!! this uncertinaty may be wrong, binomial instead of poisson
+		
+		if not self._isData:
+			# make the MC uncertainties like data
+			for i in range(self.TF_fail.GetNbinsX()):
+				for j in range(self.TF_fail.GetNbinsY()):
+					self.TF_fail.SetBinError(i+1,j+1, math.sqrt( self.TF_fail.GetBinContent(i+1,j+1) ) )
+					self.TF_pafa.SetBinError(i+1,j+1, math.sqrt( self.TF_pafa.GetBinContent(i+1,j+1) ) )
+
 		self.TF_pafa.Divide( self.TF_fail );
 
 	################################################################################################
@@ -402,7 +411,7 @@ class rhalphabet:
 		# need to update this to the TGraph2D with the mass windows missing?
 		self.TF_pafa_gr2D = self.convertHistToGraph2D(self.TF_pafa,91,89,self._ZPrimeMass);
 		self.theFitResult0 = self.TF_pafa_gr2D.Fit(self.effPlane,"RS");
-		self.theFitResult = self.TF_pafa_gr2D.Fit(self.effPlane,"RSEM");
+		self.theFitResult = self.TF_pafa_gr2D.Fit(self.effPlane,"RS");
 
 		# get baseline parameters:
 		self.base_parameters = [];
@@ -811,7 +820,7 @@ class rhalphabet:
 				# if curx > 3.8: continue;
 				# if curx > 3.4 + 0.1*cury/100: continue;
 				# if curx < 0.2: continue;
-				if curx < -0.2 + 0.1*cury/100: continue;
+				if curx < -0.0 + 0.1*cury/100: continue;
 				# if curx > 3.4 + 0.1*cury/100: continue;
 				
 				x.append( h.GetXaxis().GetBinCenter(i+1) );

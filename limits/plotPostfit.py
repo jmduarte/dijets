@@ -19,6 +19,7 @@ parser.add_option('--cats'    ,action='store',type='string',dest='cats'    ,defa
 parser.add_option('--passfail',action='store_true',         dest='passfail',default=False,help='fit pass and failng') 
 parser.add_option('--divide'  ,action='store_true',         dest='divide'  ,default=False,help='ratio') 
 parser.add_option('--mass'    ,action='store',              dest='mass'    ,default=100  ,help='mass') 
+parser.add_option('--prefit'  ,action='store_true',         dest='prefit'  ,default=False,help='ratio') 
 
 (options,args) = parser.parse_args()
 
@@ -31,7 +32,9 @@ def main():
 	lSum=[]
 	for cat in options.cats.split(','):
 		lData  = loadData(lDFile,"pass_cat"+cat)
-		lHists = loadHist(lHFile,"ch0",options.mass)
+		dopostfit = True;
+		if options.prefit: dopostfit = False;
+		lHists = loadHist(lHFile,"ch0",options.mass,True,dopostfit)
 		if options.passfail:
 			lData .extend(loadData(lDFile,"fail_cat"+cat))
 			lHists.extend(loadHist(lHFile,"ch"+cat+"_fail_cat"+cat,options.mass,True,True))
@@ -90,8 +93,8 @@ def draw(iData0,iHists0,iName="A",iPF=True,iDivide=False):
 		iHists.append( reRangeHistogram(h,30,330) );
 		iHists[i].SetLineWidth(2);
 
-	txta = ROOT.TLatex(0.15,0.92,"CMS");
-	txta.SetNDC();
+	txta = ROOT.TLatex(0.80,0.80,"CMS");
+	txta.SetNDC(); txta.SetTextSize(0.065);
 	txtb = ROOT.TLatex(0.22,0.92,"Preliminary");
 	txtb.SetNDC(); txtb.SetTextFont(52);
 	txtc = ROOT.TLatex(0.73,0.92,"2.7 fb^{-1} (13 TeV)");
@@ -109,7 +112,7 @@ def draw(iData0,iHists0,iName="A",iPF=True,iDivide=False):
 
 	p12 = ROOT.TPad("p12","p12",0.0,0.3,1.0,1.0);
 	p22 = ROOT.TPad("p22","p22",0.0,0.0,1.0,0.3);
-	p12.SetBottomMargin(0.05);
+	p12.SetBottomMargin(0.02);
 	p22.SetTopMargin(0.05);
 	p22.SetBottomMargin(0.3);
 
@@ -127,13 +130,14 @@ def draw(iData0,iHists0,iName="A",iPF=True,iDivide=False):
 	iRatio = iData[0].Clone();
 	iRatio.Divide(iHists[2]);
 	iRatio.SetTitle("; soft drop mass (GeV); Data/Prediction");
-	iRatio.GetYaxis().SetTitleSize(0.12);
-	iRatio.GetYaxis().SetLabelSize(0.1);
-	iRatio.GetYaxis().SetTitleOffset(0.4);
-	iRatio.GetXaxis().SetTitleSize(0.12);
-	iRatio.GetXaxis().SetLabelSize(0.1);
+	iRatio.GetYaxis().SetTitleSize(0.13);
+	iRatio.GetYaxis().SetNdivisions(6);
+	iRatio.GetYaxis().SetLabelSize(0.12);
+	iRatio.GetYaxis().SetTitleOffset(0.44);
+	iRatio.GetXaxis().SetTitleSize(0.13);
+	iRatio.GetXaxis().SetLabelSize(0.12);
 	iRatio.GetXaxis().SetTitleOffset(0.9);
-	iRatio.GetYaxis().SetRangeUser(0.5,1.5);
+	iRatio.GetYaxis().SetRangeUser(0.51,1.49);
 	iOneWithErrors = iHists[2].Clone();
 	iOneWithErrors.Divide(iHists[2].Clone());
 	for i in range(iOneWithErrors.GetNbinsX()): iOneWithErrors.SetBinError( i+1, iHists[2].GetBinError(i+1)/iHists[2].GetBinContent(i+1) );
@@ -150,13 +154,9 @@ def draw(iData0,iHists0,iName="A",iPF=True,iDivide=False):
 
 	iHists[2].Chi2Test(lHist,"P")
 
+	lHist.GetXaxis().SetLabelSize(0.);
 	lHist.Draw("ep")
-	# pDraw=False
-	# for pHist in iHists:
-	# 	pHist.Draw("hist sames") if pDraw else pHist.Draw("e2 sames")
-	# 	pDraw=True
 	iHists[0].Draw("e2 sames");
-	# iHists[1].Draw("hist sames");
 	iHists[2].Draw("hist sames");
 	iW.Draw("hist sames");
 	iZ.Draw("hist sames");
@@ -165,20 +165,22 @@ def draw(iData0,iHists0,iName="A",iPF=True,iDivide=False):
 	iHists[4].Draw("hist sames");
 
 	lHist.Draw("ep sames")
-	lLegend = r.TLegend(0.63,0.53,0.88,0.84)
+	lLegend = r.TLegend(0.40,0.45,0.88,0.84)
 	lLegend.SetFillColor(0)
 	lLegend.SetBorderSize(0)
+	lLegend.SetTextFont(42)
+	lLegend.SetTextSize(0.045)
 	lLegend.AddEntry(iData [0],"data","lp")
 	lLegend.AddEntry(iHists[0],"QCD Pred.","f")
 	# lLegend.AddEntry(iHists[1],"W#rightarrow qq","l")
 	lLegend.AddEntry(iHists[2],"Total SM Pred.","l")
-	lLegend.AddEntry(iW,"W(qq)","l")
-	lLegend.AddEntry(iZ,"Z(qq)","l")
-	lLegend.AddEntry(iHists[4],"Z'(qq), g_{B} = 1","l")
+	lLegend.AddEntry(iW,"W(qq)+jets","l")
+	lLegend.AddEntry(iZ,"Z(qq)+jets","l")
+	lLegend.AddEntry(iHists[4],"Z'(qq), g_{B} = 1, m_{Z'} = %s GeV" % str(options.mass),"l")
 	#lLegend.AddEntry(iHists[3],"Signal","lf")
 	lLegend.Draw()
 	txta.Draw();
-	txtb.Draw();
+	# txtb.Draw();
 	txtc.Draw();
 
 	lC0.cd();
@@ -188,11 +190,19 @@ def draw(iData0,iHists0,iName="A",iPF=True,iDivide=False):
 	iOneWithErrors.Draw("e2 sames");
 	iRatio.Draw("sames");
 
-	if not iPF:
-		lC0.SaveAs(iName+".png")
-		lC0.SaveAs(iName+".pdf")
-		# end()
-		return
+	lC0.SaveAs(iName+".png")
+	lC0.SaveAs(iName+".pdf")
+
+	p12.cd();
+	lHist.SetMaximum( lHist.GetMaximum()*25. );
+	lHist.SetMinimum( 5. );
+	ROOT.gPad.SetLogy();
+	lC0.Update();
+	lC0.SaveAs(iName+"_log.png")
+	lC0.SaveAs(iName+"_log.pdf")
+
+
+	return;
 
 	# lC0.cd(2)
 	# iData[1].Draw("ep")
@@ -237,27 +247,28 @@ def fix(iH0,iH1):
 	
 def loadHist(iFile,iCat,iMass,iEWK=True,iS=True):
 	lHists = []
-	lFit = "shapes_fit_s/"+iCat+"/" if iS else "shapes_fit_b/"+iCat+"/"
+	# lFit = "shapes_fit_s/"+iCat+"/" if iS else "shapes_fit_b/"+iCat+"/"
+	lFit = "shapes_fit_s/"+iCat+"/" if iS else "shapes_prefit/"+iCat+"/"
 	#lFit = "shapes_prefit/"+iCat+"/" if iS else "shapes_fit_b/"+iCat+"/"
 	lHists.append(load(iFile,lFit+"qcd"))
 	if iEWK:
 		lId = len(lHists)
 		lHists.append(load(iFile,lFit+"Winc"))
 		lHists.append(load(iFile,lFit+"Zinc"))
-		if iS:
-			lHists.append(load(iFile,lFit+"sig"))
+		# if iS:
+		lHists.append(load(iFile,"shapes_prefit/ch0/sig"))
 		lHists[lId].SetLineColor(46)
 		lHists[lId+1].SetLineColor(9)
-		if iS:
-			lHists[lId+2].SetLineColor(8)
+		# if iS:
+		lHists[lId+2].SetLineColor(8)
 		lHists[lId].SetLineWidth(2)
 		lHists[lId+1].SetLineWidth(2)
-		if iS :
-			lHists[lId+2].SetLineWidth(2)
+		# if iS :
+		lHists[lId+2].SetLineWidth(2)
 		lHists[lId].Add(lHists[0])
 		lHists[lId+1].Add(lHists[1])
-		if iS :
-			lHists[lId+2].Add(lHists[2])
+		# if iS :
+		lHists[lId+2].Add(lHists[2])
 	lHists[0].SetFillColor(16)
 	lHists[0].SetFillStyle(3001)
 	lHists[0].SetLineStyle(2)
