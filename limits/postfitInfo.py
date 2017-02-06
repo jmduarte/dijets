@@ -20,21 +20,25 @@ ROOT.gStyle.SetPalette(1);
 ########################################################################################
 def main():
 
-	sXSgb1 = [1.394e+05,8.419e+04,4.481e+04,2.641e+04,1.939e+04,1.462e+04,9976,7870,5707,4254,3233,2320,1131, 620]
-	masses = [       50,       60,       75,       90,      100,      110, 125, 135, 150, 165, 180, 200, 250, 300];
+	# sXSgb1 = [1.394e+05,8.419e+04,4.481e+04,2.641e+04,1.939e+04,1.462e+04,9976,7870,5707,4254,3233,2320,1131, 620]
+	# masses = [       50,       60,       75,       90,      100,      110, 125, 135, 150, 165, 180, 200, 250, 300];
 
+	sXSgb1 = [1.939e+04,1.462e+04,9976,7870,5707,4254,3233,2320,1131, 620]
+	masses = [      100,      110, 125, 135, 150, 165, 180, 200, 250, 300];
 
 	for i,m in enumerate(masses):
 
 		print i,m
 		# if i > 2: break;
+		if m != 150 and m != 135: continue;
 
 		nui_cmmd = "python diffNuisances.py datacards/mlfitZprime%i.root -g datacards/output_%03i.root" % (m,m);
 		os.system(nui_cmmd);
-		os.system("cp nuisances.pdf limplots/nuisances_%i.pdf" % (m));
-		postfitPlot_cmmd = "python plotPostfit.py --data datacards/combine_Zprime%i_0.root --input datacards/mlfitZprime%i.root --name limplots/postfitresults_%i" % (m,m,m)
+		os.system("mv nuisances.pdf limplots/nuisances_%i.pdf" % (m));
+		postfitPlot_cmmd = "python plotPostfit.py --data datacards/combine_Zprime%i_0.root --mass %s --input datacards/mlfitZprime%i.root --name limplots/postfitresults_sb_%i" % (m,m,m,m)
 		os.system(postfitPlot_cmmd);
-
+		postfitPlot_cmmd = "python plotPostfit.py --data datacards/combine_Zprime%i_0.root --mass %s --input datacards/mlfitZprime%i.root --prefit --name limplots/prefitresults_sb_%i" % (m,m,m,m)
+		os.system(postfitPlot_cmmd);
 
 if __name__ == '__main__':
 

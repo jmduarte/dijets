@@ -15,6 +15,7 @@ parser.add_option('--doData', action='store_true', dest='doData', default=False,
 parser.add_option('--doPlots', action='store_true', dest='doPlots', default=False, help='go!')
 parser.add_option('--doCards', action='store_true', dest='doCards', default=False, help='go!')
 
+parser.add_option('--extractTF', action='store_true', dest='extractTF', default=False, help='go!')
 parser.add_option("--lumi", dest="lumi", default = 0.44,help="mass of LSP", metavar="MLSP")
 parser.add_option("--rholo", dest="rholo", default = 0.,help="mass of LSP", metavar="MLSP")
 parser.add_option("--rhohi", dest="rhohi", default = 6.,help="mass of LSP", metavar="MLSP")

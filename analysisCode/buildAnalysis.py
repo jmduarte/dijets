@@ -244,7 +244,7 @@ def main():
 	if options.doData:
 		print "Now doing the data!...."
 		isData = True;
-		theData = MCContainer( idir+"/"+"JetHT.root", 1, "data" ,"data" , 1, isData, options.jetNum, NMassBins[sigmass.index(options.ZPrimeMass)], False, True );
+		theData = MCContainer( idir+"/"+"JetHT.root", 1, "data" ,"data" , 1, isData, options.jetNum, NMassBins[sigmass.index(options.ZPrimeMass)], False );
 
 	####################################################################################
 	# do some plotting
@@ -303,7 +303,7 @@ def BuildPlots(bkgContainers,sigContainers,theRhalphabet,theData):
 									theRhalphabet.grpred_jetmsd, 
 									[bkgContainers[0].h_jetmsd_passcut],
 									['qcd'],
-									'jetmsd_pred'+str(options.jetNum),
+									'jetmsd_pred'+str(options.jetNum)+"_"+str(int(options.ZPrimeMass)),
 									'plots'+str(options.jetNum)+'/results/',
 									False);
 

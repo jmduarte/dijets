@@ -20,7 +20,7 @@ import tdrstyle
 tdrstyle.setTDRStyle()
 ROOT.gStyle.SetPadTopMargin(0.06);
 ROOT.gStyle.SetPadLeftMargin(0.16);
-ROOT.gStyle.SetPadRightMargin(0.10);
+ROOT.gStyle.SetPadRightMargin(0.05);
 ROOT.gStyle.SetPalette(1);
 ROOT.gStyle.SetPaintTextFormat("1.1f");
 ROOT.gStyle.SetOptFit(0000);
@@ -31,20 +31,22 @@ def makeCanvas(hists,normalize=False,legnames=None):
 
 	color = [1,2,4,6,7,8,3,5]
 
-	c = ROOT.TCanvas("c"+hists[0].GetName(),"c"+hists[0].GetName(),1000,800);
+	c = ROOT.TCanvas("c"+hists[0].GetName(),"c"+hists[0].GetName(),900,800);
 
 	max = -999;
 
-	txta = ROOT.TLatex(0.16,0.95,"CMS");
-	txta.SetNDC();
-	txtb = ROOT.TLatex(0.22,0.95,"Simulation Preliminary");
-	txtb.SetNDC(); txtb.SetTextFont(52);
-	txta.SetTextSize(0.035);
-	txtb.SetTextSize(0.035);
+	txta = ROOT.TLatex(0.20,0.85,"CMS");
+	txta.SetNDC(); txta.SetTextSize( 0.065 );
+	txtb = ROOT.TLatex(0.32,0.85,"Simulation");
+	txtb.SetNDC(); txtb.SetTextFont(52); txtb.SetTextSize( 0.065 );
+	txtc = ROOT.TLatex(0.20,0.79,"SM QCD Multijet");
+	txtc.SetNDC(); txtc.SetTextFont(42); txtb.SetTextSize( 0.055 );
 
-	leg = ROOT.TLegend(0.5,0.65,0.9,0.9);
+	leg = ROOT.TLegend(0.5,0.20,0.8,0.45);
 	leg.SetBorderSize(0);
 	leg.SetFillStyle(0);
+	leg.SetTextFont(42);
+	leg.SetTextSize(0.045);
 	if legnames != None: 
 		for i in range(len(legnames)):
 			leg.AddEntry(hists[i],legnames[i],'pe') 	
@@ -63,6 +65,7 @@ def makeCanvas(hists,normalize=False,legnames=None):
 
 	txta.Draw();
 	txtb.Draw();
+	txtc.Draw();
 	if legnames != None: leg.Draw();
 	c.SaveAs("plots_qcd/"+hists[0].GetName()+".pdf")
 	ROOT.gPad.SetLogy();
@@ -71,7 +74,7 @@ def makeCanvas(hists,normalize=False,legnames=None):
 if __name__ == '__main__':
 
 
-	f = ROOT.TFile("../sklimming/sklim-v0-Jun05/QCD.root");
+	f = ROOT.TFile("../sklimming/sklim-v0-Jun16/QCD.root");
 	t = f.Get("otree");
 
 	h_pt = ROOT.TH1F("h_pt",";pt;N",50,0,3000);
@@ -205,11 +208,11 @@ if __name__ == '__main__':
 	for i in range(len(hn_logm_V_t21P)): hn_logm_V_t21P_prof.append( hn_logm_V_t21P[i].ProfileX() );
 	hn_rho_V_t21_prof[0].GetYaxis().SetRangeUser(0.0,1.0);
 	hn_rhP_V_t21_prof[0].GetYaxis().SetRangeUser(0.0,1.0);
-	hn_rhP_V_t21P_prof[0].GetYaxis().SetRangeUser(0.0,1.0);
+	hn_rhP_V_t21P_prof[0].GetYaxis().SetRangeUser(0.2,0.8);
 	hn_logm_V_t21P_prof[0].GetYaxis().SetRangeUser(0.0,1.0);
-	hn_rho_V_t21_prof[0].SetTitle(";#rho;<#tau_{21}>");
-	hn_rhP_V_t21_prof[0].SetTitle(";#rho^{DDT};<#tau_{21}>");
-	hn_rhP_V_t21P_prof[0].SetTitle(";#rho^{DDT};<#tau_{21}^{DDT}>");
+	hn_rho_V_t21_prof[0].SetTitle(";#rho;< #tau_{21 }>");
+	hn_rhP_V_t21_prof[0].SetTitle(";#rho^{DDT};< #tau_{21} >");
+	hn_rhP_V_t21P_prof[0].SetTitle(";#rho^{DDT};< #tau_{21}^{DDT} >");
 
 	# fitting
 	for i in range(n_ptbins):
@@ -222,11 +225,11 @@ if __name__ == '__main__':
 	normalize = False;
 
 	lnames = [];
-	lnames.append( "pT = 500-650 GeV" );
-	lnames.append( "pT = 650-800 GeV" );
-	lnames.append( "pT = 800-950 GeV" );
-	lnames.append( "pT = 950-1100 GeV" );
-	lnames.append( "pT = 1100-1250 GeV" );
+	lnames.append( "p_{T} = 500-650 GeV" );
+	lnames.append( "p_{T} = 650-800 GeV" );
+	lnames.append( "p_{T} = 800-950 GeV" );
+	lnames.append( "p_{T} = 950-1100 GeV" );
+	lnames.append( "p_{T} = 1100-1250 GeV" );
 
 	makeCanvas( hn_rho_V_t21_prof, normalize, lnames );
 	makeCanvas( hn_rhP_V_t21_prof, normalize, lnames );
