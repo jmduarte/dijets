@@ -4,9 +4,9 @@ from massplot import end,make2DGraph,avtotwidth,parser
 import math,sys,time,os,glob,tdrstyle
 from array import array
 tdrstyle.setTDRStyle()
-ROOT.gStyle.SetPadRightMargin(0.08);
-ROOT.gStyle.SetPadLeftMargin(0.14);
-ROOT.gStyle.SetPadTopMargin(0.10);
+ROOT.gStyle.SetPadRightMargin(0.065);
+ROOT.gStyle.SetPadLeftMargin(0.18);
+ROOT.gStyle.SetPadBottomMargin(0.15);
 ROOT.gStyle.SetPalette(109);
 
 
@@ -67,14 +67,14 @@ def main():
 	# PLOTTING
 	lowlim = 350;
 
-	txta = ROOT.TLatex(0.16,0.92,"CMS"); txta.SetNDC();
-	txtc = ROOT.TLatex(0.73,0.92,"12.9 fb^{-1} (13 TeV)");
+	txta = ROOT.TLatex(0.22,0.88,"CMS"); txta.SetNDC();
+	txtc = ROOT.TLatex(0.68,0.96,"12.9 fb^{-1} (13 TeV)");
 	txtc.SetNDC(); txtc.SetTextFont(42); txtc.SetTextSize(0.04);
 
-	txtd = ROOT.TLatex(0.22,0.83,"95% CL upper limits");
+	txtd = ROOT.TLatex(0.22,0.82,"95% CL upper limits");
 	txtd.SetNDC(); txtd.SetTextFont(42); txtd.SetTextSize(0.04);
 	
-	leg = ROOT.TLegend(0.20,0.63,0.6,0.81);
+	leg = ROOT.TLegend(0.20,0.61,0.6,0.81);
 	leg.SetFillStyle(0);
 	leg.SetFillColor(0);    
 	leg.SetBorderSize(0);
@@ -85,16 +85,18 @@ def main():
 	leg.AddEntry(exp1s_gq,"#pm 1 std. deviation","f")
 	leg.AddEntry(exp2s_gq,"#pm 2 std. deviation","f")
 
-	can_gB = ROOT.TCanvas("can_gB","can_gB",1200,800);
-	hrl = can_gB.DrawFrame(lowlim,0,4001,0.45);
-	hrl.GetYaxis().SetTitle("Coupling g_{q}'");
-	hrl.GetYaxis().SetTitleOffset(1.0);
-	hrl.GetXaxis().SetTitle("Z\' mass (GeV)");
+	can_gB = ROOT.TCanvas("can_gB","can_gB",900,800);
+	hrl = can_gB.DrawFrame(lowlim,0,3701,0.45);
+	hrl.GetYaxis().SetTitle("Coupling #font[12]{g#it{_{q}}'}");
+	hrl.GetYaxis().SetTitleOffset(1.4);
+	hrl.GetXaxis().SetTitle("Z\' mass [GeV]");
+	hrl.GetYaxis().SetLabelSize(0.045);
+	hrl.GetXaxis().SetLabelSize(0.045);
 
-	txt1 = ROOT.TLatex(0.18,0.58,"m_{DM} > M_{Med} / 2");
-	txt1.SetNDC(); txt1.SetTextFont(42); txt1.SetTextSize(0.03);
-	txt2 = ROOT.TLatex(0.18,0.46,"m_{DM} = 0");
-	txt2.SetNDC(); txt2.SetTextFont(42); txt2.SetTextSize(0.03);
+	txt1 = ROOT.TLatex(0.21,0.56,"m_{DM} > M_{Med} / 2");
+	txt1.SetNDC(); txt1.SetTextFont(42); txt1.SetTextSize(0.035);
+	txt2 = ROOT.TLatex(0.21,0.44,"m_{DM} = 0");
+	txt2.SetNDC(); txt2.SetTextFont(42); txt2.SetTextSize(0.035);
 
 	exp2s_gq.Draw("f");
 	exp1s_gq.Draw("fsames");
@@ -108,6 +110,27 @@ def main():
 	txt1.Draw();
 	txt2.Draw();
 	leg.Draw();
+
+	line1 = ROOT.TLine(1600,0.02,1600,0.23)
+	line1.SetLineStyle(2)
+	line1.SetLineWidth(2)
+	line1.SetLineColor(ROOT.kGray+1)
+	line1.Draw()
+	lab = ROOT.TLatex()
+	lab.SetTextSize(0.035)
+	lab.SetTextFont(42)
+	lab.SetTextColor(ROOT.kGray+1)
+	lab.SetTextAlign(33)
+	lab.DrawLatex(1600-10,0.08,"#leftarrow")
+	lab.SetTextAlign(13)
+	lab.DrawLatex(1600+10,0.08,"#rightarrow") 
+	lab.SetTextAlign(23)
+	lab.DrawLatex(1600-200,0.06,"Low")
+	lab.DrawLatex(1600-200,0.04,"mass")
+	lab.DrawLatex(1600+200,0.06,"High")
+	lab.DrawLatex(1600+200,0.04,"mass")
+
+	ROOT.gPad.RedrawAxis();
 	can_gB.SaveAs('limplotsHighMass/gB.pdf');
 
 	hrl.GetXaxis().SetMoreLogLabels(True); 
