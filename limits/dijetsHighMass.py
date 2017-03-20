@@ -62,10 +62,28 @@ def main():
 	DMMInffunc.SetLineStyle(3);
 	DMM0func.SetLineWidth(2);
 	DMMInffunc.SetLineWidth(2);
+    
+	Zfunc = ROOT.TF1('myfunc',Zconstraints,0,1000,0)
+	Zfunc.SetNpx(1000) 
+	Zfunc.SetLineColor(15)
+	Zfunc.SetLineStyle(9)
+	Zfunc.SetLineWidth(2)
+
+	gr_UA2 = csvToGraph( "externDat/UA2.csv",4,True);
+	gr_CDFRun1 = csvToGraph( "externDat/CDF_Run1.csv",2,True);
+	gr_CDFRun2 = csvToGraph( "externDat/CDF_Run2.csv",6,True);
+	gr_ATLAS = csvToGraph( "externDat/gBMZB_ATLAS_all_fbinv.csv",7,False );
+	gr_CMS = csvToGraph( "externDat/CMS_Scouting.csv",8,False );
+	gr_ATLAS_isrphoton = csvToGraph( "externDat/ATLAS_Run2ISRPhoton.csv",2,False );
+	gr_ATLAS_scouting = csvToGraph( "externDat/ATLAS_Run2Scouting.csv",4,False );
+	gr_UA2.SetLineStyle(3)
+	gr_CDFRun1.SetLineStyle(3)
+	gr_CDFRun2.SetLineStyle(3)
 
 	#--------------------------------
 	# PLOTTING
-	lowlim = 350;
+	#lowlim = 350;    
+	lowlim = 5;
 
 	txta = ROOT.TLatex(0.22,0.88,"CMS"); txta.SetNDC();
 	txtc = ROOT.TLatex(0.68,0.96,"12.9 fb^{-1} (13 TeV)");
@@ -84,6 +102,19 @@ def main():
 	leg.AddEntry(exp_gq,"Expected","l")
 	leg.AddEntry(exp1s_gq,"#pm 1 std. deviation","f")
 	leg.AddEntry(exp2s_gq,"#pm 2 std. deviation","f")
+	leg3 = ROOT.TLegend(0.6,0.2,0.9,0.4);
+	leg3.SetFillStyle(0);
+	leg3.SetFillColor(0);    
+	leg3.SetBorderSize(0);
+	leg3.SetTextFont(42); 
+	leg3.AddEntry(gr_UA2,"UA2","l")	
+	leg3.AddEntry(gr_CDFRun1,"CDF Run 1","l")	
+	leg3.AddEntry(gr_CDFRun2,"CDF Run 2","l")	
+	leg3.AddEntry(gr_ATLAS,"ATLAS 13 #oplus 20.3  fb^{-1}","l")	
+	leg3.AddEntry(gr_ATLAS_isrphoton,"ATLAS 13 #oplus 3.2 fb^{-1} (ISR #gamma)","l")
+	leg3.AddEntry(gr_ATLAS_scouting,"ATLAS 13 #oplus 3.2 fb^{-1} (TLA)","l")
+	leg3.AddEntry(gr_CMS,"CMS 8 #oplus 18.8 fb^{-1} (Scouting)","l")
+
 
 	can_gB = ROOT.TCanvas("can_gB","can_gB",900,800);
 	hrl = can_gB.DrawFrame(lowlim,0,3701,0.45);
@@ -104,12 +135,21 @@ def main():
 	exp_gq.Draw("l");
 	DMM0func.Draw("SAMES")
 	DMMInffunc.Draw("SAMES")
+    
+	gr_UA2.Draw("csames")
+	gr_CDFRun1.Draw("csames")
+	gr_CDFRun2.Draw("csames")
+	gr_ATLAS.Draw("csames")
+	gr_ATLAS_isrphoton.Draw("csames")
+	gr_ATLAS_scouting.Draw("csames")
+	gr_CMS.Draw("csames")
+	Zfunc.Draw("sames")
 	txta.Draw();
 	txtc.Draw();
 	txtd.Draw();
 	txt1.Draw();
 	txt2.Draw();
-	leg.Draw();
+	leg.Draw(); leg3.Draw()
 
 	line1 = ROOT.TLine(1600,0.02,1600,0.23)
 	line1.SetLineStyle(2)
@@ -314,7 +354,61 @@ def makeAFillGraph(listx,listy1,listy2,linecolor = 1, fillcolor = 0, fillstyle =
 	gr.SetFillColor(fillcolor)
 	gr.SetFillStyle(fillstyle)
 
-	return gr    
+	return gr
+
+def Zconstraints(x):
+	
+	# Zwidth = 2.4952;
+	# ZwidthError = 0.0023*3; # times 3 to give 3 sigma
+	# relZwidthUnc = ZwidthError/Zwidth;
+	# sin2thetaW = 0.2312;
+	# sinthetaW = math.sqrt(sin2thetaW);
+	# costhetaW = math.sqrt(1 - sin2thetaW);
+	# mW = 80.385;
+	# vev = 246.;
+	# g = mW*2./vev;
+	# Vu = 0.25 - (4. * sin2thetaW / 6.);
+	# Vd = -0.25 - (2. * sin2thetaW / 6.);
+	# mZ = 91.18;
+	# mZp = x[0];
+
+	# # y = gZ
+	# ynum = relZwidthUnc * 3 * g * -1. * math.fabs(1-(mZp*mZp/(mZ*mZ))) * (2*Vu*Vu + 3*Vd*Vd + 5/16.)
+	# yden = 2*0.01*costhetaW*sinthetaW*(2*Vu+3*Vd);
+	# # print ynum,yden,x[0],math.sqrt(ynum/yden)
+	# y = math.sqrt(ynum/yden);
+	# y *= 1.5;
+
+	mZ = 91.18;
+	mZp = x[0];
+	ynum = 4. * math.sqrt( 4. * math.pi ) * 1.96 * 1.1e-3 * ( 1-(mZp*mZp/(mZ*mZ)) );
+	yden = 1.193 * 0.02;
+	if ynum < 0: ynum *= -1.;
+	y = math.sqrt(ynum/yden);
+
+	return y/6.;
+
+def csvToGraph(fn, linecolor=1, addFactor=False):
+
+	factor = 1.;
+	if addFactor: factor = 6.;
+
+	a_m = array('d', []);
+	a_g = array('d', []);
+
+	ifile = open(fn,'r');
+	npoints = 0;
+	for line in ifile: 
+		lline = line.strip().split(',');
+		a_m.append(float(lline[0]))
+		a_g.append(float(lline[1])*factor/6.)
+		npoints += 1;
+
+	gr = ROOT.TGraph(npoints,a_m,a_g);
+	gr.SetLineColor(linecolor);
+	gr.SetLineWidth(2);
+
+	return gr
 
 if __name__ == '__main__':
 	
